@@ -49,7 +49,7 @@ export default function Hero() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
-                <p className="text-xs tracking-widest uppercase font-light">Product Name {item}</p>
+                <p className="text-xs tracking-widest uppercase font-light"></p>
                 <p className="text-xs text-gray-600 mt-2"></p>
               </motion.div>
             ))}
