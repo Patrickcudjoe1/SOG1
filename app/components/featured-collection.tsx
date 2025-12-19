@@ -2,12 +2,12 @@
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import Navbar from "../components/navbar"
+
 
 export default function FeaturedCollection() {
   const images = [
-    "/SOG300.jpg",
-    "/SOG999.jpg",
-    "/SOG222.jpg",
+    "/sogbb.webp", 
   ]
 
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -20,7 +20,9 @@ export default function FeaturedCollection() {
   }, [images.length])
 
   return (
-    <section className="w-full relative h-screen flex items-center justify-center overflow-hidden">
+    <>
+      <Navbar />
+      <section className="w-full relative h-screen flex items-center justify-center overflow-hidden">
       {/* Background Images with fade */}
       <div className="absolute inset-0 w-full h-full">
         <AnimatePresence mode="wait">
@@ -46,7 +48,8 @@ export default function FeaturedCollection() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-4xl md:text-6xl lg:text-7xl text-white tracking-widest uppercase font-light mb-8"
+          className="text-4xl md:text-6xl lg:text-7xl text-white tracking-widest uppercase font-bold mb-8"
+          style={{ fontFamily: 'var(--font-brand)', fontWeight: 400 }}
         >
           SOG Presence Collection
         </motion.h1>
@@ -62,6 +65,12 @@ export default function FeaturedCollection() {
           </Link>
         </motion.div>
       </div>
-    </section>
+      </section>
+    
+    </>
+    
+    
+
   )
+  
 }

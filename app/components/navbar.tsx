@@ -2,233 +2,290 @@
 
 import Link from "next/link"
 import { useState, useEffect } from "react"
-import { usePathname } from "next/navigation"
 import { Menu, X, Search, User, ShoppingBag } from "lucide-react"
 import { motion } from "framer-motion"
+import { useCart } from "./CartContext"
 
-export default function Navbar() {
+export default function SONOFGODNavbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
-  const pathname = usePathname()
-  const isHomePage = pathname === "/"
+  const { cart } = useCart()
 
+  // Detect scroll
   useEffect(() => {
-    // Check if mobile on mount and resize
-    const checkMobile = () => {
-      return window.innerWidth < 768
-    }
-
-    const updateScrollState = () => {
-      const mobile = checkMobile()
-      setIsMobile(mobile)
-
-      // For mobile: always show solid navbar on all pages
-      // For desktop: transparent on home page only, solid on other pages
-      if (!isHomePage || mobile) {
-        setScrolled(true)
-      } else {
-        // Desktop home page: check scroll position
-        setScrolled(window.scrollY > 50)
-      }
-    }
-
-    // Initial check
-    updateScrollState()
-
-    // For non-home pages, just listen to resize
-    if (!isHomePage) {
-      const handleResize = () => {
-        const mobile = checkMobile()
-        setIsMobile(mobile)
-        setScrolled(true)
-      }
-      window.addEventListener("resize", handleResize)
-      return () => window.removeEventListener("resize", handleResize)
-    }
-
-    // Home page: listen to both scroll and resize
     const handleScroll = () => {
-      const mobile = checkMobile()
-      if (mobile) {
-        setScrolled(true) // Mobile always solid
-      } else {
-        setScrolled(window.scrollY > 50) // Desktop: scroll-based
-      }
-    }
-
-    const handleResize = () => {
-      updateScrollState()
+      setScrolled(window.scrollY > 50)
     }
 
     window.addEventListener("scroll", handleScroll)
-    window.addEventListener("resize", handleResize)
-    return () => {
-      window.removeEventListener("scroll", handleScroll)
-      window.removeEventListener("resize", handleResize)
-    }
-  }, [isHomePage])
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   return (
     <>
       <nav
-        className={`w-full transition-all duration-300 ${
-          scrolled || !isHomePage || isMobile
-            ? "bg-white border-b border-gray-200 fixed top-0 shadow-sm"
-            : "bg-transparent absolute top-0"
-        } z-50`}
+        className={`sog-nav fixed top-0 w-full z-50 transition-all duration-300
+          ${scrolled ? "bg-white shadow-md" : "bg-transparent shadow-none"}
+        `}
       >
-        <div className="max-w-full px-6 md:px-12 py-4">
+        <div className="max-w-full px-6 md:px-12 py-4 transition-all duration-300">
           <div className="flex items-center justify-center relative h-10">
-            {/* Left Navigation - Desktop */}
-            <div className="hidden md:flex items-center gap-12 absolute left-0">
-              <Link
-                href="/"
-                className={`link-underline transition-colors duration-300 ${
-                  scrolled || !isHomePage ? "text-black" : "text-white"
-                }`}
-              >
-                SON OF GOD
-              </Link>
+
+            {/* LEFT NAV - DESKTOP */}
+            <div className="hidden md:flex items-center gap-10 absolute left-0">
+              <div className="relative group">
+                {/* Large Blurry Backdrop Overlay - FEATURED */}
+                <div
+                  className={`fixed inset-0 z-40 pointer-events-none
+                    opacity-0 invisible transition-all duration-300 ease-out
+                    group-hover:opacity-100 group-hover:visible
+                    backdrop-blur-xl
+                    ${scrolled ? "bg-white/30" : "bg-black/40"}
+                  `}
+                />
+                
+                {/* FEATURED BUTTON */}
+                <Link
+                  href="/"
+                  className={`sog-link font-light uppercase transition-colors whitespace-nowrap relative z-50 ${
+                    scrolled ? "text-black" : "text-white"
+                  }`}
+                >
+                  FEATURED
+                </Link>
+
+                {/* FEATURED DROPDOWN */}
+                <div
+                  className={`absolute left-0 top-full mt-6 w-56 z-50
+                    opacity-0 invisible group-hover:opacity-100 group-hover:visible
+                    transition-all duration-200 ease-out
+                    backdrop-blur-md
+                    ${scrolled ? "bg-white/90 text-black" : "bg-black/80 text-white"}
+                  `}
+                >
+                  <div className="flex flex-col px-4 py-3 space-y-3 text-xs tracking-widest uppercase">
+                    <Link href="/new-arrivals" className="hover:opacity-60">
+                      NEW ARRIVALS
+                    </Link>
+                    <Link href="/collections/essentials-classic" className="hover:opacity-60">
+                      ESSENTIALS CLASSIC STYLES
+                    </Link>
+                    <Link href="/collections/athletics" className="hover:opacity-60">
+                      ATHLETICS & TEAM APPAREL
+                    </Link>
+                    <Link href="/collections/essentials" className="hover:opacity-60">
+                      ESSENTIALS
+                    </Link>
+                    <Link href="/collections/fear-of-god" className="hover:opacity-60">
+                      FEAR OF GOD
+                    </Link>
+                    <Link href="/collections/footwear" className="hover:opacity-60">
+                      FOOTWEAR
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
               <Link
                 href="/shop"
-                className={`link-underline transition-colors duration-300 ${
-                  scrolled || !isHomePage ? "text-black" : "text-white"
+                className={`sog-link font-light uppercase transition-colors whitespace-nowrap ${
+                  scrolled ? "text-black" : "text-white"
                 }`}
               >
-                COLLECTIONS
+                SHOP
               </Link>
+              
+              <div className="relative group">
+                {/* Large Blurry Backdrop Overlay - COLLECTIONS */}
+                <div
+                  className={`fixed inset-0 z-40 pointer-events-none
+                    opacity-0 invisible transition-all duration-300 ease-out
+                    group-hover:opacity-100 group-hover:visible
+                    backdrop-blur-xl
+                    ${scrolled ? "bg-white/30" : "bg-black/40"}
+                  `}
+                />
+                
+                {/* COLLECTIONS BUTTON */}
+                <Link
+                  href="/shop"
+                  className={`sog-link font-light uppercase transition-colors whitespace-nowrap relative z-50 ${
+                    scrolled ? "text-black" : "text-white"
+                  }`}
+                >
+                  COLLECTIONS
+                </Link>
+
+                {/* DROPDOWN */}
+                <div
+                  className={`absolute left-0 top-full mt-6 w-48 z-50
+                    opacity-0 invisible group-hover:opacity-100 group-hover:visible
+                    transition-all duration-200 ease-out
+                    backdrop-blur-md
+                    ${scrolled ? "bg-white/90 text-black" : "bg-black/80 text-white"}
+                  `}
+                >
+                  <div className="flex flex-col px-4 py-3 space-y-3 text-xs tracking-widest uppercase">
+                    <Link href="/collections/fear-of-god" className="hover:opacity-60">
+                      TOTE BAGS
+                    </Link>
+                    <Link href="/collections/essentials" className="hover:opacity-60">
+                      PRESENCE
+                    </Link>
+                    <Link href="/collections/athletics" className="hover:opacity-60">
+                      TRINITY
+                    </Link>
+                    <Link href="/collections/fear-of-god" className="hover:opacity-60">
+                      CAPS
+                    </Link>  
+                    <Link href="/collections/fear-of-god" className="hover:opacity-60">
+                      HOODY
+                    </Link> 
+                    <Link href="/collections/fear-of-god" className="hover:opacity-60">
+                      JERSEY
+                    </Link> 
+                  </div>
+                </div>
+              </div>
+
               <Link
                 href="/new-arrivals"
-                className={`link-underline transition-colors duration-300 ${
-                  scrolled || !isHomePage ? "text-black" : "text-white"
+                className={`sog-link font-light uppercase transition-colors whitespace-nowrap ${
+                  scrolled ? "text-black" : "text-white"
                 }`}
               >
                 NEW ARRIVALS
               </Link>
             </div>
 
-            {/* Mobile Menu Button - Left Side */}
+            {/* MOBILE HAMBURGER */}
             <button
-              className={`md:hidden absolute left-0 p-2 transition-colors duration-300 ${
-                scrolled || !isHomePage || isMobile ? "text-black" : "text-white"
+              className={`md:hidden absolute left-0 p-2 transition-colors ${
+                scrolled ? "text-black" : "text-white"
               }`}
               onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Toggle mobile menu"
             >
               {mobileOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
 
-            {/* Center Brand - Desktop & Mobile */}
+            {/* CENTER LOGO */}
             <Link
               href="/"
-              className={`text-xl md:text-3xl tracking-widest uppercase font-bold transition-colors duration-300 ${
-                scrolled || !isHomePage ? "text-black" : "text-white"
+              className={`text-lg md:text-xl font-bold uppercase tracking-[0.50em] transition-colors ${
+                scrolled ? "text-black" : "text-white"
               }`}
+              style={{ fontFamily: 'var(--font-brand)' }}
             >
               SON OF GOD
             </Link>
 
-            {/* Right Navigation - Desktop */}
+            {/* RIGHT NAV – DESKTOP */}
             <div className="hidden md:flex items-center gap-6 absolute right-0">
               <Link
                 href="/search"
-                className={`p-2 hover:opacity-60 transition-opacity ${
-                  scrolled || !isHomePage ? "text-black" : "text-white"
+                className={`w-8 h-8 hover:opacity-60 transition-opacity flex items-center justify-center ${
+                  scrolled ? "text-black" : "text-white"
                 }`}
               >
-                <Search size={18} />
+                <Search size={15} />
               </Link>
+
               <Link
                 href="/account"
-                className={`p-2 hover:opacity-60 transition-opacity ${
-                  scrolled || !isHomePage ? "text-black" : "text-white"
+                className={`w-8 h-8 hover:opacity-60 transition-opacity flex items-center justify-center ${
+                  scrolled ? "text-black" : "text-white"
                 }`}
               >
-                <User size={18} />
+                <User size={15} />
               </Link>
+
               <Link
                 href="/cart"
-                className={`p-2 hover:opacity-60 transition-opacity ${
-                  scrolled || !isHomePage ? "text-black" : "text-white"
+                className={`w-8 h-8 hover:opacity-60 relative transition-opacity flex items-center justify-center ${
+                  scrolled ? "text-black" : "text-white"
                 }`}
               >
-                <ShoppingBag size={18} />
+                <ShoppingBag size={15} />
+                {cart.length > 0 && (
+                  <span className="absolute -top-1 -right-1 rounded-full bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center">
+                    {cart.length}
+                  </span>
+                )}
               </Link>
             </div>
 
-            {/* Mobile Right Navigation - Search and Cart */}
+            {/* RIGHT NAV – MOBILE */}
             <div className="md:hidden absolute right-0 flex items-center gap-3">
               <Link
                 href="/search"
-                className={`p-2 hover:opacity-60 transition-opacity ${
-                  scrolled || !isHomePage || isMobile ? "text-black" : "text-white"
+                className={`w-10 h-10 hover:opacity-60 flex items-center justify-center ${
+                  scrolled ? "text-black" : "text-white"
                 }`}
               >
                 <Search size={18} />
               </Link>
+
               <Link
                 href="/cart"
-                className={`p-2 hover:opacity-60 transition-opacity ${
-                  scrolled || !isHomePage || isMobile ? "text-black" : "text-white"
+                className={`w-10 h-10 hover:opacity-60 relative flex items-center justify-center ${
+                  scrolled ? "text-black" : "text-white"
                 }`}
               >
                 <ShoppingBag size={18} />
+                {cart.length > 0 && (
+                  <span className="absolute -top-1 -right-1 rounded-full bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center">
+                    {cart.length}
+                  </span>
+                )}
               </Link>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Mobile Menu */}
+      {/* MOBILE MENU */}
       {mobileOpen && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          className={`md:hidden fixed top-[66px] left-0 right-0 z-40 ${
-            scrolled || !isHomePage || isMobile
-              ? "bg-white border-b border-gray-200"
-              : "bg-black/90 backdrop-blur-sm"
-          } px-6 py-4 space-y-4 transition-colors duration-300 shadow-lg`}
+          className={`md:hidden fixed top-[66px] left-0 right-0 z-40 px-6 py-4 space-y-4 shadow-lg transition-colors
+            ${scrolled ? "bg-white" : "bg-black"}
+          `}
         >
           <Link
             href="/"
-            className={`block text-xs tracking-widest uppercase font-light hover:opacity-60 transition-colors cursor-pointer ${
-              scrolled || !isHomePage || isMobile ? "text-black" : "text-white"
+            className={`block sog-link font-semibold tracking-wider uppercase ${
+              scrolled ? "text-black" : "text-white"
             }`}
             onClick={() => setMobileOpen(false)}
           >
-            SON OF GOD
+            HOME
           </Link>
+
           <Link
             href="/shop"
-            className={`block text-xs tracking-widest uppercase font-light hover:opacity-60 transition-colors cursor-pointer ${
-              scrolled || !isHomePage || isMobile ? "text-black" : "text-white"
+            className={`block sog-link font-semibold tracking-wider uppercase ${
+              scrolled ? "text-black" : "text-white"
             }`}
             onClick={() => setMobileOpen(false)}
           >
             COLLECTIONS
           </Link>
+
           <Link
             href="/new-arrivals"
-            className={`block text-xs tracking-widest uppercase font-light hover:opacity-60 transition-colors cursor-pointer ${
-              scrolled || !isHomePage || isMobile ? "text-black" : "text-white"
+            className={`block sog-link font-semibold tracking-wider uppercase ${
+              scrolled ? "text-black" : "text-white"
             }`}
             onClick={() => setMobileOpen(false)}
           >
             NEW ARRIVALS
           </Link>
-          <div
-            className={`flex gap-4 pt-4 ${
-              scrolled || !isHomePage || isMobile ? "border-t border-gray-200" : "border-t border-white/20"
-            }`}
-          >
+
+          <div className="flex gap-4 pt-4 border-t border-border">
             <Link
               href="/account"
-              className={`p-2 hover:opacity-60 transition-opacity cursor-pointer ${
-                scrolled || !isHomePage || isMobile ? "text-black" : "text-white"
-              }`}
+              className={`w-10 h-10 flex items-center justify-center ${scrolled ? "text-black" : "text-white"}`}
               onClick={() => setMobileOpen(false)}
             >
               <User size={18} />

@@ -12,7 +12,7 @@ export default function NewCollection() {
           whileInView={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.2 }}
           viewport={{ once: true }}
-          src="/SOG106.jpg"
+          src="/sogbb.webp"
           alt="Lookbook"
           className="absolute inset-0 w-full h-full object-cover"
         />
@@ -26,8 +26,11 @@ export default function NewCollection() {
           viewport={{ once: true }}
           className="relative z-10 text-center px-6 max-w-4xl"
         >
-          <motion.h2 className="text-4xl md:text-5xl lg:text-7xl text-white tracking-widest uppercase font-light mb-12 leading-tight">
-            Collection Nine Menswear
+          <motion.h2 
+            className="text-4xl md:text-5xl lg:text-7xl text-white tracking-widest uppercase font-bold mb-12 leading-tight"
+            style={{ fontFamily: 'var(--font-brand)', fontWeight: 400 }}
+          >
+            The New Collection 777 Collection
           </motion.h2>
           <Link href="/gallery">
             <motion.button whileHover={{ scale: 1.02 }} className="btn-outline-white">
