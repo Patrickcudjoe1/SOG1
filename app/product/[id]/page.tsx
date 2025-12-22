@@ -1,10 +1,12 @@
 "use client"
 
 import { useParams } from "next/navigation"
+import Image from "next/image"
 import Navbar from "../../components/navbar"
 import Footer from "../../components/footer"
 import ProductDetail from "../../components/product-detail"
 import { products } from "../../lib/products"
+import { formatCurrency } from "../../lib/currency"
 
 export default function ProductPage() {
   const params = useParams()
@@ -62,17 +64,19 @@ export default function ProductPage() {
               .map((relatedProduct) => (
                 <a key={relatedProduct.id} href={`/product/${relatedProduct.id}`} className="group">
                   <div className="relative w-full aspect-square bg-gray-100 overflow-hidden mb-4">
-                    <img
+                    <Image
                       src={relatedProduct.image || "/placeholder.svg"}
                       alt={relatedProduct.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 33vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
                   <p className="text-xs tracking-widest uppercase font-light text-gray-600 mb-2">
                     {relatedProduct.category}
                   </p>
                   <h3 className="text-sm tracking-wide font-light mb-2">{relatedProduct.name}</h3>
-                  <p className="text-sm font-light">${relatedProduct.price}</p>
+                  <p className="text-sm font-light">{formatCurrency(relatedProduct.price)}</p>
                 </a>
               ))}
           </div>

@@ -2,20 +2,25 @@
 
 import type React from "react"
 import { useState } from "react"
+import { createClient } from "@/app/lib/supabase/client"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { Eye, EyeOff } from "lucide-react"
 import Navbar from "../components/navbar"
-import Footer from "../components/footer"
 import { motion } from "framer-motion"
+import { SocialProviders } from "../account/components/SocialProviders"
 
 export default function SignUp() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const supabase = createClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,103 +39,184 @@ export default function SignUp() {
     setLoading(true)
 
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+      // Sign up with Supabase Auth
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: name,
+          },
+          emailRedirectTo: `${typeof window !== "undefined" ? window.location.origin : ""}/auth/callback`,
+        },
       })
 
-      if (!res.ok) {
-        const data = await res.json()
-        setError(data.error || "Failed to create account")
+      if (signUpError) {
+        // Provide more specific error messages
+        if (signUpError.message.includes("User already registered")) {
+          setError("An account with this email already exists. Please sign in instead.")
+        } else if (signUpError.message.includes("Password")) {
+          setError(signUpError.message)
+        } else {
+          setError(signUpError.message || "Failed to create account")
+        }
+        console.error("Sign up error:", signUpError)
         return
       }
 
-      // Redirect to signin after successful registration
-      router.push("/signin?registered=true")
-    } catch (err) {
-      setError("An error occurred. Please try again.")
+      if (data.user) {
+        // Check if email confirmation is required
+        // Supabase sends confirmation email if email_confirmed_at is null
+        // and the provider requires email confirmation
+        const needsEmailConfirmation = !data.user.email_confirmed_at && data.session === null
+        
+        if (needsEmailConfirmation) {
+          // Email confirmation required - user needs to check email
+          router.push("/signin?registered=true&confirm=email")
+        } else {
+          // Email confirmation not required - can sign in immediately
+          router.push("/signin?registered=true")
+        }
+      }
+    } catch (err: any) {
+      console.error("Sign up exception:", err)
+      setError(err.message || "An error occurred. Please try again.")
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <main className="w-full">
-      <Navbar />
-      <section className="w-full min-h-screen flex items-center justify-center py-20 px-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md w-full">
-          <h1 className="text-3xl md:text-4xl font-light tracking-widest uppercase text-center mb-12">
-            Create Account
-          </h1>
+    <main className="w-full min-h-screen bg-white flex flex-col">
+      <Navbar forceDark={true} />
+
+      <div className="flex-1 flex items-center justify-center p-8 md:p-12 pt-28">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="w-full max-w-md"
+        >
+          {/* Header */}
+          <div className="mb-10">
+            <h1 className="text-3xl md:text-4xl font-bold text-black mb-2">Create Account</h1>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm tracking-wide">{error}</div>
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded"
+              >
+                {error}
+              </motion.div>
             )}
 
-            <div>
-              <label className="block text-xs tracking-widest uppercase font-light mb-3">Full Name</label>
+            {/* Name Input */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Full Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-gray-300 text-sm focus:outline-none focus:border-black transition-colors"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:border-black focus:ring-2 focus:ring-gray-200 transition-all duration-200 placeholder:text-gray-400"
                 placeholder="John Doe"
               />
             </div>
 
-            <div>
-              <label className="block text-xs tracking-widest uppercase font-light mb-3">Email</label>
+            {/* Email Input */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-gray-300 text-sm focus:outline-none focus:border-black transition-colors"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:border-black focus:ring-2 focus:ring-gray-200 transition-all duration-200 placeholder:text-gray-400"
                 placeholder="you@example.com"
               />
             </div>
 
-            <div>
-              <label className="block text-xs tracking-widest uppercase font-light mb-3">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full px-4 py-3 border border-gray-300 text-sm focus:outline-none focus:border-black transition-colors"
-                placeholder="••••••••"
-              />
+            {/* Password Input */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:border-black focus:ring-2 focus:ring-gray-200 transition-all duration-200 placeholder:text-gray-400"
+                  placeholder="Password*"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-xs tracking-widest uppercase font-light mb-3">Confirm Password</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="w-full px-4 py-3 border border-gray-300 text-sm focus:outline-none focus:border-black transition-colors"
-                placeholder="••••••••"
-              />
+            {/* Confirm Password Input */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:border-black focus:ring-2 focus:ring-gray-200 transition-all duration-200 placeholder:text-gray-400"
+                  placeholder="Confirm Password*"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
 
-            <button type="submit" disabled={loading} className="w-full btn-outline py-4 disabled:opacity-60">
-              {loading ? "CREATING ACCOUNT..." : "CREATE ACCOUNT"}
+            {/* Create Account Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full px-6 py-3.5 bg-black text-white rounded-lg hover:bg-gray-900 transition-all duration-300 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+            >
+              {loading ? "Creating account..." : "Create account"}
             </button>
           </form>
 
-          <p className="text-center text-sm font-light mt-8">
+          {/* Social Providers */}
+          <div className="space-y-4 mt-8">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-white px-4 text-gray-500">Or continue with</span>
+              </div>
+            </div>
+            <SocialProviders />
+          </div>
+
+          {/* Sign In Link */}
+          <p className="text-center text-sm text-gray-600 mt-8">
             Already have an account?{" "}
-            <Link href="/signin" className="underline hover:opacity-60">
-              Sign In
+            <Link href="/signin" className="text-black underline hover:text-gray-600 transition-colors">
+              Sign in
             </Link>
           </p>
         </motion.div>
-      </section>
-      <Footer />
+      </div>
     </main>
   )
 }

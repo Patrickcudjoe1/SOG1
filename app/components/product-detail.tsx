@@ -3,6 +3,8 @@
 import Image from "next/image"
 import { useState } from "react"
 import type { Product } from "@/app/lib/products"
+import { useCart } from './CartContext'
+import { formatCurrency } from "@/app/lib/currency"
 
 interface ProductDetailProps {
   product: Product
@@ -12,6 +14,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const [selectedSize, setSelectedSize] = useState<string>("")
   const [selectedColor, setSelectedColor] = useState<string>(product.colors?.[0] || "")
   const [quantity, setQuantity] = useState(1)
+  const { addToCart } = useCart();
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
@@ -31,7 +34,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         <div>
           <p className="text-xs tracking-widest uppercase font-light text-gray-600 mb-2">{product.category}</p>
           <h1 className="text-3xl md:text-4xl font-light tracking-wide mb-4">{product.name}</h1>
-          <p className="text-lg font-light">${product.price}</p>
+          <p className="text-lg font-light">{formatCurrency(product.price)}</p>
         </div>
 
         <p className="text-sm font-light leading-relaxed text-gray-700">{product.description}</p>
@@ -39,33 +42,53 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         {/* Color Selection */}
         {product.colors && product.colors.length > 0 && (
           <div>
-            <p className="text-xs tracking-widest uppercase font-light mb-4">Color: {selectedColor}</p>
-            <div className="flex gap-3">
-              {product.colors.map((color) => (
-                <button
-                  key={color}
-                  onClick={() => setSelectedColor(color)}
-                  className={`w-10 h-10 border-2 transition-all ${
-                    selectedColor === color ? "border-black" : "border-gray-300 hover:border-gray-500"
-                  }`}
-                  title={color}
-                  style={{
-                    backgroundColor:
-                      color.toLowerCase() === "black"
-                        ? "#000000"
-                        : color.toLowerCase() === "white"
-                          ? "#ffffff"
-                          : color.toLowerCase() === "gray"
-                            ? "#d1d5db"
-                            : color.toLowerCase() === "cream"
-                              ? "#fef3c7"
-                              : color.toLowerCase() === "charcoal"
-                                ? "#36454f"
-                                : "#f5f5f5",
-                  }}
-                />
-              ))}
-            </div>
+            <p className="text-xs tracking-widest uppercase font-light mb-4">
+              Color: {product.colors.length === 1 ? product.colors[0] : selectedColor}
+            </p>
+            {product.colors.length > 1 && (
+              <div className="flex gap-3">
+                {product.colors.map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => setSelectedColor(color)}
+                    className={`w-10 h-10 border-2 transition-all ${
+                      selectedColor === color ? "border-black" : "border-gray-300 hover:border-gray-500"
+                    }`}
+                    title={color}
+                    style={{
+                      backgroundColor:
+                        color.toLowerCase() === "black"
+                          ? "#000000"
+                          : color.toLowerCase() === "white"
+                            ? "#ffffff"
+                            : color.toLowerCase() === "gray"
+                              ? "#d1d5db"
+                              : color.toLowerCase() === "cream"
+                                ? "#fef3c7"
+                                : color.toLowerCase() === "charcoal"
+                                  ? "#36454f"
+                                  : color.toLowerCase() === "pink"
+                                    ? "#ec4899"
+                                    : color.toLowerCase() === "orange"
+                                      ? "#f97316"
+                                      : color.toLowerCase() === "brown"
+                                        ? "#92400e"
+                                        : color.toLowerCase() === "gold"
+                                          ? "#fbbf24"
+                                          : color.toLowerCase() === "green"
+                                            ? "#10b981"
+                                            : color.toLowerCase() === "red"
+                                              ? "#ef4444"
+                                              : color.toLowerCase() === "navy"
+                                                ? "#1e3a8a"
+                                                : color.toLowerCase() === "blue"
+                                                  ? "#3b82f6"
+                                                  : "#f5f5f5",
+                    }}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -107,14 +130,33 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         </div>
 
         {/* Add to Cart Button */}
-        <button className="btn-outline w-full md:w-auto">Add to Cart</button>
+        <button
+          className="btn-outline w-full md:w-auto"
+          onClick={() => {
+            if (product.sizes && product.sizes.length > 0 && !selectedSize) {
+              alert("Please select a size");
+              return;
+            }
+            addToCart({
+              id: product.id,
+              name: product.name,
+              price: product.price,
+              image: product.image,
+              size: selectedSize || undefined,
+              color: selectedColor || undefined,
+              quantity: quantity,
+              productId: product.id,
+            });
+            alert("Item added to cart!");
+          }}
+        >Add to Cart</button>
 
         {/* Product Details */}
         <div className="border-t border-gray-200 pt-8 space-y-4">
           <div>
             <p className="text-xs tracking-widest uppercase font-light text-gray-600 mb-2">Shipping & Returns</p>
             <p className="text-sm font-light text-gray-700">
-              Free shipping on orders over $100. Easy returns within 30 days.
+              Free shipping on orders over ₵100. Easy returns within 30 days.
             </p>
           </div>
           <div>

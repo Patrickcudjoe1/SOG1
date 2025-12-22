@@ -44,7 +44,7 @@ export default function Footer() {
           </div>
 
           <div className="flex flex-col gap-3 text-xs tracking-widest uppercase font-light">
-            <button className="text-left hover:opacity-60 transition-opacity">USD $</button>
+            <button className="text-left hover:opacity-60 transition-opacity">GHS ₵</button>
             <Link href="/contact" className="hover:opacity-60 transition-opacity">
               Contact
             </Link>
@@ -57,7 +57,7 @@ export default function Footer() {
             <a href="#" className="hover:opacity-60 transition-opacity">
               Legal
             </a>
-            <a href="#" className="hover:opacity-60 transition-opacity">
+            <a href="https://www.instagram.com/sonofgod_world/?__pwa=1" className="hover:opacity-60 transition-opacity">
               Instagram
             </a>
             <a href="#" className="hover:opacity-60 transition-opacity">

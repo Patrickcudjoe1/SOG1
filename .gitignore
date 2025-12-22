@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/backend/node_modules
 
 # next.js
 /.next/
@@ -9,6 +10,11 @@
 
 # production
 /build
+/dist
+
+# cache
+.cache
+/.cache
 
 # debug
 npm-debug.log*
@@ -25,3 +31,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# prisma
+node_modules/.prisma

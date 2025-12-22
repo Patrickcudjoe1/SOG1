@@ -1,77 +1,98 @@
+"use client"
 import Navbar from "../components/navbar"
 import Footer from "../components/footer"
+import { useState } from "react"
+import Image from "next/image"
 
 export default function GalleryPage() {
   const galleryImages = [
-    { id: 1, label: "Faith", image: "/SOG105.jpg" },
-    { id: 2, label: "Grace", image: "/SOG106.jpg" },
-    { id: 3, label: "Purpose", image: "/SOG107.jpg" },
-    { id: 4, label: "Light", image: "/SOG200.jpg" },
-    { id: 5, label: "Devotion", image: "/SOG103.jpg" },
-    { id: 6, label: "Spirit", image: "/SOG300.jpg" },
-    { id: 7, label: "Truth", image: "/SOG222.jpg" },
-    { id: 8, label: "Love", image: "/SOG333.jpg" },
-    { id: 9, label: "Peace", image: "/SOG444.jpg" },
-    { id: 10, label: "Hope", image: "/SOG600.jpg" },
-    { id: 11, label: "Joy", image: "/SOG777.jpg" },
-    { id: 12, label: "Strength", image: "/SOG888.jpg" },
+    { id: 1, label: "Faith", image: "/gallery/ddd.jpg", number: "01" },
+    { id: 2, label: "Grace", image: "/gallery/fff.jpg", number: "02" },
+    { id: 3, label: "Purpose", image: "/gallery/SOG107.jpg", number: "03" },
+    { id: 4, label: "Light", image: "/gallery/SOG14.jpg", number: "04" },
+    { id: 5, label: "Devotion", image: "/gallery/IMG_9419.JPG", number: "05" },
+    { id: 6, label: "Spirit", image: "/gallery/IMG_9422.JPG", number: "06" },
+    { id: 7, label: "Truth", image: "/gallery/IMG_9577.JPG", number: "07" },
+    { id: 8, label: "Love", image: "/gallery/IMG_2831.JPG", number: "08" },
+    { id: 9, label: "Peace", image: "/gallery/SOG-_30.jpg", number: "09" },
+    { id: 10, label: "Hope", image: "/gallery/SOG-_43.jpg", number: "10" },
+    { id: 11, label: "Joy", image: "/gallery/SOG-3-Digit-Serial-Number-_17.jpg", number: "11" },
+    { id: 12, label: "Strength", image: "/gallery/SOG-3-Digit-Serial-Number-_23.jpg", number: "12" },
+    { id: 13, label: "Wisdom", image: "/gallery/SOG-3-Digit-Serial-Number-_37.jpg", number: "13" },
+    { id: 14, label: "Mercy", image: "/gallery/SOG_75-1.jpg", number: "14" },
+    { id: 15, label: "Glory", image: "/gallery/SOG-3-Digit-Serial-Number-_54.jpg", number: "15" },
+    { id: 16, label: "Honor", image: "/gallery/SOG-3-Digit-Serial-Number-_63.jpg", number: "16" },
+    { id: 17, label: "Praise", image: "/gallery/SOG999.jpg", number: "17" },
+    { id: 18, label: "Worship", image: "/gallery/SOG_16.jpg", number: "18" },
+    { id: 19, label: "Victory", image: "/gallery/SOG_142.jpg", number: "19" },
+    { id: 20, label: "Crown", image: "/gallery/SOG_135.jpg", number: "20" },
+    { id: 21, label: "Crown", image: "/gallery/SOG_118.jpg", number: "21" },
   ]
 
+  const [hoveredId, setHoveredId] = useState<number | null>(null)
+
   return (
-    <main className="w-full">
+    <main className="w-full bg-white min-h-screen">
       <Navbar />
       
-      {/* Collection Hero Section */}
-      <section className="w-full bg-white border-b border-gray-200">
-        <div className="grid grid-cols-1 md:grid-cols-2 min-h-[600px] md:min-h-screen">
-          {/* Left: Text Content */}
-          <div className="flex flex-col justify-center px-6 md:px-12 lg:px-16 py-12 md:py-16">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light tracking-wide uppercase mb-6 md:mb-8 leading-tight">
-              COLLECTION 777 WEAR
-            </h1>
-            <p className="text-sm md:text-base lg:text-lg font-light leading-relaxed text-gray-700 mb-8 md:mb-12 max-w-2xl">
-              For Collection Nine, Son of God draws from the visual and metaphoric field of faith: a realm embedded deeply in our culture and the vision of Son of God. "The one constant in our history is faith, a mark of the times." reflects our founder. "And growing up in a faith-filled family, nine is the perfect number. Nine fruits of the spirit, nine as a symbol of completion." Translated from the ethereal to the physical, what emerges is the refined sophistication of the house's shapes and silhouettes, imbued with the honesty of American tailoring and sportswear. Here is one of the enduring signposts of our culture, reflected through the distinct Son of God perspective.
-            </p>
-            <p className="text-xs md:text-sm font-light text-gray-600 uppercase tracking-wider">
-              The collection arrives early 2026.
-            </p>
-          </div>
+      {/* Minimalist Lookbook Grid */}
+      <section className="w-full py-12 md:py-16 lg:py-20 px-4 md:px-6 lg:px-8">
+        <div className="max-w-[1400px] mx-auto">
+          {/* 3-Column Grid with Thin Gutters */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3 lg:gap-4">
+            {galleryImages.map((item) => {
+              const isHovered = hoveredId === item.id
+              
+              return (
+                <div
+                  key={item.id}
+                  className="relative overflow-hidden group cursor-pointer bg-gray-100"
+                  style={{ aspectRatio: '3/4' }}
+                  onMouseEnter={() => setHoveredId(item.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                >
+                  {/* Image with Muted Filter */}
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={item.image || "/gallery/ddd.jpg"}
+                      alt={item.label}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 33vw"
+                      className="object-cover transition-all duration-700 group-hover:scale-105"
+                      style={{
+                        filter: 'brightness(0.95) contrast(0.9) saturate(0.8)',
+                      }}
+                    />
+                    {/* Cool grey/blue overlay for muted aesthetic */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-gray-900/5 to-gray-800/10 mix-blend-overlay" />
+                  </div>
 
-          {/* Right: Model Image */}
-          <div className="relative w-full h-[400px] md:h-auto bg-gray-100">
-            <img
-              src="/SOG106.jpg"
-              alt="Collection Nine Menswear"
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Gallery Grid Section */}
-      <section className="w-full py-8 md:py-20 px-4 md:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-black mb-3 md:mb-4 text-center">FAITH IN MOTION</h2>
-          <p className="text-sm md:text-lg text-stone-600 text-center mb-8 md:mb-16">
-            A complete visual story of style, purpose, and devotion.
-          </p>
-
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
-            {galleryImages.map((item) => (
-              <div key={item.id} className="relative overflow-hidden group cursor-pointer aspect-square">
-                <img
-                  src={item.image || "/SOG12.jpg"}
-                  alt={`${item.label}`}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <span className="text-white text-lg md:text-2xl font-semibold tracking-wide">{item.label}</span>
+                  {/* Bold Numeric Typography - Appears on Hover */}
+                  <div 
+                    className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-300 ${
+                      isHovered ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  >
+                    <div 
+                      className="text-white font-bold tracking-tight"
+                      style={{ 
+                        fontFamily: 'var(--font-brand)',
+                        fontSize: 'clamp(4rem, 12vw, 8rem)',
+                        fontWeight: 400,
+                        lineHeight: 1,
+                        textShadow: '0 2px 20px rgba(0,0,0,0.3)'
+                      }}
+                    >
+                      {item.number}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>
+      
       <Footer />
     </main>
   )
