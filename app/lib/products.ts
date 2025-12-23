@@ -165,7 +165,7 @@ export const products: Product[] = [
   {
     id: "cap-1",
     name: "Classic Logo Cap",
-    price: 65,
+    price: 150,
     image: "/caps/cap-a.png",
     category: "Caps",
     description: "Premium cotton cap with embroidered logo",
@@ -175,7 +175,7 @@ export const products: Product[] = [
   {
     id: "cap-2",
     name: "Minimalist Snapback",
-    price: 75,
+    price: 150,
     image: "/caps/cap-bl.png",
     category: "Caps",
     description: "Clean design snapback cap",
@@ -185,7 +185,7 @@ export const products: Product[] = [
   {
     id: "cap-3",
     name: "Heritage Baseball Cap",
-    price: 70,
+    price: 150,
     image: "/caps/cap-g.png",
     category: "Caps",
     description: "Classic baseball cap with premium materials",
@@ -195,7 +195,7 @@ export const products: Product[] = [
   {
     id: "cap-4",
     name: "Structured Cap",
-    price: 80,
+    price: 150,
     image: "/caps/cap-p.png",
     category: "Caps",
     description: "Structured cap with modern silhouette",
@@ -205,7 +205,7 @@ export const products: Product[] = [
   {
     id: "cap-5",
     name: "Five-Panel Cap",
-    price: 68,
+    price: 150,
     image: "/caps/cap-r.png",
     category: "Caps",
     description: "Five-panel design with subtle branding",
@@ -215,7 +215,7 @@ export const products: Product[] = [
   {
     id: "cap-6",
     name: "Premium Wool Cap",
-    price: 95,
+    price: 150,
     image: "/caps/cap-m.png",
     category: "Caps",
     description: "Luxury wool cap for elevated style",
@@ -287,7 +287,7 @@ export const products: Product[] = [
   {
     id: "presence-1",
     name: "Presence Essential Tee",
-    price: 95,
+    price: 350,
     image: "/presence/shirt-black.png",
     category: "Presence",
     description: "Core essential tee from the Presence collection",
@@ -297,7 +297,7 @@ export const products: Product[] = [
   {
     id: "presence-2",
     name: "Presence Hoodie",
-    price: 185,
+    price: 350,
     image: "/presence/shirt-pink.png",
     category: "Presence",
     description: "Premium hoodie with Presence branding",
@@ -307,7 +307,7 @@ export const products: Product[] = [
   {
     id: "presence-3",
     name: "Presence Sweatpants",
-    price: 165,
+    price: 350,
     image: "/presence/ddd.jpg",
     category: "Presence",
     description: "Comfortable sweatpants from Presence line",
@@ -317,7 +317,7 @@ export const products: Product[] = [
   {
     id: "presence-4",
     name: "Presence Long Sleeve",
-    price: 125,
+    price: 350,
     image: "/presence/fff.jpg",
     category: "Presence",
     description: "Long sleeve shirt with minimal design",
@@ -327,7 +327,7 @@ export const products: Product[] = [
   {
     id: "presence-5",
     name: "Presence Shorts",
-    price: 105,
+    price: 350,
     image: "/presence/shirt-white.png",
     category: "Presence",
     description: "Athletic shorts from Presence collection",
@@ -337,7 +337,7 @@ export const products: Product[] = [
   {
     id: "presence-6",
     name: "Presence Crewneck",
-    price: 145,
+    price: 350,
     image: "/presence/SOG_30.jpg",
     category: "Presence",
     description: "Classic crewneck sweater",
@@ -348,7 +348,7 @@ export const products: Product[] = [
   {
     id: "trinity-1",
     name: "Trinity Logo Tee",
-    price: 110,
+    price: 350,
     image: "/trinity/trinity-1.png",
     category: "Trinity",
     description: "Signature Trinity collection t-shirt",
@@ -358,7 +358,7 @@ export const products: Product[] = [
   {
     id: "trinity-2",
     name: "Trinity Track Jacket",
-    price: 225,
+    price: 350,
     image: "/trinity/trinity-2.png",
     category: "Trinity",
     description: "Athletic track jacket from Trinity line",
@@ -368,7 +368,7 @@ export const products: Product[] = [
   {
     id: "trinity-3",
     name: "Trinity Joggers",
-    price: 175,
+    price: 350,
     image: "/trinity/trinity-3.png",
     category: "Trinity",
     description: "Premium joggers with Trinity branding",
@@ -378,7 +378,7 @@ export const products: Product[] = [
   {
     id: "trinity-4",
     name: "Trinity Pullover",
-    price: 195,
+    price: 350,
     image: "/trinity/trinity-4.png",
     category: "Trinity",
     description: "Comfortable pullover from Trinity collection",
@@ -388,7 +388,7 @@ export const products: Product[] = [
   {
     id: "trinity-5",
     name: "Trinity Windbreaker",
-    price: 245,
+    price: 350,
     image: "/trinity/trinity-5.png",
     category: "Trinity",
     description: "Lightweight windbreaker jacket",
@@ -398,7 +398,7 @@ export const products: Product[] = [
   {
     id: "trinity-6",
     name: "Trinity Sweatshirt",
-    price: 165,
+    price: 350,
     image: "/trinity/trinity-6.png",
     category: "Trinity",
     description: "Classic sweatshirt with Trinity design",
@@ -470,7 +470,7 @@ export const products: Product[] = [
   {
     id: "jersey-1",
     name: "Classic Basketball Jersey",
-    price: 125,
+    price: 300,
     image: "/jerseys/jersey-1.jpg",
     category: "Jerseys",
     description: "Authentic basketball jersey design",
@@ -480,7 +480,7 @@ export const products: Product[] = [
   {
     id: "jersey-2",
     name: "Mesh Training Jersey",
-    price: 95,
+    price: 300,
     image: "/jerseys/jersey-2.jpg",
     category: "Jerseys",
     description: "Breathable mesh training jersey",
@@ -490,7 +490,7 @@ export const products: Product[] = [
   {
     id: "jersey-3",
     name: "Vintage Style Jersey",
-    price: 135,
+    price: 300,
     image: "/jerseys/jersey-3.jpg",
     category: "Jerseys",
     description: "Retro-inspired vintage jersey",
@@ -500,7 +500,7 @@ export const products: Product[] = [
   {
     id: "jersey-4",
     name: "Performance Jersey",
-    price: 115,
+    price: 300,
     image: "/jerseys/jersey-4.jpg",
     category: "Jerseys",
     description: "High-performance athletic jersey",
@@ -510,7 +510,7 @@ export const products: Product[] = [
   {
     id: "jersey-5",
     name: "Long Sleeve Jersey",
-    price: 145,
+    price: 300,
     image: "/jerseys/jersey-5.jpg",
     category: "Jerseys",
     description: "Long sleeve jersey for cooler conditions",
@@ -520,7 +520,7 @@ export const products: Product[] = [
   {
     id: "jersey-6",
     name: "Limited Edition Jersey",
-    price: 165,
+    price: 300,
     image: "/jerseys/jersey-6.jpg",
     category: "Jerseys",
     description: "Exclusive limited edition jersey",
