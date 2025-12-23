@@ -4,24 +4,30 @@ import Footer from "../../components/footer"
 
 export default function ProductNotFound() {
   return (
-    <main className="w-full">
+    <main className="w-full min-h-screen bg-white flex flex-col">
       <Navbar />
-      <section className="w-full py-20 px-6 md:px-12">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-3xl font-light tracking-wide mb-4">Product Not Found</h1>
-          <p className="text-sm font-light text-gray-600 mb-8">
+      
+      {/* Main Content - Centered */}
+      <section className="flex-1 flex items-center justify-center px-6 py-20">
+        <div className="max-w-md w-full text-center space-y-6">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-wide">
+            PRODUCT NOT FOUND
+          </h1>
+          <p className="text-sm md:text-base font-light text-gray-600">
             The product you're looking for doesn't exist.
           </p>
-          <Link
-            href="/shop"
-            className="inline-block px-8 py-4 border border-black text-black hover:bg-black hover:text-white transition-all duration-300 text-xs tracking-widest uppercase font-light"
-          >
-            Back to Shop
-          </Link>
+          <div className="pt-4">
+            <Link
+              href="/shop"
+              className="inline-block px-8 py-3 border border-gray-900 bg-white text-gray-900 text-xs tracking-widest uppercase font-light hover:bg-gray-50 transition-colors"
+            >
+              BACK TO SHOP
+            </Link>
+          </div>
         </div>
       </section>
+
       <Footer />
     </main>
   )
 }
-
