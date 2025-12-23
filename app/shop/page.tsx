@@ -10,8 +10,16 @@ export default function Shop() {
   const [selectedCategory, setSelectedCategory] = useState<string>("All")
 
   const categories = ["All"]
+  
+  // Filter products: only show those with valid images (not empty, not placeholder)
+  const productsWithImages = products.filter(
+    (p) => p.image && p.image.trim() !== "" && !p.image.includes("placeholder")
+  )
+  
   const filteredProducts =
-    selectedCategory === "All" ? products : products.filter((p) => p.category === selectedCategory)
+    selectedCategory === "All" 
+      ? productsWithImages 
+      : productsWithImages.filter((p) => p.category === selectedCategory)
 
   return (
     <main className="w-full">
