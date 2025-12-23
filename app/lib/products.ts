@@ -53,15 +53,14 @@ export function getAllProductSlugs(): string[] {
 
 export const products: Product[] = [
   {
-    id: "10",
-    name: "Leather Boots",
-    price: 525,
-    image: "/SOG10.jpg",
-    category: "Essentials",
-    description: "Handcrafted leather boots with premium finish",
-    sizes: ["6", "7", "8", "9", "10", "11", "12", "13"],
-    colors: ["Brown"],
-    isNewArrival: true,
+    id: "jersey-6",
+    name: "Limited Edition Jersey",
+    price: 300,
+    image: "/jerseys/jersey-6.jpg",
+    category: "Jerseys",
+    description: "Exclusive limited edition jersey",
+    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+    colors: ["Gold"],
   },
   // Caps
   {
@@ -416,16 +415,6 @@ export const products: Product[] = [
     image: "/jerseys/jersey-5.jpg",
     category: "Jerseys",
     description: "Long sleeve jersey for cooler conditions",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-    colors: ["Gold"],
-  },
-  {
-    id: "jersey-6",
-    name: "Limited Edition Jersey",
-    price: 300,
-    image: "/jerseys/jersey-6.jpg",
-    category: "Jerseys",
-    description: "Exclusive limited edition jersey",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
     colors: ["Gold"],
   },
