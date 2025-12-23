@@ -17,8 +17,9 @@ export async function generateStaticParams() {
 }
 
 // SEO Metadata generation
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const product = getProductBySlug(params.slug)
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const product = getProductBySlug(slug)
 
   if (!product) {
     return {
@@ -56,7 +57,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       images: [imageUrl],
     },
     alternates: {
-      canonical: `/products/${params.slug}`,
+      canonical: `/products/${slug}`,
     },
   }
 }
@@ -65,13 +66,17 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 export const revalidate = 60
 
 interface ProductPageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
-export default function ProductPage({ params }: ProductPageProps) {
-  const product = getProductBySlug(params.slug)
+export default async function ProductPage({ params }: ProductPageProps) {
+  const { slug } = await params
+  const product = getProductBySlug(slug)
 
   if (!product) {
+    // Debug: log available products and slugs
+    console.error(`Product not found for slug: ${slug}`)
+    console.error(`Available slugs:`, products.map(p => getProductSlug(p)).slice(0, 5))
     notFound()
   }
 
@@ -79,7 +84,7 @@ export default function ProductPage({ params }: ProductPageProps) {
   const relatedProducts = products
     .filter((p) => {
       const pSlug = getProductSlug(p)
-      return p.category === product.category && pSlug !== params.slug
+      return p.category === product.category && pSlug !== slug
     })
     .slice(0, 3)
 
