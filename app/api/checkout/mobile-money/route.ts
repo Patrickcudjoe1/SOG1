@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/app/lib/auth-config";
-import { PrismaClient } from "@prisma/client";
+import { createClient } from "@/app/lib/supabase/server";
+import { PrismaClient, OrderStatus, PaymentStatus } from "@prisma/client";
 import { 
   generateIdempotencyKey, 
   sanitizeAmount, 
@@ -25,7 +25,8 @@ function generateTransactionId(): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
+    const supabase = await createClient();
+    const { data: { session } } = await supabase.auth.getSession();
     const body = await req.json();
 
     const {
@@ -109,6 +110,23 @@ export async function POST(req: NextRequest) {
     // Generate transaction ID
     const transactionId = generateTransactionId();
 
+    // Create shipping address first
+    const shippingAddress = await prisma.address.create({
+      data: {
+        userId: session?.user?.id || null,
+        fullName: shipping.fullName,
+        email: shipping.email,
+        phone: shipping.phone || null,
+        addressLine1: shipping.addressLine1,
+        addressLine2: shipping.addressLine2 || null,
+        city: shipping.city,
+        region: shipping.region || null,
+        postalCode: shipping.postalCode,
+        country: shipping.country || "Ghana",
+        isDefault: false,
+      },
+    });
+
     // Create order in database (before payment)
     const orderNumber = generateOrderNumber();
     const order = await prisma.order.create({
@@ -116,20 +134,21 @@ export async function POST(req: NextRequest) {
         orderNumber,
         userId: session?.user?.id || null,
         email: shipping.email,
-        phone: shipping.phone,
-        status: "PENDING",
+        phone: shipping.phone || null,
+        status: OrderStatus.PENDING,
         subtotal: sanitizedSubtotal,
         shippingCost: sanitizedShippingCost,
         discountAmount: sanitizedDiscount,
         totalAmount: sanitizedTotal,
         promoCode: promoCode || null,
         paymentMethod: "mobile_money",
-        paymentStatus: "PENDING", // Will be updated when payment is confirmed via webhook
+        paymentStatus: PaymentStatus.PENDING, // Will be updated when payment is confirmed via webhook
         mobileMoneyTransactionId: transactionId,
         mobileMoneyProvider,
         mobileMoneyPhone: cleanPhone,
-        deliveryMethod,
+        deliveryMethod: deliveryMethod || null,
         idempotencyKey,
+        shippingAddressId: shippingAddress.id,
         items: {
           create: validatedItems.map((item: any) => ({
             productId: item.productId,
@@ -140,21 +159,6 @@ export async function POST(req: NextRequest) {
             size: item.size || null,
             color: item.color || null,
           })),
-        },
-        shippingAddress: {
-          create: {
-            userId: session?.user?.id || null,
-            fullName: shipping.fullName,
-            email: shipping.email,
-            phone: shipping.phone,
-            addressLine1: shipping.addressLine1,
-            addressLine2: shipping.addressLine2 || null,
-            city: shipping.city,
-            region: shipping.region || null,
-            postalCode: shipping.postalCode,
-            country: shipping.country || "Ghana",
-            isDefault: false,
-          },
         },
       },
       include: {

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import Navbar from "../components/navbar";
-import Footer from "../components/footer";
+import Navbar from "../../components/navbar";
+import Footer from "../../components/footer";
 import { CheckCircle, Package, Mail, XCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";

@@ -28,7 +28,6 @@ export async function GET(req: NextRequest) {
     return successResponse(result.orders, "Orders retrieved successfully", {
       total: result.total,
       limit: result.limit,
-      offset: result.offset,
       hasMore: result.hasMore,
     })
   } catch (error: any) {

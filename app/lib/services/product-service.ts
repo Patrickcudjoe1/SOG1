@@ -28,7 +28,8 @@ export class ProductService {
 
     if (filters?.collection) {
       filteredProducts = filteredProducts.filter(
-        (p) => p.collection?.toLowerCase() === filters.collection!.toLowerCase()
+        (p) => p.category?.toLowerCase() === filters.collection!.toLowerCase() || 
+               (p as any).subCategory?.toLowerCase() === filters.collection!.toLowerCase()
       )
     }
 
@@ -51,7 +52,7 @@ export class ProductService {
     }
 
     if (filters?.inStock !== undefined) {
-      filteredProducts = filteredProducts.filter((p) => p.inStock === filters.inStock)
+      filteredProducts = filteredProducts.filter((p) => (p as any).inStock === filters.inStock)
     }
 
     return filteredProducts
@@ -81,11 +82,12 @@ export class ProductService {
   }
 
   /**
-   * Get products by collection
+   * Get products by collection (uses category or subCategory)
    */
   static async getProductsByCollection(collection: string) {
     return products.filter(
-      (p) => p.collection?.toLowerCase() === collection.toLowerCase()
+      (p) => p.category?.toLowerCase() === collection.toLowerCase() || 
+             (p as any).subCategory?.toLowerCase() === collection.toLowerCase()
     )
   }
 
@@ -100,7 +102,7 @@ export class ProductService {
           p.name.toLowerCase().includes(queryLower) ||
           p.description?.toLowerCase().includes(queryLower) ||
           p.category.toLowerCase().includes(queryLower) ||
-          p.collection?.toLowerCase().includes(queryLower)
+          (p as any).subCategory?.toLowerCase().includes(queryLower)
       )
       .slice(0, limit)
 
@@ -111,7 +113,7 @@ export class ProductService {
    * Get featured products
    */
   static async getFeaturedProducts(limit = 8) {
-    return products.filter((p) => p.featured).slice(0, limit)
+    return products.filter((p) => (p as any).featured).slice(0, limit)
   }
 
   /**
@@ -119,8 +121,8 @@ export class ProductService {
    */
   static async getNewArrivals(limit = 8) {
     return products
-      .filter((p) => p.newArrival)
-      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+      .filter((p) => (p as any).isNewArrival || (p as any).newArrival)
+      .sort((a, b) => ((b as any).createdAt || 0) - ((a as any).createdAt || 0))
       .slice(0, limit)
   }
 
@@ -135,7 +137,7 @@ export class ProductService {
       .filter(
         (p) =>
           p.id !== productId &&
-          (p.category === product.category || p.collection === product.collection)
+          (p.category === product.category || (p as any).subCategory === (product as any).subCategory)
       )
       .slice(0, limit)
   }
@@ -146,11 +148,11 @@ export class ProductService {
   static async getProductStats() {
     const categories = new Set(products.map((p) => p.category))
     const collections = new Set(
-      products.map((p) => p.collection).filter((c) => c)
+      products.map((p) => (p as any).subCategory).filter((c) => c)
     )
 
     const totalProducts = products.length
-    const inStockProducts = products.filter((p) => p.inStock).length
+    const inStockProducts = products.filter((p) => (p as any).inStock !== false).length
     const outOfStockProducts = totalProducts - inStockProducts
 
     const averagePrice =
@@ -181,24 +183,24 @@ export class ProductService {
       return { available: false, error: "Product not found" }
     }
 
-    if (!product.inStock) {
+    if ((product as any).inStock === false) {
       return { available: false, error: "Product out of stock" }
     }
 
-    if (quantity > (product.stock || 0)) {
+    if (quantity > ((product as any).stock || 0)) {
       return {
         available: false,
-        error: `Only ${product.stock} items available`,
+        error: `Only ${(product as any).stock} items available`,
       }
     }
 
     // Validate size if required
-    if (size && product.sizes && !product.sizes.includes(size)) {
+    if (size && product.sizes && Array.isArray(product.sizes) && !product.sizes.includes(size)) {
       return { available: false, error: "Invalid size" }
     }
 
     // Validate color if required
-    if (color && product.colors && !product.colors.includes(color)) {
+    if (color && product.colors && Array.isArray(product.colors) && !product.colors.includes(color)) {
       return { available: false, error: "Invalid color" }
     }
 

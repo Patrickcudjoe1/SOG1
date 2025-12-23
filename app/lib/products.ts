@@ -30,6 +30,13 @@ export function getProductSlug(product: Product): string {
 }
 
 /**
+ * Find product by ID
+ */
+export function getProductById(id: string): Product | undefined {
+  return products.find((p) => p.id === id)
+}
+
+/**
  * Find product by slug
  */
 export function getProductBySlug(slug: string): Product | undefined {

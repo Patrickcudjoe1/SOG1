@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/app/lib/auth-config";
+import { createClient } from "@/app/lib/supabase/server";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -7,7 +7,8 @@ const prisma = new PrismaClient();
 // GET - Fetch all addresses for the current user
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth();
+    const supabase = await createClient();
+    const { data: { session } } = await supabase.auth.getSession();
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -31,7 +32,8 @@ export async function GET(req: NextRequest) {
 // POST - Create a new address
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
+    const supabase = await createClient();
+    const { data: { session } } = await supabase.auth.getSession();
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

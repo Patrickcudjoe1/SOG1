@@ -40,7 +40,6 @@ export async function GET(req: NextRequest) {
     return successResponse(products, "Products retrieved successfully", {
       total,
       limit,
-      offset,
       hasMore: offset + limit < total,
     })
   } catch (error: any) {
@@ -85,7 +84,14 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    return successResponse(product, "Product created successfully", {}, 201)
+    return NextResponse.json(
+      {
+        success: true,
+        data: product,
+        message: "Product created successfully",
+      },
+      { status: 201 }
+    )
   } catch (error: any) {
     console.error("Create product error:", error)
     return errorResponse(error.message || "Failed to create product", 500)

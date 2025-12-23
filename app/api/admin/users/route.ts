@@ -22,7 +22,6 @@ export async function GET(req: NextRequest) {
     return successResponse(result.users, "Users retrieved successfully", {
       total: result.total,
       limit: result.limit,
-      offset: result.offset,
       hasMore: result.hasMore,
     })
   } catch (error: any) {

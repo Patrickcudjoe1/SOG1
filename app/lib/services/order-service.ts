@@ -57,20 +57,37 @@ export class OrderService {
   static async createOrder(data: CreateOrderData): Promise<Order> {
     const orderNumber = this.generateOrderNumber()
 
+    // Create shipping address first
+    const shippingAddress = await prisma.address.create({
+      data: {
+        userId: data.userId || null,
+        fullName: data.shipping.fullName,
+        email: data.shipping.email,
+        phone: data.shipping.phone || null,
+        addressLine1: data.shipping.addressLine1,
+        addressLine2: data.shipping.addressLine2 || null,
+        city: data.shipping.city,
+        region: data.shipping.region || null,
+        postalCode: data.shipping.postalCode,
+        country: data.shipping.country || "Ghana",
+        isDefault: false,
+      },
+    })
+
     const order = await prisma.order.create({
       data: {
         orderNumber,
         userId: data.userId || null,
         email: data.email,
         phone: data.phone || null,
-        status: "PENDING",
+        status: OrderStatus.PENDING,
         subtotal: data.subtotal,
         shippingCost: data.shippingCost,
         discountAmount: data.discountAmount,
         totalAmount: data.totalAmount,
         promoCode: data.promoCode || null,
         paymentMethod: data.paymentMethod,
-        paymentStatus: "PENDING",
+        paymentStatus: PaymentStatus.PENDING,
         deliveryMethod: data.deliveryMethod || null,
         idempotencyKey: data.idempotencyKey,
         stripeSessionId: data.stripeSessionId || null,
@@ -78,6 +95,7 @@ export class OrderService {
         mobileMoneyTransactionId: data.mobileMoneyTransactionId || null,
         mobileMoneyProvider: data.mobileMoneyProvider || null,
         mobileMoneyPhone: data.mobileMoneyPhone || null,
+        shippingAddressId: shippingAddress.id,
         items: {
           create: data.items.map((item) => ({
             productId: item.productId,
@@ -88,21 +106,6 @@ export class OrderService {
             size: item.size || null,
             color: item.color || null,
           })),
-        },
-        shippingAddress: {
-          create: {
-            userId: data.userId || null,
-            fullName: data.shipping.fullName,
-            email: data.shipping.email,
-            phone: data.shipping.phone,
-            addressLine1: data.shipping.addressLine1,
-            addressLine2: data.shipping.addressLine2 || null,
-            city: data.shipping.city,
-            region: data.shipping.region || null,
-            postalCode: data.shipping.postalCode,
-            country: data.shipping.country || "Ghana",
-            isDefault: false,
-          },
         },
       },
       include: {

@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2022-11-15' });
+    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2025-12-15.clover' });
 
     const items = await req.json();
     if (!Array.isArray(items) || items.length === 0) {

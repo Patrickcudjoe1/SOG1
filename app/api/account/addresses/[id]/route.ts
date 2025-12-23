@@ -1,24 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/app/lib/auth-config";
+import { createClient } from "@/app/lib/supabase/server";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 // PATCH - Update an address
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await auth();
+    const supabase = await createClient();
+    const { data: { session } } = await supabase.auth.getSession();
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     const body = await req.json();
     const { fullName, phone, addressLine1, addressLine2, city, state, postalCode, country, isDefault } = body;
 
     // Verify address belongs to user
     const existingAddress = await prisma.address.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!existingAddress) {
@@ -32,13 +34,13 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     // If setting as default, unset other defaults
     if (isDefault) {
       await prisma.address.updateMany({
-        where: { userId: session.user.id, isDefault: true, id: { not: params.id } },
+        where: { userId: session.user.id, isDefault: true, id: { not: id } },
         data: { isDefault: false },
       });
     }
 
     const address = await prisma.address.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         fullName: fullName || existingAddress.fullName,
         phone: phone !== undefined ? phone : existingAddress.phone,
@@ -60,17 +62,20 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 }
 
 // DELETE - Delete an address
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await auth();
+    const supabase = await createClient();
+    const { data: { session } } = await supabase.auth.getSession();
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
+
     // Verify address belongs to user
     const existingAddress = await prisma.address.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!existingAddress) {
@@ -82,7 +87,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
 
     await prisma.address.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: "Address deleted successfully" });

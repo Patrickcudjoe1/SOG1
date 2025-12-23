@@ -25,7 +25,6 @@ export async function GET(req: NextRequest) {
 
     return successResponse(results, "Search completed successfully", {
       total: results.length,
-      query,
     })
   } catch (error: any) {
     console.error("Search error:", error)

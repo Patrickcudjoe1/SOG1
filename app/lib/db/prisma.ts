@@ -24,7 +24,7 @@ if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma
  * Execute a database transaction
  */
 export async function transaction<T>(
-  callback: (tx: PrismaClient) => Promise<T>
+  callback: (tx: Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">) => Promise<T>
 ): Promise<T> {
   return await prisma.$transaction(callback)
 }

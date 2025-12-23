@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/app/lib/auth-config";
-import { PrismaClient } from "@prisma/client";
+import { createClient } from "@/app/lib/supabase/server";
+import { PrismaClient, OrderStatus, PaymentStatus } from "@prisma/client";
 import Stripe from "stripe";
 import { generateIdempotencyKey, sanitizeAmount, validateEmail } from "@/app/lib/payment-utils";
 
 const prisma = new PrismaClient();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2024-11-20.acacia",
+  apiVersion: "2025-12-15.clover",
 });
 
 // Generate order number
@@ -18,7 +18,8 @@ function generateOrderNumber(): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
+    const supabase = await createClient();
+    const { data: { session } } = await supabase.auth.getSession();
     const body = await req.json();
 
     const {
@@ -64,12 +65,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Sanitize amounts
-    const sanitizedSubtotal = sanitizeAmount(validatedSubtotal);
-    const sanitizedShippingCost = sanitizeAmount(shippingCost);
-    const sanitizedDiscount = sanitizeAmount(discount);
-    const sanitizedTotal = sanitizeAmount(sanitizedSubtotal + sanitizedShippingCost - sanitizedDiscount);
-
     // Server-side cart validation before processing
     const { validateCartItems } = await import("@/app/lib/cart-validation")
     const validationResult = await validateCartItems(items)
@@ -88,6 +83,29 @@ export async function POST(req: NextRequest) {
     const validatedItems = validationResult.validatedItems || items;
     const validatedSubtotal = validationResult.correctedSubtotal || subtotal;
 
+    // Sanitize amounts
+    const sanitizedSubtotal = sanitizeAmount(validatedSubtotal);
+    const sanitizedShippingCost = sanitizeAmount(shippingCost);
+    const sanitizedDiscount = sanitizeAmount(discount);
+    const sanitizedTotal = sanitizeAmount(sanitizedSubtotal + sanitizedShippingCost - sanitizedDiscount);
+
+    // Create shipping address first
+    const shippingAddress = await prisma.address.create({
+      data: {
+        userId: session?.user?.id || null,
+        fullName: shipping.fullName,
+        email: shipping.email,
+        phone: shipping.phone || null,
+        addressLine1: shipping.addressLine1,
+        addressLine2: shipping.addressLine2 || null,
+        city: shipping.city,
+        region: shipping.region || null,
+        postalCode: shipping.postalCode,
+        country: shipping.country || "Ghana",
+        isDefault: false,
+      },
+    });
+
     // Create order in database first (before payment)
     const orderNumber = generateOrderNumber();
     const order = await prisma.order.create({
@@ -95,17 +113,18 @@ export async function POST(req: NextRequest) {
         orderNumber,
         userId: session?.user?.id || null,
         email: shipping.email,
-        phone: shipping.phone,
-        status: "PENDING",
+        phone: shipping.phone || null,
+        status: OrderStatus.PENDING,
         subtotal: sanitizedSubtotal,
         shippingCost: sanitizedShippingCost,
         discountAmount: sanitizedDiscount,
         totalAmount: sanitizedTotal,
         promoCode: promoCode || null,
         paymentMethod: "card",
-        paymentStatus: "PENDING",
-        deliveryMethod,
+        paymentStatus: PaymentStatus.PENDING,
+        deliveryMethod: deliveryMethod || null,
         idempotencyKey,
+        shippingAddressId: shippingAddress.id,
         items: {
           create: validatedItems.map((item: any) => ({
             productId: item.productId,
@@ -116,21 +135,6 @@ export async function POST(req: NextRequest) {
             size: item.size || null,
             color: item.color || null,
           })),
-        },
-        shippingAddress: {
-          create: {
-            userId: session?.user?.id || null,
-            fullName: shipping.fullName,
-            email: shipping.email,
-            phone: shipping.phone,
-            addressLine1: shipping.addressLine1,
-            addressLine2: shipping.addressLine2 || null,
-            city: shipping.city,
-            region: shipping.region || null,
-            postalCode: shipping.postalCode,
-            country: shipping.country || "Ghana",
-            isDefault: false,
-          },
         },
       },
       include: {
@@ -159,6 +163,7 @@ export async function POST(req: NextRequest) {
           currency: "ghs",
           product_data: {
             name: "Shipping",
+            images: [],
           },
           unit_amount: Math.round(shippingCost * 100),
         },
@@ -173,6 +178,7 @@ export async function POST(req: NextRequest) {
           currency: "ghs",
           product_data: {
             name: "Discount",
+            images: [],
           },
           unit_amount: -Math.round(discount * 100), // Negative amount for discount
         },
@@ -192,8 +198,6 @@ export async function POST(req: NextRequest) {
         orderNumber: order.orderNumber,
         idempotencyKey,
       },
-      // Idempotency key for Stripe
-      idempotency_key: idempotencyKey,
     });
 
     // Update order with Stripe session ID
