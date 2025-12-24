@@ -3,9 +3,16 @@ import { PrismaClient } from "@prisma/client";
 import Stripe from "stripe";
 
 const prisma = new PrismaClient();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2025-12-15.clover",
-});
+// Lazy Stripe initialization to prevent build errors
+const getStripe = () => {
+  const stripeKey = process.env.STRIPE_SECRET_KEY;
+  if (!stripeKey) {
+    throw new Error("STRIPE_SECRET_KEY is not configured");
+  }
+  return new Stripe(stripeKey, {
+    apiVersion: "2025-12-15.clover",
+  });
+}
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 

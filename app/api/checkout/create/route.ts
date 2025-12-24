@@ -5,9 +5,19 @@ import Stripe from "stripe";
 import { generateIdempotencyKey, sanitizeAmount, validateEmail } from "@/app/lib/payment-utils";
 
 const prisma = new PrismaClient();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2025-12-15.clover",
-});
+// Stripe is optional - only initialize if key exists (lazy initialization)
+let stripeInstance: Stripe | null = null;
+const getStripe = () => {
+  if (stripeInstance) return stripeInstance;
+  const stripeKey = process.env.STRIPE_SECRET_KEY;
+  if (!stripeKey) {
+    return null;
+  }
+  stripeInstance = new Stripe(stripeKey, {
+    apiVersion: "2025-12-15.clover",
+  });
+  return stripeInstance;
+};
 
 // Generate order number
 function generateOrderNumber(): string {
@@ -184,6 +194,14 @@ export async function POST(req: NextRequest) {
         },
         quantity: 1,
       });
+    }
+
+    const stripe = getStripe();
+    if (!stripe) {
+      return NextResponse.json(
+        { error: "Stripe is not configured. Please use Paystack payment method." },
+        { status: 500 }
+      );
     }
 
     const checkoutSession = await stripe.checkout.sessions.create({
