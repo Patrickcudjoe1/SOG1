@@ -39,7 +39,10 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-brand: "BeatriceDeck", sans-serif;
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+  --font-accent: var(--font-accent);
+  --font-brand: var(--font-heading);
 
   --background: #ffffff;
   --foreground: #000000;
@@ -163,7 +166,11 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-brand);
+    font-family: var(--font-body), sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading), serif;
   }
 
   h1 {
@@ -176,6 +183,11 @@
 
   p {
     @apply text-sm font-light leading-relaxed;
+    font-family: var(--font-body), sans-serif;
+  }
+
+  button, .btn-outline {
+    font-family: var(--font-accent), cursive;
   }
   .hero {
     font-family: var(--font-brand) !important;

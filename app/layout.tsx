@@ -1,18 +1,29 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
-import { Inter } from 'next/font/google'
+import { Playfair_Display, Lato, Great_Vibes } from 'next/font/google'
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import ClientRoot from "./components/ClientRoot"
 
-// inter (Logo, Navbar)
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter', weight: ['400', '500', '600', '700'] })
+// Playfair Display for headings
+const playfairDisplay = Playfair_Display({ 
+  subsets: ['latin'], 
+  variable: '--font-heading',
+  weight: ['400', '500', '600', '700', '900']
+})
 
-// Clean Sans (Body text)
-const fogSans = Inter({
+// Lato for body text
+const lato = Lato({
   subsets: ["latin"],
-  weight: ["300", "400", "500"],
-  variable: "--font-fog-sans",
+  weight: ["300", "400", "700"],
+  variable: "--font-body",
+})
+
+// Great Vibes for accent/buttons
+const greatVibes = Great_Vibes({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-accent",
 })
 
 
@@ -37,7 +48,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${fogSans.variable} ${inter.variable}`}
+      className={`${playfairDisplay.variable} ${lato.variable} ${greatVibes.variable}`}
     >
       <head>
         <meta charSet="utf-8" />

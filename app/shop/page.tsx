@@ -9,12 +9,22 @@ import { useState } from "react"
 export default function Shop() {
   const [selectedCategory, setSelectedCategory] = useState<string>("All")
 
-  const categories = ["All"]
+  // Filter products: only show those with valid images
+  // Exclude products with empty, undefined, null, or placeholder images
+  const productsWithImages = products.filter((p) => {
+    if (!p.image) return false
+    const imagePath = p.image.trim()
+    if (imagePath === "") return false
+    if (imagePath.includes("placeholder")) return false
+    return true
+  })
   
-  // Filter products: only show those with valid images (not empty, not placeholder)
-  const productsWithImages = products.filter(
-    (p) => p.image && p.image.trim() !== "" && !p.image.includes("placeholder")
-  )
+  // Dynamically extract unique categories from products with valid images
+  const uniqueCategories = Array.from(
+    new Set(productsWithImages.map((p) => p.category))
+  ).sort()
+  
+  const categories = ["All", ...uniqueCategories]
   
   const filteredProducts =
     selectedCategory === "All" 
