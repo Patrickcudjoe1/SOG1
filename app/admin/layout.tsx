@@ -1,6 +1,5 @@
 "use client"
 
-import { createClient } from "@/app/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import Link from "next/link"
@@ -10,51 +9,30 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = createClient()
   const router = useRouter()
   const [session, setSession] = useState<any>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Check current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
+    // Check current session and admin status
+    fetch("/api/admin/check")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.isAdmin) {
+          setIsAdmin(true)
+          setSession(data.user)
+        } else {
+          router.push("/signin?callbackUrl=/admin")
+        }
+      })
+      .catch(() => {
         router.push("/signin?callbackUrl=/admin")
-        return
-      }
-      setSession(session)
-
-      // Check if user is admin
-      fetch("/api/admin/check")
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success && data.isAdmin) {
-            setIsAdmin(true)
-          } else {
-            router.push("/")
-          }
-        })
-        .catch(() => {
-          router.push("/")
-        })
-        .finally(() => {
-          setLoading(false)
-        })
-    })
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      if (!session) {
-        router.push("/signin?callbackUrl=/admin")
-      }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [router, supabase])
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [router])
 
   if (loading) {
     return (
@@ -136,15 +114,16 @@ export default function AdminLayout({
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-sm font-medium text-gray-900">
-                {session?.user?.user_metadata?.name || session?.user?.email?.split("@")[0]}
+                {session?.name || session?.email?.split("@")[0]}
               </p>
-              <p className="text-xs text-gray-500">{session?.user?.email}</p>
+              <p className="text-xs text-gray-500">{session?.email}</p>
             </div>
           </div>
           <button
             onClick={async () => {
-              await supabase.auth.signOut()
+              await fetch("/api/auth/signout", { method: "POST" })
               router.push("/")
+              router.refresh()
             }}
             className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
           >

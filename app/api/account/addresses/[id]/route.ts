@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/app/lib/supabase/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { requireAuth } from "@/app/lib/api/middleware";
+import { prisma } from "@/app/lib/db/prisma";
 
 // PATCH - Update an address
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const supabase = await createClient();
-    const { data: { session } } = await supabase.auth.getSession();
+    const { error, user } = await requireAuth(req);
 
-    if (!session?.user?.id) {
+    if (error || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -27,14 +24,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ error: "Address not found" }, { status: 404 });
     }
 
-    if (existingAddress.userId !== session.user.id) {
+    if (existingAddress.userId !== user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
     // If setting as default, unset other defaults
     if (isDefault) {
       await prisma.address.updateMany({
-        where: { userId: session.user.id, isDefault: true, id: { not: id } },
+        where: { userId: user.id, isDefault: true, id: { not: id } },
         data: { isDefault: false },
       });
     }
@@ -64,10 +61,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 // DELETE - Delete an address
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const supabase = await createClient();
-    const { data: { session } } = await supabase.auth.getSession();
+    const { error, user } = await requireAuth(req);
 
-    if (!session?.user?.id) {
+    if (error || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -82,7 +78,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       return NextResponse.json({ error: "Address not found" }, { status: 404 });
     }
 
-    if (existingAddress.userId !== session.user.id) {
+    if (existingAddress.userId !== user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 

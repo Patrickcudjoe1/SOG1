@@ -1,18 +1,13 @@
-import { createClient } from '@/app/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+// OAuth callback route - currently not used as OAuth is disabled
+// This can be implemented later if OAuth support is needed
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
-  const code = requestUrl.searchParams.get('code')
   const redirectTo = requestUrl.searchParams.get('redirect') || '/account'
 
-  if (code) {
-    const supabase = await createClient()
-    await supabase.auth.exchangeCodeForSession(code)
-  }
-
-  // URL to redirect to after sign in process completes
+  // Redirect to account page
   return NextResponse.redirect(new URL(redirectTo, request.url))
 }
 

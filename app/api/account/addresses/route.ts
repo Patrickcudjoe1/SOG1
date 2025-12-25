@@ -1,21 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/app/lib/supabase/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { requireAuth } from "@/app/lib/api/middleware";
+import { prisma } from "@/app/lib/db/prisma";
 
 // GET - Fetch all addresses for the current user
 export async function GET(req: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { session } } = await supabase.auth.getSession();
+    const { error, user } = await requireAuth(req);
 
-    if (!session?.user?.id) {
+    if (error || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const addresses = await prisma.address.findMany({
-      where: { userId: session.user.id },
+      where: { userId: user.id },
       orderBy: [
         { isDefault: "desc" },
         { createdAt: "desc" },
@@ -32,10 +29,9 @@ export async function GET(req: NextRequest) {
 // POST - Create a new address
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { session } } = await supabase.auth.getSession();
+    const { error, user } = await requireAuth(req);
 
-    if (!session?.user?.id) {
+    if (error || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -53,14 +49,14 @@ export async function POST(req: NextRequest) {
     // If setting as default, unset other defaults
     if (isDefault) {
       await prisma.address.updateMany({
-        where: { userId: session.user.id, isDefault: true },
+        where: { userId: user.id, isDefault: true },
         data: { isDefault: false },
       });
     }
 
     const address = await prisma.address.create({
       data: {
-        userId: session.user.id,
+        userId: user.id,
         fullName,
         phone: phone || null,
         addressLine1,

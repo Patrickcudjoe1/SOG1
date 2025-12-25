@@ -57,13 +57,18 @@ export default function FeaturedCollection() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-white tracking-[0.15em] uppercase leading-[1.3] sm:leading-[1.2] md:leading-[1.1] px-4 sm:px-2 sm:whitespace-nowrap font-bold max-w-[90vw] sm:max-w-none"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white uppercase px-4 text-center"
           style={{ 
-            fontFamily: 'var(--font-brand)', 
+            fontFamily: 'var(--font-brand)',
+            fontWeight: 300,
+            fontSize: 'clamp(1.75rem, 6vw, 3.5rem)',
+            lineHeight: '1.4',
+            letterSpacing: '0.05em',
             textShadow: '0 2px 8px rgba(0,0,0,0.7)'
           }}
         >
-          SOG Presence Collection
+          <span className="block md:inline">SOG Presence</span>
+          <span className="block md:inline md:ml-2">Collection</span>
         </motion.h1>
 
         {/* Shop and Lookbook Buttons - At Bottom */}

@@ -1,11 +1,24 @@
-import { createClient } from "./supabase/server"
 import { redirect } from "next/navigation"
+import { getSessionFromToken, TokenPayload } from "./jwt"
+import { prisma } from "./db/prisma"
 
 export async function getSession() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const tokenPayload = await getSessionFromToken()
+  
+  if (!tokenPayload) {
+    return null
+  }
+
+  // Optionally verify user still exists in database
+  const user = await prisma.user.findUnique({
+    where: { id: tokenPayload.userId },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+    },
+  })
 
   if (!user) {
     return null
@@ -15,7 +28,8 @@ export async function getSession() {
     user: {
       id: user.id,
       email: user.email,
-      name: user.user_metadata?.name || user.email?.split("@")[0] || null,
+      name: user.name || user.email?.split("@")[0] || null,
+      role: user.role,
     },
   }
 }

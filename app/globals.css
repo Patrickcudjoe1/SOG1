@@ -7,8 +7,15 @@
 
 @font-face {
   font-family: "BeatriceDeck";
-  src: url("/fonts/BeatriceDeck-Light.woff") format("woff"),
-       url("/fonts/BeatriceDeck-Light.woff") format("woff");
+  src: url("/fonts/BeatriceDeck-Thin.woff") format("woff");
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "BeatriceDeck";
+  src: url("/fonts/BeatriceDeck-Light.woff") format("woff");
   font-weight: 300;
   font-style: normal;
   font-display: swap;
@@ -16,18 +23,8 @@
 
 @font-face {
   font-family: "BeatriceDeck";
-  src: url("/fonts/BeatriceDeck-Bold.woff") format("woff"),
-       url("/fonts/BeatriceDeck-Bold.woff") format("woff");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "BeatriceDeck";
-  src: url("/fonts/BeatriceDeck-Thin.woff") format("woff"),
-       url("/fonts/BeatriceDeck-Thin.woff") format("woff");
-  font-weight: 500;
+  src: url("/fonts/BeatriceDeck-Bold.woff") format("woff");
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
@@ -42,7 +39,7 @@
   --font-heading: var(--font-heading);
   --font-body: var(--font-body);
   --font-accent: var(--font-accent);
-  --font-brand: var(--font-heading);
+  --font-brand: "BeatriceDeck", sans-serif;
 
   --background: #ffffff;
   --foreground: #000000;

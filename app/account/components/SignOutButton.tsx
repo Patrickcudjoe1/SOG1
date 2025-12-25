@@ -1,17 +1,24 @@
 "use client"
 
-import { createClient } from "@/app/lib/supabase/client"
 import { LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 export default function SignOutButton() {
   const router = useRouter()
-  const supabase = createClient()
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push("/")
-    router.refresh()
+    try {
+      await fetch("/api/auth/signout", {
+        method: "POST",
+      })
+      router.push("/")
+      router.refresh()
+    } catch (error) {
+      console.error("Sign out error:", error)
+      // Still redirect even if API call fails
+      router.push("/")
+      router.refresh()
+    }
   }
 
   return (

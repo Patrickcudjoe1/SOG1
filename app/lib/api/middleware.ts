@@ -1,50 +1,5 @@
-import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/app/lib/supabase/server"
-import { unauthorizedResponse, errorResponse } from "./response"
-
-/**
- * Require authentication middleware
- */
-export async function requireAuth(req: NextRequest) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return {
-      error: unauthorizedResponse(),
-      user: null,
-    }
-  }
-
-  return {
-    error: null,
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.user_metadata?.name || user.email?.split("@")[0] || null,
-    },
-  }
-}
-
-/**
- * Require admin middleware (if you add admin role later)
- */
-export async function requireAdmin(req: NextRequest) {
-  const { error, user } = await requireAuth(req)
-
-  if (error) {
-    return { error, user: null }
-  }
-
-  // Add admin check here if needed
-  // if (user.role !== 'admin') {
-  //   return { error: forbiddenResponse(), user: null }
-  // }
-
-  return { error: null, user }
-}
+// Re-export from auth-middleware for backward compatibility
+export { requireAuth, requireAdmin, requireSuperAdmin } from "../auth-middleware"
 
 /**
  * Rate limiting helper (simple in-memory version)

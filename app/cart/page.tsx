@@ -72,10 +72,10 @@ export default function Cart() {
                     transition={{ delay: idx * 0.1 }}
                     className="border-b border-gray-200 pb-4 md:pb-6 last:border-b-0"
                   >
-                    <div className="flex gap-3 md:gap-4 lg:gap-6">
+                    <div className="flex gap-4 md:gap-5 lg:gap-6">
                       {/* Product Image */}
                       <Link href={`/product/${item.productId || item.id}`} className="flex-shrink-0">
-                        <div className="relative w-20 h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 bg-white border border-gray-200 overflow-hidden">
+                        <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-40 lg:h-40 bg-white border border-gray-200 overflow-hidden">
                           <Image
                             src={item.image || "/placeholder.svg"}
                             alt={item.name}
@@ -89,15 +89,15 @@ export default function Cart() {
                       <div className="flex-1 flex flex-col justify-between min-w-0">
                         <div className="flex-1">
                           <Link href={`/product/${item.productId || item.id}`}>
-                            <h3 className="text-xs md:text-sm lg:text-base font-light tracking-wide mb-1 md:mb-2 hover:opacity-60 transition-opacity line-clamp-2">
+                            <h3 className="text-sm sm:text-base md:text-lg font-light tracking-wide mb-1 md:mb-2 hover:opacity-60 transition-opacity line-clamp-2">
                               {item.name}
                             </h3>
                           </Link>
-                          <div className="text-[10px] md:text-xs text-gray-600 space-y-0.5 md:space-y-1 mb-2 md:mb-4">
+                          <div className="text-xs md:text-sm text-gray-600 space-y-0.5 md:space-y-1 mb-2 md:mb-4">
                             {item.size && <p>Size: {item.size}</p>}
                             {item.color && <p>Color: {item.color}</p>}
                     </div>
-                          <p className="text-xs md:text-sm font-light mb-3 md:mb-0">{formatCurrency(item.price)}</p>
+                          <p className="text-sm md:text-base font-light mb-3 md:mb-0">{formatCurrency(item.price)}</p>
               </div>
 
                         {/* Quantity Controls - Mobile Optimized */}
@@ -123,7 +123,7 @@ export default function Cart() {
                       </div>
 
                           <div className="flex items-center gap-2 md:gap-4">
-                            <p className="text-xs md:text-sm font-light whitespace-nowrap">
+                            <p className="text-sm md:text-base font-light whitespace-nowrap">
                               {formatCurrency(item.price * item.quantity)}
                             </p>
                             <button

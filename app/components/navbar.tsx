@@ -53,8 +53,8 @@ export default function SONOFGODNavbar({ forceDark = false }: NavbarProps) {
           ${bgColor} ${forceDark ? "shadow-md" : (scrolled ? "shadow-md" : "shadow-none")}
         `}
       >
-        <div className="max-w-full px-6 md:px-12 py-4 transition-all duration-300">
-          <div className="flex items-center justify-center relative h-10">
+        <div className="max-w-full px-4 sm:px-6 md:px-12 py-3 md:py-4 transition-all duration-300">
+          <div className="flex items-center justify-center relative h-12 md:h-14">
 
             {/* LEFT NAV - DESKTOP */}
             <div className="hidden md:flex items-center gap-10 absolute left-0 h-full">
@@ -187,8 +187,8 @@ export default function SONOFGODNavbar({ forceDark = false }: NavbarProps) {
             {/* CENTER LOGO */}
             <Link
               href="/"
-              className={`text-lg md:text-xl uppercase tracking-[0.15em] transition-colors font-bold ${textColor}`}
-              style={{ fontFamily: 'var(--font-brand)' }}
+              className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl uppercase tracking-tight transition-colors font-bold ${textColor}`}
+              style={{ fontFamily: 'var(--font-brand)', fontWeight: 700 }}
             >
               SON OF GOD
             </Link>

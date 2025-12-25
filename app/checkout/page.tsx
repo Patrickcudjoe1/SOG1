@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/app/lib/supabase/client";
 import dynamic from "next/dynamic";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
@@ -56,22 +55,26 @@ const DELIVERY_OPTIONS = [
 
 export default function Checkout() {
   const router = useRouter();
-  const supabase = createClient();
   const [session, setSession] = useState<any>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [supabase]);
+    // Fetch user session if authenticated (guest checkout is allowed)
+    fetch('/api/account/profile', { method: 'GET' })
+      .then(res => {
+        if (res.ok) {
+          return res.json();
+        }
+        return null;
+      })
+      .then(data => {
+        if (data?.user) {
+          setSession({ user: data.user });
+        }
+      })
+      .catch(() => {
+        // Not authenticated, allow guest checkout
+      });
+  }, []);
   const { cart, getCartTotal, clearCart, validateCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");

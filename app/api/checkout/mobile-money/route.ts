@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/app/lib/supabase/server";
-import { PrismaClient, OrderStatus, PaymentStatus } from "@prisma/client";
+import { getSessionFromToken } from "@/app/lib/jwt";
+import { OrderStatus, PaymentStatus } from "@prisma/client";
+import { prisma } from "@/app/lib/db/prisma";
 import { 
   generateIdempotencyKey, 
   sanitizeAmount, 
@@ -8,8 +9,6 @@ import {
   validateGhanaPhone,
   formatGhanaPhone 
 } from "@/app/lib/payment-utils";
-
-const prisma = new PrismaClient();
 
 // Generate order number
 function generateOrderNumber(): string {
@@ -25,8 +24,10 @@ function generateTransactionId(): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { session } } = await supabase.auth.getSession();
+    // Get user session if authenticated (guest checkout is allowed)
+    const tokenPayload = await getSessionFromToken();
+    const userId = tokenPayload?.userId || null;
+    
     const body = await req.json();
 
     const {
@@ -113,7 +114,7 @@ export async function POST(req: NextRequest) {
     // Create shipping address first
     const shippingAddress = await prisma.address.create({
       data: {
-        userId: session?.user?.id || null,
+        userId: userId,
         fullName: shipping.fullName,
         email: shipping.email,
         phone: shipping.phone || null,
@@ -132,7 +133,7 @@ export async function POST(req: NextRequest) {
     const order = await prisma.order.create({
       data: {
         orderNumber,
-        userId: session?.user?.id || null,
+        userId: userId,
         email: shipping.email,
         phone: shipping.phone || null,
         status: OrderStatus.PENDING,
