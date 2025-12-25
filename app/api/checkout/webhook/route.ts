@@ -1,18 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import Stripe from "stripe";
-
-const prisma = new PrismaClient();
-// Lazy Stripe initialization to prevent build errors
-const getStripe = () => {
-  const stripeKey = process.env.STRIPE_SECRET_KEY;
-  if (!stripeKey) {
-    throw new Error("STRIPE_SECRET_KEY is not configured");
-  }
-  return new Stripe(stripeKey, {
-    apiVersion: "2025-12-15.clover",
-  });
-}
+import { prisma } from "@/app/lib/db/prisma";
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -27,6 +15,13 @@ export async function POST(req: NextRequest) {
   let event: Stripe.Event;
 
   try {
+    // Create a Stripe instance for webhook verification
+    // Note: The API key is not used for webhook verification, only the webhook secret is needed
+    // But we need an instance to call the constructEvent method
+    const stripeKey = process.env.STRIPE_SECRET_KEY || "sk_test_dummy_for_webhook_verification";
+    const stripe = new Stripe(stripeKey, {
+      apiVersion: "2025-12-15.clover",
+    });
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err: any) {
     console.error("Webhook signature verification failed:", err.message);
