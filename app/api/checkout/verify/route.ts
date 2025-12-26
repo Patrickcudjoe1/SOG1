@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
-
-const prisma = new PrismaClient()
+import { firestoreDB, COLLECTIONS, Order } from "@/app/lib/firebase/db"
 
 /**
  * Verify payment status for an order
@@ -21,32 +19,22 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    let order
+    let order: Order | null = null
 
     if (orderId) {
-      order = await prisma.order.findUnique({
-        where: { id: orderId },
-        include: {
-          items: true,
-          shippingAddress: true,
-        },
-      })
+      order = await firestoreDB.get<Order>(COLLECTIONS.ORDERS, orderId)
     } else if (sessionId) {
-      order = await prisma.order.findFirst({
-        where: { stripeSessionId: sessionId },
-        include: {
-          items: true,
-          shippingAddress: true,
-        },
-      })
+      const orders = await firestoreDB.getMany<Order>(
+        COLLECTIONS.ORDERS,
+        { orderBy: "stripeSessionId", equalTo: sessionId, limitToFirst: 1 }
+      )
+      order = orders[0] || null
     } else if (reference) {
-      order = await prisma.order.findFirst({
-        where: { paystackReference: reference },
-        include: {
-          items: true,
-          shippingAddress: true,
-        },
-      })
+      const orders = await firestoreDB.getMany<Order>(
+        COLLECTIONS.ORDERS,
+        { orderBy: "paystackReference", equalTo: reference, limitToFirst: 1 }
+      )
+      order = orders[0] || null
     }
 
     if (!order) {

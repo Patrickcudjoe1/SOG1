@@ -16,7 +16,7 @@ export default function AdminLayout({
 
   useEffect(() => {
     // Check current session and admin status
-    fetch("/api/admin/check")
+    fetch("/api/admin/check", { credentials: 'same-origin' })
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.isAdmin) {
@@ -120,10 +120,10 @@ export default function AdminLayout({
             </div>
           </div>
           <button
-            onClick={async () => {
-              await fetch("/api/auth/signout", { method: "POST" })
-              router.push("/")
-              router.refresh()
+            onClick={() => {
+              // Sign out in background and redirect immediately for smooth UX
+              fetch("/api/auth/signout", { method: "POST", credentials: 'same-origin' }).catch(console.error)
+              window.location.href = "/"
             }}
             className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
           >

@@ -32,7 +32,7 @@ export default function AdminProducts() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch("/api/admin/products?limit=100")
+      const res = await fetch("/api/admin/products?limit=100", { credentials: 'same-origin' })
       const data = await res.json()
       if (data.success) {
         setProducts(data.data)

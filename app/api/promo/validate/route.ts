@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { firestoreDB, COLLECTIONS, PromoCode } from "@/app/lib/firebase/db";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,9 +13,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ valid: false, error: "Invalid amount" }, { status: 400 });
     }
 
-    const promo = await prisma.promoCode.findUnique({
-      where: { code: code.toUpperCase().trim() },
-    });
+    const promos = await firestoreDB.getMany<PromoCode>(
+      COLLECTIONS.PROMO_CODES,
+      { orderBy: "code", equalTo: code.toUpperCase().trim(), limitToFirst: 1 }
+    );
+    
+    const promo = promos[0] || null;
 
     if (!promo) {
       return NextResponse.json({ valid: false, error: "Invalid promo code" }, { status: 200 });

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { headers } from "next/headers"
-import { PrismaClient } from "@prisma/client"
+import { firestoreDB, COLLECTIONS, Order } from "@/app/lib/firebase/db"
+import { findOrderByPaystackReference } from "@/app/lib/firebase/queries"
 import crypto from "crypto"
 
-const prisma = new PrismaClient()
 const paystackSecretKey = process.env.PAYSTACK_SECRET_KEY
 
 /**
@@ -47,25 +47,8 @@ export async function POST(req: NextRequest) {
         const data = event.data
         const reference = data.reference
 
-        // Check if already processed (idempotency)
-        const existingOrder = await prisma.order.findFirst({
-          where: {
-            paystackReference: reference,
-            webhookProcessed: true,
-          },
-        })
-
-        if (existingOrder) {
-          console.log(`Order ${existingOrder.orderNumber} already processed`)
-          return NextResponse.json({ received: true, duplicate: true })
-        }
-
-        // Find order by Paystack reference
-        const order = await prisma.order.findFirst({
-          where: {
-            paystackReference: reference,
-          },
-        })
+        // Find order by Paystack reference using optimized query
+        const order = await findOrderByPaystackReference(reference)
 
         if (!order) {
           console.error(`Order not found for Paystack reference ${reference}`)
@@ -75,22 +58,28 @@ export async function POST(req: NextRequest) {
           )
         }
 
+        // Check if already processed (idempotency)
+        if (order.webhookProcessed) {
+          console.log(`Order ${order.orderNumber} already processed`)
+          return NextResponse.json({ received: true, duplicate: true })
+        }
+
         // Verify payment was successful
         if (data.status === "success" && data.gateway_response === "Successful") {
           // Update order with payment confirmation
-          await prisma.order.update({
-            where: { id: order.id },
-            data: {
-              paymentStatus: "COMPLETED",
-              status: "PROCESSING",
-              webhookProcessed: true,
-            },
+          await firestoreDB.update<Order>(COLLECTIONS.ORDERS, order.id, {
+            paymentStatus: "COMPLETED",
+            status: "PROCESSING",
+            webhookProcessed: true,
           })
 
           // Send order confirmation email (async)
-          fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/orders/${order.id}/send-email`, {
-            method: "POST",
-          }).catch((err) => console.error("Failed to send email:", err))
+          fetch(
+            `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/orders/${order.id}/send-email`,
+            {
+              method: "POST",
+            }
+          ).catch((err) => console.error("Failed to send email:", err))
 
           console.log(`Order ${order.orderNumber} payment confirmed via Paystack`)
         }
@@ -102,19 +91,13 @@ export async function POST(req: NextRequest) {
         const data = event.data
         const reference = data.reference
 
-        const order = await prisma.order.findFirst({
-          where: {
-            paystackReference: reference,
-          },
-        })
+        // Find order by Paystack reference using optimized query
+        const order = await findOrderByPaystackReference(reference)
 
         if (order) {
-          await prisma.order.update({
-            where: { id: order.id },
-            data: {
-              paymentStatus: "FAILED",
-              status: "CANCELLED",
-            },
+          await firestoreDB.update<Order>(COLLECTIONS.ORDERS, order.id, {
+            paymentStatus: "FAILED",
+            status: "CANCELLED",
           })
 
           console.log(`Order ${order.orderNumber} payment failed via Paystack`)
@@ -139,4 +122,3 @@ export async function POST(req: NextRequest) {
 
 // Disable body parsing, we need raw body for signature verification
 export const runtime = "nodejs"
-

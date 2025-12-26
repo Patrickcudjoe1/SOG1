@@ -1,19 +1,15 @@
-import { PrismaClient, User } from "@prisma/client"
-import { hash } from "bcryptjs"
-
-const prisma = new PrismaClient()
+import { firestoreDB, COLLECTIONS, User, Order, Address } from "../firebase/db"
 
 export interface CreateUserData {
+  id: string
   name: string
   email: string
-  password?: string
   image?: string
 }
 
 export interface UpdateUserData {
   name?: string
   email?: string
-  password?: string
   image?: string
 }
 
@@ -22,15 +18,11 @@ export class UserService {
    * Create a new user
    */
   static async createUser(data: CreateUserData): Promise<User> {
-    const hashedPassword = data.password ? await hash(data.password, 12) : null
-
-    const user = await prisma.user.create({
-      data: {
-        name: data.name,
-        email: data.email.toLowerCase(),
-        password: hashedPassword,
-        image: data.image || null,
-      },
+    const user = await firestoreDB.create<User>(COLLECTIONS.USERS, data.id, {
+      name: data.name,
+      email: data.email.toLowerCase(),
+      image: data.image || undefined,
+      role: 'USER',
     })
 
     return user
@@ -40,32 +32,41 @@ export class UserService {
    * Get user by ID
    */
   static async getUserById(userId: string) {
-    return await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        image: true,
-        emailVerified: true,
-        createdAt: true,
-        addresses: true,
-        _count: {
-          select: {
-            orders: true,
-          },
-        },
+    const user = await firestoreDB.get<User>(COLLECTIONS.USERS, userId)
+    if (!user) return null
+
+    const [addresses, orders] = await Promise.all([
+      firestoreDB.getMany<Address>(COLLECTIONS.ADDRESSES, {
+        orderBy: 'userId',
+        equalTo: userId
+      }),
+      firestoreDB.getMany<Order>(COLLECTIONS.ORDERS, {
+        orderBy: 'userId',
+        equalTo: userId
+      }),
+    ])
+
+    return {
+      ...user,
+      addresses,
+      _count: {
+        orders: orders.length,
       },
-    })
+    }
   }
 
   /**
    * Get user by email
    */
   static async getUserByEmail(email: string) {
-    return await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
-    })
+    const users = await firestoreDB.getMany<User>(
+      COLLECTIONS.USERS,
+      {
+        orderBy: 'email',
+        equalTo: email.toLowerCase()
+      }
+    )
+    return users[0] || null
   }
 
   /**
@@ -76,67 +77,47 @@ export class UserService {
 
     if (data.name) updateData.name = data.name
     if (data.email) updateData.email = data.email.toLowerCase()
-    if (data.password) updateData.password = await hash(data.password, 12)
     if (data.image !== undefined) updateData.image = data.image
 
-    return await prisma.user.update({
-      where: { id: userId },
-      data: updateData,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        image: true,
-      },
-    })
+    await firestoreDB.update<User>(COLLECTIONS.USERS, userId, updateData)
+
+    return await firestoreDB.get<User>(COLLECTIONS.USERS, userId)
   }
 
   /**
    * Delete user
    */
   static async deleteUser(userId: string) {
-    return await prisma.user.delete({
-      where: { id: userId },
-    })
+    await firestoreDB.delete(COLLECTIONS.USERS, userId)
   }
 
   /**
    * Check if email exists
    */
   static async emailExists(email: string) {
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
-      select: { id: true },
-    })
-    return !!user
+    const users = await firestoreDB.getMany<User>(
+      COLLECTIONS.USERS,
+      {
+        orderBy: 'email',
+        equalTo: email.toLowerCase()
+      }
+    )
+    return users.length > 0
   }
 
   /**
    * Get user statistics
    */
   static async getUserStats(userId: string) {
-    const [user, orders, addresses] = await Promise.all([
-      prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          createdAt: true,
-        },
+    const [user, orders, addressCount] = await Promise.all([
+      firestoreDB.get<User>(COLLECTIONS.USERS, userId),
+      firestoreDB.getMany<Order>(COLLECTIONS.ORDERS, {
+        orderBy: 'userId',
+        equalTo: userId
       }),
-      prisma.order.findMany({
-        where: { userId },
-        select: {
-          id: true,
-          totalAmount: true,
-          status: true,
-          paymentStatus: true,
-          createdAt: true,
-        },
-      }),
-      prisma.address.count({
-        where: { userId },
+      firestoreDB.count(COLLECTIONS.ADDRESSES, {
+        orderBy: 'userId',
+        equalTo: userId
       }),
     ])
 
@@ -157,9 +138,8 @@ export class UserService {
         totalOrders,
         totalSpent,
         pendingOrders,
-        savedAddresses: addresses,
+        savedAddresses: addressCount,
       },
     }
   }
 }
-

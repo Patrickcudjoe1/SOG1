@@ -1,8 +1,15 @@
-import { type NextRequest } from "next/server";
-import { updateSession } from "@/app/lib/auth-middleware";
+import { type NextRequest, NextResponse } from "next/server"
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request);
+  const response = NextResponse.next({
+    request,
+  })
+
+  // Protected routes that require authentication will be handled client-side
+  // by the AuthProvider and useAuth hook
+  // This middleware just ensures proper routing
+
+  return response
 }
 
 export const config = {
@@ -17,5 +24,4 @@ export const config = {
      */
     "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
-};
-
+}

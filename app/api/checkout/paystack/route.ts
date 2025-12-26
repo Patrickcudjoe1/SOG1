@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getSessionFromToken } from "@/app/lib/jwt"
-import { OrderStatus, PaymentStatus } from "@prisma/client"
-import { prisma } from "@/app/lib/db/prisma"
+import { adminDB, COLLECTIONS, Order, Address, OrderItem, PromoCode } from "@/app/lib/firebase/admin-db"
 import { 
   validateCartItems 
 } from "@/app/lib/cart-validation"
@@ -82,6 +81,7 @@ export async function POST(req: NextRequest) {
     const validationResult = await validateCartItems(items)
 
     if (!validationResult.valid) {
+      console.error("Cart validation failed:", validationResult.errors)
       return NextResponse.json(
         { 
           error: "Cart validation failed", 
@@ -98,11 +98,13 @@ export async function POST(req: NextRequest) {
     const idempotencyKey = generateIdempotencyKey()
 
     // Check for duplicate order
-    const existingOrder = await prisma.order.findUnique({
-      where: { idempotencyKey },
-    })
+    const existingOrders = await adminDB.getMany<Order>(
+      COLLECTIONS.ORDERS,
+      { orderBy: "idempotencyKey", equalTo: idempotencyKey, limitToFirst: 1 }
+    )
 
-    if (existingOrder) {
+    if (existingOrders.length > 0) {
+      const existingOrder = existingOrders[0]
       return NextResponse.json(
         { 
           error: "Duplicate payment detected",
@@ -120,59 +122,60 @@ export async function POST(req: NextRequest) {
     const sanitizedTotal = sanitizeAmount(sanitizedSubtotal + sanitizedShippingCost - sanitizedDiscount)
 
     // Create shipping address first
-    const shippingAddress = await prisma.address.create({
-      data: {
-        userId: userId,
-        fullName: shipping.fullName,
-        email: shipping.email,
-        phone: shipping.phone || null,
-        addressLine1: shipping.addressLine1,
-        addressLine2: shipping.addressLine2 || null,
-        city: shipping.city,
-        region: shipping.region || null,
-        postalCode: shipping.postalCode,
-        country: shipping.country || "Ghana",
-        isDefault: false,
-      },
+    const addressId = `addr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const shippingAddress = await adminDB.create<Address>(COLLECTIONS.ADDRESSES, addressId, {
+      userId: userId ?? undefined,
+      fullName: shipping.fullName,
+      email: shipping.email,
+      phone: shipping.phone,
+      addressLine1: shipping.addressLine1,
+      addressLine2: shipping.addressLine2,
+      city: shipping.city,
+      region: shipping.region,
+      postalCode: shipping.postalCode,
+      country: shipping.country || "Ghana",
+      isDefault: false,
     })
 
     // Create order in database
     const orderNumber = generateOrderNumber()
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        userId: userId,
-        email: shipping.email,
-        phone: shipping.phone || null,
-        status: OrderStatus.PENDING,
-        subtotal: sanitizedSubtotal,
-        shippingCost: sanitizedShippingCost,
-        discountAmount: sanitizedDiscount,
-        totalAmount: sanitizedTotal,
-        promoCode: promoCode || null,
-        paymentMethod: paymentMethod || "card",
-        paymentStatus: PaymentStatus.PENDING,
-        mobileMoneyProvider: paymentMethod === "mobile_money" ? mobileMoneyProvider : null,
-        mobileMoneyPhone: paymentMethod === "mobile_money" ? formatGhanaPhone(mobileMoneyPhone) : null,
-        deliveryMethod: deliveryMethod || null,
-        idempotencyKey,
-        shippingAddressId: shippingAddress.id,
-        items: {
-          create: validatedItems.map((item: any) => ({
-            productId: item.productId,
-            productName: item.name,
-            productImage: item.image,
-            price: item.price,
-            quantity: item.quantity,
-            size: item.size || null,
-            color: item.color || null,
-          })),
-        },
-      },
-      include: {
-        items: true,
-        shippingAddress: true,
-      },
+    const orderId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    
+    // Create order items
+    const orderItems: OrderItem[] = validatedItems.map((item: any, index: number) => ({
+      id: `item_${orderId}_${index}`,
+      orderId,
+      productId: item.productId || item.id,
+      productName: item.name,
+      productImage: item.image,
+      price: item.price,
+      quantity: item.quantity,
+      size: item.size,
+      color: item.color,
+      createdAt: new Date(),
+    }))
+
+    const order = await adminDB.create<Order>(COLLECTIONS.ORDERS, orderId, {
+      orderNumber,
+      userId: userId ?? undefined,
+      email: shipping.email,
+      phone: shipping.phone,
+      status: 'PENDING',
+      subtotal: sanitizedSubtotal,
+      shippingCost: sanitizedShippingCost,
+      discountAmount: sanitizedDiscount,
+      totalAmount: sanitizedTotal,
+      promoCode,
+      paymentMethod: paymentMethod || "card",
+      paymentStatus: 'PENDING',
+      mobileMoneyProvider: paymentMethod === "mobile_money" ? mobileMoneyProvider : undefined,
+      mobileMoneyPhone: paymentMethod === "mobile_money" ? formatGhanaPhone(mobileMoneyPhone) : undefined,
+      deliveryMethod,
+      idempotencyKey,
+      shippingAddressId: addressId,
+      shippingAddress,
+      webhookProcessed: false,
+      items: orderItems,
     })
 
     // Initialize Paystack payment
@@ -211,7 +214,7 @@ export async function POST(req: NextRequest) {
     if (!paystackResponse.ok) {
       const errorData = await paystackResponse.json()
       // Rollback order creation
-      await prisma.order.delete({ where: { id: order.id } })
+      await adminDB.delete(COLLECTIONS.ORDERS, order.id)
       return NextResponse.json(
         { error: errorData.message || "Failed to initialize payment" },
         { status: 500 }
@@ -222,7 +225,7 @@ export async function POST(req: NextRequest) {
 
     if (!paystackData.status) {
       // Rollback order creation
-      await prisma.order.delete({ where: { id: order.id } })
+      await adminDB.delete(COLLECTIONS.ORDERS, order.id)
       return NextResponse.json(
         { error: paystackData.message || "Failed to initialize payment" },
         { status: 500 }
@@ -230,21 +233,32 @@ export async function POST(req: NextRequest) {
     }
 
     // Update order with Paystack reference
-    await prisma.order.update({
-      where: { id: order.id },
-      data: {
-        paystackReference: paystackData.data.reference,
-      },
+    await adminDB.update<Order>(COLLECTIONS.ORDERS, order.id, {
+      paystackReference: paystackData.data.reference,
     })
 
-    // Increment promo code usage if applicable
+    // Increment promo code usage if applicable (ATOMIC)
     if (promoCode) {
-      await prisma.promoCode.update({
-        where: { code: promoCode.toUpperCase() },
-        data: { usedCount: { increment: 1 } },
-      }).catch(() => {
-        // Ignore if promo code doesn't exist
-      })
+      try {
+        const promos = await adminDB.getMany<PromoCode>(
+          COLLECTIONS.PROMO_CODES,
+          { orderBy: "code", equalTo: promoCode.toUpperCase(), limitToFirst: 1 }
+        )
+        if (promos.length > 0) {
+          const promo = promos[0]
+          // Use Firebase transaction for atomic increment
+          const { database } = await import("@/app/lib/firebase/config")
+          const { ref, runTransaction } = await import("firebase/database")
+          
+          const promoRef = ref(database, `${COLLECTIONS.PROMO_CODES}/${promo.id}/usedCount`)
+          await runTransaction(promoRef, (currentCount) => {
+            return (currentCount || 0) + 1
+          })
+        }
+      } catch (error) {
+        console.error('Failed to increment promo code usage:', error)
+        // Don't fail the order if promo increment fails
+      }
     }
 
     return NextResponse.json({

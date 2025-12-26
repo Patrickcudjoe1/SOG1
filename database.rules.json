@@ -1,0 +1,44 @@
+{
+  "rules": {
+    "users": {
+      ".indexOn": ["email", "role"],
+      "$userId": {
+        ".read": "auth != null && (auth.uid == $userId || root.child('users').child(auth.uid).child('role').val() == 'ADMIN' || root.child('users').child(auth.uid).child('role').val() == 'SUPER_ADMIN')",
+        ".write": "auth != null && auth.uid == $userId && (!data.exists() || (newData.child('role').val() == data.child('role').val() && newData.child('email').val() == data.child('email').val())) || root.child('users').child(auth.uid).child('role').val() == 'SUPER_ADMIN'",
+        ".validate": "newData.hasChildren(['id', 'email', 'role', 'createdAt', 'updatedAt']) && (newData.child('role').val() == 'USER' || newData.child('role').val() == 'ADMIN' || newData.child('role').val() == 'SUPER_ADMIN')"
+      }
+    },
+    "addresses": {
+      ".indexOn": ["userId", "isDefault"],
+      "$addressId": {
+        ".read": "auth != null && (data.child('userId').val() == auth.uid || root.child('users').child(auth.uid).child('role').val() == 'ADMIN' || root.child('users').child(auth.uid).child('role').val() == 'SUPER_ADMIN')",
+        ".write": "auth != null && ((!data.exists() && newData.child('userId').val() == auth.uid) || (data.exists() && data.child('userId').val() == auth.uid) || root.child('users').child(auth.uid).child('role').val() == 'ADMIN' || root.child('users').child(auth.uid).child('role').val() == 'SUPER_ADMIN')",
+        ".validate": "newData.hasChildren(['id', 'userId', 'fullName', 'addressLine1', 'city', 'postalCode', 'country', 'createdAt', 'updatedAt']) && (newData.child('userId').val() == auth.uid || root.child('users').child(auth.uid).child('role').val() == 'ADMIN')"
+      }
+    },
+    "orders": {
+      ".indexOn": ["userId", "email", "orderNumber", "stripeSessionId", "paystackReference", "paymentStatus", "status", "idempotencyKey"],
+      "$orderId": {
+        ".read": "auth != null && (data.child('userId').val() == auth.uid || data.child('email').val() == auth.token.email || root.child('users').child(auth.uid).child('role').val() == 'ADMIN' || root.child('users').child(auth.uid).child('role').val() == 'SUPER_ADMIN')",
+        ".write": "auth != null && (!data.exists() || data.child('userId').val() == auth.uid || root.child('users').child(auth.uid).child('role').val() == 'ADMIN' || root.child('users').child(auth.uid).child('role').val() == 'SUPER_ADMIN')",
+        ".validate": "newData.hasChildren(['id', 'orderNumber', 'email', 'status', 'paymentStatus', 'totalAmount', 'createdAt', 'updatedAt']) && newData.child('totalAmount').val() >= 0"
+      }
+    },
+    "products": {
+      ".indexOn": ["category", "subCategory", "bestseller", "inStock"],
+      "$productId": {
+        ".read": "true",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() == 'ADMIN' || root.child('users').child(auth.uid).child('role').val() == 'SUPER_ADMIN')",
+        ".validate": "newData.hasChildren(['id', 'name', 'description', 'price', 'category', 'subCategory', 'createdAt', 'updatedAt']) && newData.child('price').val() >= 0"
+      }
+    },
+    "promoCodes": {
+      ".indexOn": ["code", "isActive"],
+      "$promoId": {
+        ".read": "auth != null",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() == 'ADMIN' || root.child('users').child(auth.uid).child('role').val() == 'SUPER_ADMIN')",
+        ".validate": "newData.hasChildren(['id', 'code', 'discountType', 'discountValue', 'createdAt', 'updatedAt']) && newData.child('discountValue').val() > 0"
+      }
+    }
+  }
+}

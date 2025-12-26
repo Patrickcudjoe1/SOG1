@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from "next/server"
-import { healthCheck } from "@/app/lib/db/prisma"
 import { successResponse, errorResponse } from "@/app/lib/api/response"
+import { firestoreDB, COLLECTIONS } from "@/app/lib/firebase/db"
+
+/**
+ * Firebase health check
+ */
+async function healthCheck() {
+  try {
+    // Test Firestore connection by attempting to count users
+    await firestoreDB.count(COLLECTIONS.USERS, [])
+    return { healthy: true }
+  } catch (error: any) {
+    console.error("Firebase health check failed:", error)
+    return { healthy: false, error: error.message }
+  }
+}
 
 /**
  * GET /api/health
@@ -14,6 +28,7 @@ export async function GET(req: NextRequest) {
       status: "ok",
       timestamp: new Date().toISOString(),
       database: dbHealth.healthy ? "connected" : "disconnected",
+      databaseType: "Firebase Firestore",
       ...(dbHealth.error && { databaseError: dbHealth.error }),
     }
 
@@ -27,4 +42,3 @@ export async function GET(req: NextRequest) {
     return errorResponse("Health check failed", 500)
   }
 }
-

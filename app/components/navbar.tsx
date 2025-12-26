@@ -2,9 +2,11 @@
 
 import Link from "next/link"
 import { useState, useEffect } from "react"
-import { Menu, X, Search, User, ShoppingBag, ChevronRight, ChevronDown } from "lucide-react"
+import { Menu, X, Search, User, ShoppingBag, ChevronRight, ChevronDown, Moon, Sun } from "lucide-react"
 import { motion } from "framer-motion"
 import { useCart } from "./CartContext"
+import { useAuth } from "./AuthProvider"
+import { useTheme } from "./ThemeProvider"
 
 interface NavbarProps {
   forceDark?: boolean
@@ -19,6 +21,8 @@ export default function SONOFGODNavbar({ forceDark = false }: NavbarProps) {
     newArrivals: false,
   })
   const { cart } = useCart()
+  const { user } = useAuth()
+  const { theme, toggleTheme } = useTheme()
 
   const toggleMobileDropdown = (dropdown: 'featured' | 'collections' | 'newArrivals') => {
     setMobileDropdowns(prev => ({
@@ -202,12 +206,29 @@ export default function SONOFGODNavbar({ forceDark = false }: NavbarProps) {
                 <Search size={15} />
               </Link>
 
-              <Link
-                href="/account"
+              <button
+                onClick={toggleTheme}
                 className={`w-8 h-8 hover:opacity-60 transition-opacity flex items-center justify-center ${textColor}`}
+                aria-label="Toggle theme"
               >
-                <User size={15} />
-              </Link>
+                {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+              </button>
+
+              {user ? (
+                <Link
+                  href="/account"
+                  className={`w-8 h-8 hover:opacity-60 transition-opacity flex items-center justify-center ${textColor}`}
+                >
+                  <User size={15} />
+                </Link>
+              ) : (
+                <Link
+                  href="/signin"
+                  className={`w-8 h-8 hover:opacity-60 transition-opacity flex items-center justify-center ${textColor}`}
+                >
+                  <User size={15} />
+                </Link>
+              )}
 
               <Link
                 href="/cart"
@@ -436,6 +457,13 @@ export default function SONOFGODNavbar({ forceDark = false }: NavbarProps) {
 
             {/* Service/Account Links Section */}
             <div className="px-6 pb-6 space-y-4">
+              <button
+                onClick={toggleTheme}
+                className="w-full text-left flex items-center gap-3 text-sm tracking-widest uppercase hover:opacity-60 transition-opacity"
+              >
+                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+                <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+              </button>
               <Link
                 href="/account"
                 className="block sog-link uppercase text-black hover:opacity-60 transition-opacity"

@@ -1,3 +1,5 @@
+import { NextRequest, NextResponse } from "next/server"
+
 // Re-export from auth-middleware for backward compatibility
 export { requireAuth, requireAdmin, requireSuperAdmin } from "../auth-middleware"
 

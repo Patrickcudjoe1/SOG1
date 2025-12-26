@@ -21,7 +21,7 @@ export async function updateSession(request: NextRequest) {
   const protectedRoutes = ['/account', '/checkout']
   const isProtectedRoute = protectedRoutes.some((route) => request.nextUrl.pathname.startsWith(route))
 
-  // Routes that should redirect to account if already authenticated
+  // Routes that should redirect to homepage if already authenticated
   const authRoutes = ['/signin', '/signup']
   const isAuthRoute = authRoutes.some((route) => request.nextUrl.pathname.startsWith(route))
 
@@ -32,9 +32,9 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(signInUrl)
   }
 
-  // Redirect to account if accessing auth routes while authenticated
+  // Redirect to homepage if accessing auth routes while authenticated
   if (isAuthRoute && user) {
-    return NextResponse.redirect(new URL('/account', request.url))
+    return NextResponse.redirect(new URL('/', request.url))
   }
 
   return response

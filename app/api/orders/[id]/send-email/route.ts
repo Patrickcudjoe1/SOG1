@@ -1,21 +1,26 @@
-import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { NextRequest, NextResponse } from "next/server"
+import { firestoreDB, COLLECTIONS, Order, Address } from "@/app/lib/firebase/db"
 
-const prisma = new PrismaClient();
-
-export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = await params;
-    const order = await prisma.order.findUnique({
-      where: { id },
-      include: {
-        items: true,
-        shippingAddress: true,
-      },
-    });
+    const { id } = await params
+    const order = await firestoreDB.get<Order>(COLLECTIONS.ORDERS, id)
 
     if (!order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      return NextResponse.json({ error: "Order not found" }, { status: 404 })
+    }
+
+    // Get shipping address if exists
+    let shippingAddress = order.shippingAddress
+    if (!shippingAddress && order.shippingAddressId) {
+      const address = await firestoreDB.get<Address>(
+        COLLECTIONS.ADDRESSES,
+        order.shippingAddressId
+      )
+      shippingAddress = address || undefined
     }
 
     // In production, use a proper email service like SendGrid, Resend, or AWS SES
@@ -55,7 +60,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
               </thead>
               <tbody>
                 ${order.items
-                  .map(
+                  ?.map(
                     (item) => `
                   <tr style="border-bottom: 1px solid #ddd;">
                     <td style="padding: 10px;">${item.productName}</td>
@@ -68,17 +73,21 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
               </tbody>
             </table>
             
-            ${order.shippingAddress ? `
+            ${
+              shippingAddress
+                ? `
               <h2>Shipping Address</h2>
               <div style="background: #f5f5f5; padding: 15px; margin: 20px 0;">
-                <p>${order.shippingAddress.fullName}</p>
-                <p>${order.shippingAddress.addressLine1}</p>
-                ${order.shippingAddress.addressLine2 ? `<p>${order.shippingAddress.addressLine2}</p>` : ""}
-                <p>${order.shippingAddress.city}, ${order.shippingAddress.region || ""} ${order.shippingAddress.postalCode}</p>
-                <p>${order.shippingAddress.country}</p>
-                ${order.shippingAddress.phone ? `<p>Phone: ${order.shippingAddress.phone}</p>` : ""}
+                <p>${shippingAddress.fullName}</p>
+                <p>${shippingAddress.addressLine1}</p>
+                ${shippingAddress.addressLine2 ? `<p>${shippingAddress.addressLine2}</p>` : ""}
+                <p>${shippingAddress.city}, ${shippingAddress.region || ""} ${shippingAddress.postalCode}</p>
+                <p>${shippingAddress.country}</p>
+                ${shippingAddress.phone ? `<p>Phone: ${shippingAddress.phone}</p>` : ""}
               </div>
-            ` : ""}
+            `
+                : ""
+            }
             
             <p style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
               You will receive shipping updates via email. If you have any questions, please contact our customer service.
@@ -90,7 +99,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           </body>
         </html>
       `,
-    };
+    }
 
     // TODO: Integrate with actual email service
     // Example with Resend:
@@ -102,12 +111,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     //   html: emailContent.html,
     // });
 
-    console.log("Order confirmation email:", emailContent);
+    console.log("Order confirmation email:", emailContent)
 
-    return NextResponse.json({ success: true, message: "Email sent" });
+    return NextResponse.json({ success: true, message: "Email sent" })
   } catch (error: any) {
-    console.error("Error sending email:", error);
-    return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
+    console.error("Error sending email:", error)
+    return NextResponse.json(
+      { error: "Failed to send email" },
+      { status: 500 }
+    )
   }
 }
-

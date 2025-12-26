@@ -1,7 +1,4 @@
-import { PrismaClient } from "@prisma/client"
 import { products, getProductById, getProductBySlug } from "@/app/lib/products"
-
-const prisma = new PrismaClient()
 
 export interface ProductFilters {
   category?: string

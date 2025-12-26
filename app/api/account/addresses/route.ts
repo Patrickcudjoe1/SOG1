@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/app/lib/api/middleware";
-import { prisma } from "@/app/lib/db/prisma";
+import { adminDB, COLLECTIONS, Address } from "@/app/lib/firebase/admin-db";
 
 // GET - Fetch all addresses for the current user
 export async function GET(req: NextRequest) {
@@ -11,12 +11,18 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const addresses = await prisma.address.findMany({
-      where: { userId: user.id },
-      orderBy: [
-        { isDefault: "desc" },
-        { createdAt: "desc" },
-      ],
+    // Get all addresses and filter by userId (Realtime DB doesn't support complex queries)
+    const allAddresses = await adminDB.getMany<Address>(COLLECTIONS.ADDRESSES);
+    let addresses = allAddresses.filter(addr => addr.userId === user.id);
+    
+    // Sort by default first, then by creation date
+    addresses.sort((a, b) => {
+      if (a.isDefault !== b.isDefault) {
+        return b.isDefault ? 1 : -1;
+      }
+      const aTime = typeof a.createdAt === 'string' ? new Date(a.createdAt).getTime() : a.createdAt.getTime();
+      const bTime = typeof b.createdAt === 'string' ? new Date(b.createdAt).getTime() : b.createdAt.getTime();
+      return bTime - aTime;
     });
 
     return NextResponse.json({ addresses });
@@ -48,25 +54,28 @@ export async function POST(req: NextRequest) {
 
     // If setting as default, unset other defaults
     if (isDefault) {
-      await prisma.address.updateMany({
-        where: { userId: user.id, isDefault: true },
-        data: { isDefault: false },
-      });
+      const allAddresses = await adminDB.getMany<Address>(COLLECTIONS.ADDRESSES);
+      const defaultAddresses = allAddresses.filter(
+        addr => addr.userId === user.id && addr.isDefault === true
+      );
+      
+      for (const addr of defaultAddresses) {
+        await adminDB.update<Address>(COLLECTIONS.ADDRESSES, addr.id, { isDefault: false });
+      }
     }
 
-    const address = await prisma.address.create({
-      data: {
-        userId: user.id,
-        fullName,
-        phone: phone || null,
-        addressLine1,
-        addressLine2: addressLine2 || null,
-        city,
-        region: state || null,
-        postalCode,
-        country: country || "Ghana",
-        isDefault: isDefault || false,
-      },
+    const addressId = `addr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const address = await adminDB.create<Address>(COLLECTIONS.ADDRESSES, addressId, {
+      userId: user.id,
+      fullName,
+      phone,
+      addressLine1,
+      addressLine2,
+      city,
+      region: state,
+      postalCode,
+      country: country || "Ghana",
+      isDefault: isDefault || false,
     });
 
     return NextResponse.json({ message: "Address created successfully", address }, { status: 201 });

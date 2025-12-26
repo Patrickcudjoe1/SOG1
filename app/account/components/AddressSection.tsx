@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { Plus, Edit2, Trash2, MapPin } from "lucide-react"
+import CountrySelector from "@/app/components/CountrySelector"
+import RegionSelector from "@/app/components/RegionSelector"
 
 interface Address {
   id: string
@@ -33,7 +35,7 @@ export default function AddressSection({ userId }: AddressSectionProps) {
     city: "",
     state: "",
     postalCode: "",
-    country: "US",
+    country: "GH",
     isDefault: false,
   })
   const [error, setError] = useState("")
@@ -46,6 +48,7 @@ export default function AddressSection({ userId }: AddressSectionProps) {
     try {
       const res = await fetch("/api/account/addresses", {
         cache: 'no-store', // User-specific data, don't cache
+        credentials: 'same-origin', // Include cookies
       })
       if (res.ok) {
         const data = await res.json()
@@ -69,6 +72,7 @@ export default function AddressSection({ userId }: AddressSectionProps) {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
+        credentials: 'same-origin', // Include cookies
         body: JSON.stringify(formData),
       })
 
@@ -119,6 +123,7 @@ export default function AddressSection({ userId }: AddressSectionProps) {
     try {
       const res = await fetch(`/api/account/addresses/${id}`, {
         method: "DELETE",
+        credentials: 'same-origin', // Include cookies
       })
 
       if (res.ok) {
@@ -130,17 +135,17 @@ export default function AddressSection({ userId }: AddressSectionProps) {
   }
 
   if (loading) {
-    return <div className="text-sm font-light text-gray-600">Loading addresses...</div>
+    return <div className="text-sm font-light text-gray-600 dark:text-gray-400">Loading addresses...</div>
   }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-light tracking-widest uppercase">Shipping Addresses</h2>
+        <h2 className="text-sm font-light tracking-widest uppercase dark:text-white">Shipping Addresses</h2>
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 text-xs tracking-widest uppercase font-light hover:opacity-60"
+            className="flex items-center gap-2 text-xs tracking-widest uppercase font-light hover:opacity-60 dark:text-white"
           >
             <Plus size={14} /> Add Address
           </button>
@@ -148,20 +153,20 @@ export default function AddressSection({ userId }: AddressSectionProps) {
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>
+        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm">{error}</div>
       )}
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="mb-6 p-4 border border-gray-200 space-y-4">
+        <form onSubmit={handleSubmit} className="mb-6 p-4 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 space-y-4 transition-colors">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs tracking-widest uppercase font-light mb-2">Full Name</label>
+              <label className="block text-xs tracking-widest uppercase font-light mb-2 dark:text-gray-300">Full Name</label>
               <input
                 type="text"
                 required
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 text-sm focus:outline-none focus:border-black"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:border-black dark:focus:border-white dark:text-white transition-colors"
               />
             </div>
 
@@ -208,12 +213,14 @@ export default function AddressSection({ userId }: AddressSectionProps) {
             </div>
 
             <div>
-              <label className="block text-xs tracking-widest uppercase font-light mb-2">State</label>
-              <input
-                type="text"
+              <label className="block text-xs tracking-widest uppercase font-light mb-2">
+                State / Region {formData.country && <span className="text-red-500">*</span>}
+              </label>
+              <RegionSelector
+                countryCode={formData.country}
                 value={formData.state}
-                onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 text-sm focus:outline-none focus:border-black"
+                onChange={(region) => setFormData({ ...formData, state: region })}
+                required={!!formData.country}
               />
             </div>
 
@@ -229,13 +236,16 @@ export default function AddressSection({ userId }: AddressSectionProps) {
             </div>
 
             <div>
-              <label className="block text-xs tracking-widest uppercase font-light mb-2">Country</label>
-              <input
-                type="text"
-                required
+              <label className="block text-xs tracking-widest uppercase font-light mb-2">
+                Country <span className="text-red-500">*</span>
+              </label>
+              <CountrySelector
                 value={formData.country}
-                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 text-sm focus:outline-none focus:border-black"
+                onChange={(code, name) => {
+                  // Clear state when country changes
+                  setFormData({ ...formData, country: code, state: "" })
+                }}
+                required
               />
             </div>
           </div>
@@ -266,15 +276,15 @@ export default function AddressSection({ userId }: AddressSectionProps) {
                 setShowForm(false)
                 setEditingId(null)
                 setFormData({
-                  fullName: "",
-                  phone: "",
-                  addressLine1: "",
-                  addressLine2: "",
-                  city: "",
-                  state: "",
-                  postalCode: "",
-                  country: "US",
-                  isDefault: false,
+        fullName: "",
+        phone: "",
+        addressLine1: "",
+        addressLine2: "",
+        city: "",
+        state: "",
+        postalCode: "",
+        country: "GH",
+        isDefault: false,
                 })
                 setError("")
               }}
@@ -288,42 +298,42 @@ export default function AddressSection({ userId }: AddressSectionProps) {
 
       <div className="space-y-4">
         {addresses.length === 0 ? (
-          <div className="text-sm font-light text-gray-600">No addresses saved yet</div>
+          <div className="text-sm font-light text-gray-600 dark:text-gray-400">No addresses saved yet</div>
         ) : (
           addresses.map((address) => (
-            <div key={address.id} className="p-4 border border-gray-200 relative">
+            <div key={address.id} className="p-4 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 relative transition-colors">
               {address.isDefault && (
-                <span className="absolute top-2 right-2 text-xs tracking-widest uppercase font-light bg-black text-white px-2 py-1">
+                <span className="absolute top-2 right-2 text-xs tracking-widest uppercase font-light bg-black dark:bg-white text-white dark:text-black px-2 py-1">
                   Default
                 </span>
               )}
               <div className="flex items-start gap-2 mb-2">
-                <MapPin size={16} className="mt-0.5 text-gray-600" />
+                <MapPin size={16} className="mt-0.5 text-gray-600 dark:text-gray-400" />
                 <div className="flex-1">
-                  <p className="text-sm font-light mb-1">{address.fullName}</p>
-                  <p className="text-xs text-gray-600 font-light">
+                  <p className="text-sm font-light mb-1 dark:text-white">{address.fullName}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 font-light">
                     {address.addressLine1}
                     {address.addressLine2 && `, ${address.addressLine2}`}
                   </p>
-                  <p className="text-xs text-gray-600 font-light">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 font-light">
                     {address.city}, {address.state} {address.postalCode}
                   </p>
-                  <p className="text-xs text-gray-600 font-light">{address.country}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 font-light">{address.country}</p>
                   {address.phone && (
-                    <p className="text-xs text-gray-600 font-light mt-1">Phone: {address.phone}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 font-light mt-1">Phone: {address.phone}</p>
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-100">
+              <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
                 <button
                   onClick={() => handleEdit(address)}
-                  className="flex items-center gap-1 text-xs tracking-widest uppercase font-light hover:opacity-60"
+                  className="flex items-center gap-1 text-xs tracking-widest uppercase font-light hover:opacity-60 dark:text-white"
                 >
                   <Edit2 size={12} /> Edit
                 </button>
                 <button
                   onClick={() => handleDelete(address.id)}
-                  className="flex items-center gap-1 text-xs tracking-widest uppercase font-light text-red-600 hover:opacity-60"
+                  className="flex items-center gap-1 text-xs tracking-widest uppercase font-light text-red-600 dark:text-red-400 hover:opacity-60"
                 >
                   <Trash2 size={12} /> Delete
                 </button>

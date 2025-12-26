@@ -17,6 +17,8 @@ import { formatCurrency } from "@/app/lib/currency";
 import { motion } from "framer-motion";
 import { CheckCircle, XCircle, MapPin } from "lucide-react";
 import Image from "next/image";
+import CountrySelector from "@/app/components/CountrySelector";
+import RegionSelector from "@/app/components/RegionSelector";
 
 interface Address {
   id: string;
@@ -97,7 +99,7 @@ export default function Checkout() {
     city: "",
     region: "",
     postalCode: "",
-    country: "Ghana",
+    country: "GH",
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
@@ -113,11 +115,23 @@ export default function Checkout() {
     }
   }, [cart, router]);
 
+  // Auto-fill user information when session is available
+  useEffect(() => {
+    if (session?.user) {
+      setFormData(prev => ({
+        ...prev,
+        fullName: session.user.name || prev.fullName,
+        email: session.user.email || prev.email,
+      }));
+    }
+  }, [session]);
+
   // Fetch saved addresses if user is logged in
   useEffect(() => {
     if (session?.user?.id) {
       fetch("/api/account/addresses", {
         cache: 'no-store', // User-specific data, don't cache
+        credentials: 'same-origin', // Include cookies
       })
         .then((res) => res.json())
         .then((data) => {
@@ -171,7 +185,7 @@ export default function Checkout() {
       city: "",
       region: "",
       postalCode: "",
-      country: "Ghana",
+      country: "GH",
     });
   };
 
@@ -263,6 +277,7 @@ export default function Checkout() {
 
       const orderData = {
         items: itemsToCheckout.map((item) => ({
+          id: item.id,
           productId: item.productId || item.id,
           name: item.name,
           image: item.image,
@@ -325,11 +340,11 @@ export default function Checkout() {
   }
 
   return (
-    <main className="w-full min-h-screen">
+    <main className="w-full min-h-screen bg-white dark:bg-gray-950 transition-colors">
       <Navbar />
       <section className="w-full py-8 md:py-12 lg:py-20 px-4 md:px-6 lg:px-12">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-xl md:text-2xl lg:text-4xl font-light tracking-wide mb-6 md:mb-8 lg:mb-12">CHECKOUT</h1>
+          <h1 className="text-xl md:text-2xl lg:text-4xl font-light tracking-wide mb-6 md:mb-8 lg:mb-12 dark:text-white">CHECKOUT</h1>
 
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-12">
@@ -338,11 +353,11 @@ export default function Checkout() {
                 {/* Shipping Information */}
                 <div>
                   <div className="flex items-center justify-between mb-4 md:mb-6">
-                    <h2 className="text-base md:text-lg lg:text-xl font-light tracking-wide">SHIPPING INFORMATION</h2>
+                    <h2 className="text-base md:text-lg lg:text-xl font-light tracking-wide dark:text-white">SHIPPING INFORMATION</h2>
                     {session?.user?.id && savedAddresses.length > 0 && (
                       <Link
                         href="/account"
-                        className="text-[10px] md:text-xs tracking-widest uppercase font-light text-gray-600 hover:text-black transition-colors"
+                        className="text-[10px] md:text-xs tracking-widest uppercase font-light text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
                       >
                         Manage Addresses
                       </Link>
@@ -464,7 +479,37 @@ export default function Checkout() {
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                      <div>
+                        <label className="block text-[10px] md:text-xs tracking-widest uppercase font-light mb-1.5 md:mb-2">
+                          Country <span className="text-red-500">*</span>
+                        </label>
+                        <CountrySelector
+                          value={formData.country}
+                          onChange={(code, name) => {
+                            // Clear region when country changes
+                            setFormData({ ...formData, country: code, region: "" })
+                          }}
+                          required
+                          error={errors.country}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] md:text-xs tracking-widest uppercase font-light mb-1.5 md:mb-2">
+                          Region / State {formData.country && <span className="text-red-500">*</span>}
+                        </label>
+                        <RegionSelector
+                          countryCode={formData.country}
+                          value={formData.region}
+                          onChange={(region) => setFormData({ ...formData, region })}
+                          required={!!formData.country}
+                          error={errors.region}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                       <div>
                         <label className="block text-[10px] md:text-xs tracking-widest uppercase font-light mb-1.5 md:mb-2">
                           City <span className="text-red-500">*</span>
@@ -479,22 +524,6 @@ export default function Checkout() {
                           required
                         />
                         {errors.city && <p className="text-[10px] md:text-xs text-red-500 mt-1">{errors.city}</p>}
-                      </div>
-
-                      <div>
-                        <label className="block text-[10px] md:text-xs tracking-widest uppercase font-light mb-1.5 md:mb-2">
-                          Region <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.region}
-                          onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                          className={`w-full px-3 md:px-4 py-2.5 md:py-3 border text-xs md:text-sm focus:outline-none focus:border-black transition-colors ${
-                            errors.region ? "border-red-500" : "border-gray-300"
-                          }`}
-                          required
-                        />
-                        {errors.region && <p className="text-[10px] md:text-xs text-red-500 mt-1">{errors.region}</p>}
                       </div>
 
                       <div>

@@ -25,6 +25,9 @@ yarn-error.log*
 # env files
 .env*
 
+# Firebase service account files (security sensitive)
+*firebase-adminsdk*.json
+
 # vercel
 .vercel
 
@@ -34,3 +37,6 @@ next-env.d.ts
 
 # prisma
 node_modules/.prisma
+
+# documentation files (exclude to keep repo clean)
+*.md

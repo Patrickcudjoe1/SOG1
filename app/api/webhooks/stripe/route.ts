@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
 import { headers } from "next/headers"
 import Stripe from "stripe"
-import { PrismaClient } from "@prisma/client"
+import { firestoreDB, COLLECTIONS, Order } from "@/app/lib/firebase/db"
+import { findOrderByStripeSession, findOrderByStripePaymentIntent } from "@/app/lib/firebase/queries"
 
-const prisma = new PrismaClient()
 // Lazy Stripe initialization to prevent build errors
 const getStripe = () => {
-  const stripeKey = process.env.STRIPE_SECRET_KEY;
+  const stripeKey = process.env.STRIPE_SECRET_KEY
   if (!stripeKey) {
-    throw new Error("STRIPE_SECRET_KEY is not configured");
+    throw new Error("STRIPE_SECRET_KEY is not configured")
   }
   return new Stripe(stripeKey, {
     apiVersion: "2025-12-15.clover",
-  });
+  })
 }
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
 
     try {
       // Verify webhook signature
-      const stripe = getStripe();
+      const stripe = getStripe()
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
     } catch (err: any) {
       console.error("Webhook signature verification failed:", err.message)
@@ -55,25 +55,8 @@ export async function POST(req: NextRequest) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session
 
-        // Check if already processed (idempotency)
-        const existingOrder = await prisma.order.findFirst({
-          where: {
-            stripeSessionId: session.id,
-            webhookProcessed: true,
-          },
-        })
-
-        if (existingOrder) {
-          console.log(`Order ${existingOrder.orderNumber} already processed`)
-          return NextResponse.json({ received: true, duplicate: true })
-        }
-
-        // Find order by session ID
-        const order = await prisma.order.findFirst({
-          where: {
-            stripeSessionId: session.id,
-          },
-        })
+        // Find order by session ID using optimized query
+        const order = await findOrderByStripeSession(session.id)
 
         if (!order) {
           console.error(`Order not found for session ${session.id}`)
@@ -83,23 +66,29 @@ export async function POST(req: NextRequest) {
           )
         }
 
+        // Check if already processed (idempotency)
+        if (order.webhookProcessed) {
+          console.log(`Order ${order.orderNumber} already processed`)
+          return NextResponse.json({ received: true, duplicate: true })
+        }
+
         // Verify payment was successful
         if (session.payment_status === "paid") {
           // Update order with payment confirmation
-          await prisma.order.update({
-            where: { id: order.id },
-            data: {
-              paymentStatus: "COMPLETED",
-              status: "PROCESSING",
-              stripePaymentIntentId: session.payment_intent as string,
-              webhookProcessed: true,
-            },
+          await firestoreDB.update<Order>(COLLECTIONS.ORDERS, order.id, {
+            paymentStatus: "COMPLETED",
+            status: "PROCESSING",
+            stripePaymentIntentId: session.payment_intent as string,
+            webhookProcessed: true,
           })
 
           // Send order confirmation email (async)
-          fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/orders/${order.id}/send-email`, {
-            method: "POST",
-          }).catch((err) => console.error("Failed to send email:", err))
+          fetch(
+            `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/orders/${order.id}/send-email`,
+            {
+              method: "POST",
+            }
+          ).catch((err) => console.error("Failed to send email:", err))
 
           console.log(`Order ${order.orderNumber} payment confirmed`)
         }
@@ -110,21 +99,14 @@ export async function POST(req: NextRequest) {
       case "payment_intent.succeeded": {
         const paymentIntent = event.data.object as Stripe.PaymentIntent
 
-        // Find order by payment intent ID
-        const order = await prisma.order.findFirst({
-          where: {
-            stripePaymentIntentId: paymentIntent.id,
-          },
-        })
+        // Find order by payment intent ID using optimized query
+        const order = await findOrderByStripePaymentIntent(paymentIntent.id)
 
         if (order && !order.webhookProcessed) {
-          await prisma.order.update({
-            where: { id: order.id },
-            data: {
-              paymentStatus: "COMPLETED",
-              status: "PROCESSING",
-              webhookProcessed: true,
-            },
+          await firestoreDB.update<Order>(COLLECTIONS.ORDERS, order.id, {
+            paymentStatus: "COMPLETED",
+            status: "PROCESSING",
+            webhookProcessed: true,
           })
 
           console.log(`Order ${order.orderNumber} payment confirmed via payment_intent`)
@@ -136,19 +118,13 @@ export async function POST(req: NextRequest) {
       case "payment_intent.payment_failed": {
         const paymentIntent = event.data.object as Stripe.PaymentIntent
 
-        const order = await prisma.order.findFirst({
-          where: {
-            stripePaymentIntentId: paymentIntent.id,
-          },
-        })
+        // Find order by payment intent ID using optimized query
+        const order = await findOrderByStripePaymentIntent(paymentIntent.id)
 
         if (order) {
-          await prisma.order.update({
-            where: { id: order.id },
-            data: {
-              paymentStatus: "FAILED",
-              status: "CANCELLED",
-            },
+          await firestoreDB.update<Order>(COLLECTIONS.ORDERS, order.id, {
+            paymentStatus: "FAILED",
+            status: "CANCELLED",
           })
 
           console.log(`Order ${order.orderNumber} payment failed`)
@@ -173,4 +149,3 @@ export async function POST(req: NextRequest) {
 
 // Disable body parsing, we need raw body for signature verification
 export const runtime = "nodejs"
-

@@ -35,8 +35,9 @@ export async function validateCartItems(items: CartItem[]): Promise<ValidationRe
   for (const item of items) {
     const itemErrors: ValidationError[] = []
 
-    // Validate required fields
-    if (!item.id || !item.productId) {
+    // Validate required fields - accept either id or productId
+    const itemIdentifier = item.productId || item.id
+    if (!itemIdentifier) {
       itemErrors.push({
         itemId: item.id || "unknown",
         field: "id",
@@ -45,12 +46,12 @@ export async function validateCartItems(items: CartItem[]): Promise<ValidationRe
       continue
     }
 
-    // Find product by ID or slug
-    let product = products.find((p) => p.id === item.productId || p.id === item.id)
+    // Find product by ID or slug - check both id and productId
+    let product = products.find((p) => p.id === itemIdentifier || p.id === item.id)
 
     // If not found by ID, try to find by slug
-    if (!product && item.productId) {
-      product = getProductBySlug(item.productId)
+    if (!product) {
+      product = getProductBySlug(itemIdentifier)
     }
 
     if (!product) {
@@ -126,9 +127,9 @@ export async function validateCartItems(items: CartItem[]): Promise<ValidationRe
       continue
     }
 
-    // Create validated item with corrected values
+    // Create validated item with corrected values - ensure both id and productId are set
     const validatedItem: CartItem = {
-      id: item.id,
+      id: item.id || product.id,
       productId: product.id,
       name: product.name,
       price: product.price, // Use server price

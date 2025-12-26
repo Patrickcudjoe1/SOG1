@@ -164,6 +164,21 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body), sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Dark mode input and form element overrides */
+  .dark input,
+  .dark textarea,
+  .dark select {
+    background-color: #1a1a1a;
+    color: #ffffff;
+    border-color: #333333;
+  }
+
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: #666666;
   }
 
   h1, h2, h3, h4, h5, h6 {

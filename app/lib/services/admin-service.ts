@@ -1,16 +1,12 @@
-import { PrismaClient, UserRole } from "@prisma/client"
-import { prisma } from "@/app/lib/db/prisma"
+import { firestoreDB, COLLECTIONS, User, Order, OrderStatus, UserRole } from "../firebase/db"
+import { where } from "firebase/firestore"
 
 export class AdminService {
   /**
    * Check if user is admin
    */
   static async isAdmin(userId: string): Promise<boolean> {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    })
-
+    const user = await firestoreDB.get<User>(COLLECTIONS.USERS, userId)
     return user?.role === "ADMIN" || user?.role === "SUPER_ADMIN"
   }
 
@@ -18,11 +14,7 @@ export class AdminService {
    * Check if user is super admin
    */
   static async isSuperAdmin(userId: string): Promise<boolean> {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    })
-
+    const user = await firestoreDB.get<User>(COLLECTIONS.USERS, userId)
     return user?.role === "SUPER_ADMIN"
   }
 
@@ -30,42 +22,46 @@ export class AdminService {
    * Get all users with pagination
    */
   static async getUsers(limit = 50, offset = 0, search?: string) {
-    const where = search
-      ? {
-          OR: [
-            { name: { contains: search, mode: "insensitive" as const } },
-            { email: { contains: search, mode: "insensitive" as const } },
-          ],
-        }
-      : {}
+    let users = await firestoreDB.getMany<User>(COLLECTIONS.USERS)
 
-    const [users, total] = await Promise.all([
-      prisma.user.findMany({
-        where,
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          image: true,
-          emailVerified: true,
-          createdAt: true,
+    // Apply search filter
+    if (search) {
+      const searchLower = search.toLowerCase()
+      users = users.filter(u => 
+        u.name?.toLowerCase().includes(searchLower) ||
+        u.email.toLowerCase().includes(searchLower)
+      )
+    }
+
+    // Sort by creation date descending
+    users.sort((a, b) => {
+      const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt)
+      const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt)
+      return dateB.getTime() - dateA.getTime()
+    })
+
+    // Get counts for each user
+    const usersWithCounts = await Promise.all(
+      users.map(async (user) => {
+        const [orders, addresses] = await Promise.all([
+          firestoreDB.count(COLLECTIONS.ORDERS, [where('userId', '==', user.id)]),
+          firestoreDB.count(COLLECTIONS.ADDRESSES, [where('userId', '==', user.id)]),
+        ])
+        return {
+          ...user,
           _count: {
-            select: {
-              orders: true,
-              addresses: true,
-            },
+            orders,
+            addresses,
           },
-        },
-        orderBy: { createdAt: "desc" },
-        take: limit,
-        skip: offset,
-      }),
-      prisma.user.count({ where }),
-    ])
+        }
+      })
+    )
+
+    const total = usersWithCounts.length
+    const paginatedUsers = usersWithCounts.slice(offset, offset + limit)
 
     return {
-      users,
+      users: paginatedUsers,
       total,
       limit,
       offset,
@@ -77,121 +73,91 @@ export class AdminService {
    * Update user role
    */
   static async updateUserRole(userId: string, role: UserRole) {
-    return await prisma.user.update({
-      where: { id: userId },
-      data: { role },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-      },
-    })
+    await firestoreDB.update<User>(COLLECTIONS.USERS, userId, { role })
+    return await firestoreDB.get<User>(COLLECTIONS.USERS, userId)
   }
 
   /**
    * Delete user
    */
   static async deleteUser(userId: string) {
-    return await prisma.user.delete({
-      where: { id: userId },
-    })
+    await firestoreDB.delete(COLLECTIONS.USERS, userId)
   }
 
   /**
    * Get dashboard statistics
    */
   static async getDashboardStats() {
-    const [
-      totalUsers,
-      totalOrders,
-      totalRevenue,
-      pendingOrders,
-      processingOrders,
-      completedOrders,
-      todayOrders,
-      todayRevenue,
-    ] = await Promise.all([
-      prisma.user.count(),
-      prisma.order.count(),
-      prisma.order.aggregate({
-        where: { paymentStatus: "COMPLETED" },
-        _sum: { totalAmount: true },
-      }),
-      prisma.order.count({ where: { status: "PENDING" } }),
-      prisma.order.count({ where: { status: "PROCESSING" } }),
-      prisma.order.count({ where: { status: "DELIVERED" } }),
-      prisma.order.count({
-        where: {
-          createdAt: {
-            gte: new Date(new Date().setHours(0, 0, 0, 0)),
-          },
-        },
-      }),
-      prisma.order.aggregate({
-        where: {
-          paymentStatus: "COMPLETED",
-          createdAt: {
-            gte: new Date(new Date().setHours(0, 0, 0, 0)),
-          },
-        },
-        _sum: { totalAmount: true },
-      }),
+    const [users, orders] = await Promise.all([
+      firestoreDB.getMany<User>(COLLECTIONS.USERS),
+      firestoreDB.getMany<Order>(COLLECTIONS.ORDERS),
     ])
 
+    const totalUsers = users.length
+    const totalOrders = orders.length
+
+    const completedOrders = orders.filter(o => o.paymentStatus === 'COMPLETED')
+    const totalRevenue = completedOrders.reduce((sum, o) => sum + o.totalAmount, 0)
+
+    const pendingOrders = orders.filter(o => o.status === 'PENDING').length
+    const processingOrders = orders.filter(o => o.status === 'PROCESSING').length
+    const deliveredOrders = orders.filter(o => o.status === 'DELIVERED').length
+
+    const todayStart = new Date(new Date().setHours(0, 0, 0, 0))
+    const todayOrders = orders.filter(o => {
+      const orderDate = o.createdAt instanceof Date ? o.createdAt : new Date(o.createdAt)
+      return orderDate >= todayStart
+    }).length
+    const todayRevenue = orders
+      .filter(o => {
+        const orderDate = o.createdAt instanceof Date ? o.createdAt : new Date(o.createdAt)
+        return o.paymentStatus === 'COMPLETED' && orderDate >= todayStart
+      })
+      .reduce((sum, o) => sum + o.totalAmount, 0)
+
     // Get recent orders
-    const recentOrders = await prisma.order.findMany({
-      take: 10,
-      orderBy: { createdAt: "desc" },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-        items: {
-          take: 3,
-        },
-      },
+    const recentOrders = orders
+      .sort((a, b) => {
+        const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt)
+        const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt)
+        return dateB.getTime() - dateA.getTime()
+      })
+      .slice(0, 10)
+
+    // Get top products
+    const productStats: any = {}
+    orders.forEach(order => {
+      order.items?.forEach(item => {
+        if (!productStats[item.productId]) {
+          productStats[item.productId] = {
+            productId: item.productId,
+            productName: item.productName,
+            totalQuantity: 0,
+            orderCount: 0,
+          }
+        }
+        productStats[item.productId].totalQuantity += item.quantity
+        productStats[item.productId].orderCount += 1
+      })
     })
 
-    // Get top products (by order count)
-    const orderItems = await prisma.orderItem.groupBy({
-      by: ["productId", "productName"],
-      _sum: {
-        quantity: true,
-      },
-      _count: {
-        id: true,
-      },
-      orderBy: {
-        _count: {
-          id: "desc",
-        },
-      },
-      take: 10,
-    })
+    const topProducts = Object.values(productStats)
+      .sort((a: any, b: any) => b.orderCount - a.orderCount)
+      .slice(0, 10)
 
     return {
       overview: {
         totalUsers,
         totalOrders,
-        totalRevenue: totalRevenue._sum.totalAmount || 0,
+        totalRevenue,
         pendingOrders,
         processingOrders,
-        completedOrders,
+        completedOrders: deliveredOrders,
         todayOrders,
-        todayRevenue: todayRevenue._sum.totalAmount || 0,
+        todayRevenue,
       },
       recentOrders,
-      topProducts: orderItems.map((item) => ({
-        productId: item.productId,
-        productName: item.productName,
-        totalQuantity: item._sum.quantity || 0,
-        orderCount: item._count.id,
-      })),
+      topProducts,
     }
   }
 
@@ -207,46 +173,37 @@ export class AdminService {
       search?: string
     }
   ) {
-    const where: any = {}
+    let orders = await firestoreDB.getMany<Order>(COLLECTIONS.ORDERS)
 
+    // Apply filters
     if (filters?.status) {
-      where.status = filters.status
+      orders = orders.filter(o => o.status === filters.status)
     }
 
     if (filters?.paymentStatus) {
-      where.paymentStatus = filters.paymentStatus
+      orders = orders.filter(o => o.paymentStatus === filters.paymentStatus)
     }
 
     if (filters?.search) {
-      where.OR = [
-        { orderNumber: { contains: filters.search, mode: "insensitive" as const } },
-        { email: { contains: filters.search, mode: "insensitive" as const } },
-      ]
+      const searchLower = filters.search.toLowerCase()
+      orders = orders.filter(o => 
+        o.orderNumber.toLowerCase().includes(searchLower) ||
+        o.email.toLowerCase().includes(searchLower)
+      )
     }
 
-    const [orders, total] = await Promise.all([
-      prisma.order.findMany({
-        where,
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-          items: true,
-          shippingAddress: true,
-        },
-        orderBy: { createdAt: "desc" },
-        take: limit,
-        skip: offset,
-      }),
-      prisma.order.count({ where }),
-    ])
+    // Sort by date descending
+    orders.sort((a, b) => {
+      const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt)
+      const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt)
+      return dateB.getTime() - dateA.getTime()
+    })
+
+    const total = orders.length
+    const paginatedOrders = orders.slice(offset, offset + limit)
 
     return {
-      orders,
+      orders: paginatedOrders,
       total,
       limit,
       offset,
@@ -258,21 +215,10 @@ export class AdminService {
    * Update order status
    */
   static async updateOrderStatus(orderId: string, status: string) {
-    return await prisma.order.update({
-      where: { id: orderId },
-      data: { status: status as any },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-        items: true,
-        shippingAddress: true,
-      },
+    await firestoreDB.update<Order>(COLLECTIONS.ORDERS, orderId, { 
+      status: status as OrderStatus 
     })
+    return await firestoreDB.get<Order>(COLLECTIONS.ORDERS, orderId)
   }
 }
 

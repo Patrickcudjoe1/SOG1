@@ -24,7 +24,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch("/api/admin/dashboard")
+    fetch("/api/admin/dashboard", { credentials: 'same-origin' })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {

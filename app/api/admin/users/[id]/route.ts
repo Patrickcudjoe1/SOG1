@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server"
 import { AdminService } from "@/app/lib/services/admin-service"
 import { successResponse, notFoundResponse, errorResponse } from "@/app/lib/api/response"
 import { requireSuperAdmin } from "@/app/lib/api/admin-middleware"
-import { UserRole } from "@prisma/client"
+import { UserRole } from "@/app/lib/firebase/db"
+
+// Valid user roles
+const VALID_ROLES: UserRole[] = ['USER', 'ADMIN', 'SUPER_ADMIN']
 
 /**
  * PATCH /api/admin/users/[id]
@@ -20,7 +23,7 @@ export async function PATCH(
     const body = await req.json()
     const { role } = body
 
-    if (!role || !Object.values(UserRole).includes(role)) {
+    if (!role || !VALID_ROLES.includes(role)) {
       return errorResponse("Invalid role", 400)
     }
 

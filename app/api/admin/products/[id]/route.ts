@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/app/lib/db/prisma"
+import { firestoreDB, COLLECTIONS, Product } from "@/app/lib/firebase/db"
 import { requireAdmin } from "@/app/lib/api/admin-middleware"
-import { successResponse, errorResponse, notFoundResponse } from "@/app/lib/api/response"
+import {
+  successResponse,
+  errorResponse,
+  notFoundResponse,
+} from "@/app/lib/api/response"
 
 /**
  * GET /api/admin/products/[id]
@@ -16,9 +20,7 @@ export async function GET(
     if (error) return error
 
     const { id } = await params
-    const product = await prisma.product.findUnique({
-      where: { id },
-    })
+    const product = await firestoreDB.get<Product>(COLLECTIONS.PRODUCTS, id)
 
     if (!product) {
       return notFoundResponse("Product")
@@ -47,18 +49,20 @@ export async function PATCH(
     const body = await req.json()
 
     // Check if product exists
-    const existingProduct = await prisma.product.findUnique({
-      where: { id },
-    })
+    const existingProduct = await firestoreDB.get<Product>(
+      COLLECTIONS.PRODUCTS,
+      id
+    )
 
     if (!existingProduct) {
       return notFoundResponse("Product")
     }
 
     // Prepare update data
-    const updateData: any = {}
+    const updateData: Partial<Product> = {}
     if (body.name !== undefined) updateData.name = body.name
-    if (body.description !== undefined) updateData.description = body.description
+    if (body.description !== undefined)
+      updateData.description = body.description
     if (body.price !== undefined) {
       if (body.price < 0) {
         return errorResponse("Price must be greater than or equal to 0", 400)
@@ -67,15 +71,14 @@ export async function PATCH(
     }
     if (body.image !== undefined) updateData.image = body.image
     if (body.category !== undefined) updateData.category = body.category
-    if (body.subCategory !== undefined) updateData.subCategory = body.subCategory
+    if (body.subCategory !== undefined)
+      updateData.subCategory = body.subCategory
     if (body.sizes !== undefined) updateData.sizes = body.sizes
     if (body.bestseller !== undefined) updateData.bestseller = body.bestseller
     if (body.inStock !== undefined) updateData.inStock = body.inStock
 
-    const product = await prisma.product.update({
-      where: { id },
-      data: updateData,
-    })
+    await firestoreDB.update<Product>(COLLECTIONS.PRODUCTS, id, updateData)
+    const product = await firestoreDB.get<Product>(COLLECTIONS.PRODUCTS, id)
 
     return successResponse(product, "Product updated successfully")
   } catch (error: any) {
@@ -99,18 +102,14 @@ export async function DELETE(
     const { id } = await params
 
     // Check if product exists
-    const product = await prisma.product.findUnique({
-      where: { id },
-    })
+    const product = await firestoreDB.get<Product>(COLLECTIONS.PRODUCTS, id)
 
     if (!product) {
       return notFoundResponse("Product")
     }
 
     // Delete product
-    await prisma.product.delete({
-      where: { id },
-    })
+    await firestoreDB.delete(COLLECTIONS.PRODUCTS, id)
 
     return successResponse({ id }, "Product deleted successfully")
   } catch (error: any) {
@@ -118,4 +117,3 @@ export async function DELETE(
     return errorResponse(error.message || "Failed to delete product", 500)
   }
 }
-

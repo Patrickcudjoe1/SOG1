@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionFromToken } from "@/app/lib/jwt";
-import { PrismaClient, OrderStatus, PaymentStatus } from "@prisma/client";
-import { prisma } from "@/app/lib/db/prisma";
+import { firestoreDB, COLLECTIONS, Order, Address, OrderItem, PromoCode } from "@/app/lib/firebase/db";
 import Stripe from "stripe";
 import { generateIdempotencyKey, sanitizeAmount, validateEmail } from "@/app/lib/payment-utils";
 
-// Using shared prisma instance from lib/db/prisma
 // Stripe is optional - only initialize if key exists (lazy initialization)
 let stripeInstance: Stripe | null = null;
 const getStripe = () => {
@@ -63,11 +61,13 @@ export async function POST(req: NextRequest) {
     const idempotencyKey = generateIdempotencyKey();
 
     // Check for duplicate order with same idempotency key
-    const existingOrder = await prisma.order.findUnique({
-      where: { idempotencyKey },
-    });
+    const existingOrders = await firestoreDB.getMany<Order>(
+      COLLECTIONS.ORDERS,
+      { orderBy: "idempotencyKey", equalTo: idempotencyKey, limitToFirst: 1 }
+    );
 
-    if (existingOrder) {
+    if (existingOrders.length > 0) {
+      const existingOrder = existingOrders[0];
       return NextResponse.json(
         { 
           error: "Duplicate payment detected",
@@ -83,6 +83,7 @@ export async function POST(req: NextRequest) {
     const validationResult = await validateCartItems(items)
 
     if (!validationResult.valid) {
+      console.error("Cart validation failed:", validationResult.errors)
       return NextResponse.json(
         { 
           error: "Cart validation failed", 
@@ -103,57 +104,58 @@ export async function POST(req: NextRequest) {
     const sanitizedTotal = sanitizeAmount(sanitizedSubtotal + sanitizedShippingCost - sanitizedDiscount);
 
     // Create shipping address first
-    const shippingAddress = await prisma.address.create({
-      data: {
-        userId: userId,
-        fullName: shipping.fullName,
-        email: shipping.email,
-        phone: shipping.phone || null,
-        addressLine1: shipping.addressLine1,
-        addressLine2: shipping.addressLine2 || null,
-        city: shipping.city,
-        region: shipping.region || null,
-        postalCode: shipping.postalCode,
-        country: shipping.country || "Ghana",
-        isDefault: false,
-      },
+    const addressId = `addr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const shippingAddress = await firestoreDB.create<Address>(COLLECTIONS.ADDRESSES, addressId, {
+      userId: userId || undefined,
+      fullName: shipping.fullName,
+      email: shipping.email,
+      phone: shipping.phone || undefined,
+      addressLine1: shipping.addressLine1,
+      addressLine2: shipping.addressLine2 || undefined,
+      city: shipping.city,
+      region: shipping.region || undefined,
+      postalCode: shipping.postalCode,
+      country: shipping.country || "Ghana",
+      isDefault: false,
     });
 
     // Create order in database first (before payment)
     const orderNumber = generateOrderNumber();
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        userId: userId,
-        email: shipping.email,
-        phone: shipping.phone || null,
-        status: OrderStatus.PENDING,
-        subtotal: sanitizedSubtotal,
-        shippingCost: sanitizedShippingCost,
-        discountAmount: sanitizedDiscount,
-        totalAmount: sanitizedTotal,
-        promoCode: promoCode || null,
-        paymentMethod: "card",
-        paymentStatus: PaymentStatus.PENDING,
-        deliveryMethod: deliveryMethod || null,
-        idempotencyKey,
-        shippingAddressId: shippingAddress.id,
-        items: {
-          create: validatedItems.map((item: any) => ({
-            productId: item.productId,
-            productName: item.name,
-            productImage: item.image,
-            price: item.price,
-            quantity: item.quantity,
-            size: item.size || null,
-            color: item.color || null,
-          })),
-        },
-      },
-      include: {
-        items: true,
-        shippingAddress: true,
-      },
+    const orderId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Create order items
+    const orderItems: OrderItem[] = validatedItems.map((item: any, index: number) => ({
+      id: `item_${orderId}_${index}`,
+      orderId,
+      productId: item.productId || item.id,
+      productName: item.name,
+      productImage: item.image || undefined,
+      price: item.price,
+      quantity: item.quantity,
+      size: item.size || undefined,
+      color: item.color || undefined,
+      createdAt: new Date(),
+    }));
+
+    const order = await firestoreDB.create<Order>(COLLECTIONS.ORDERS, orderId, {
+      orderNumber,
+      userId: userId || undefined,
+      email: shipping.email,
+      phone: shipping.phone || undefined,
+      status: 'PENDING',
+      subtotal: sanitizedSubtotal,
+      shippingCost: sanitizedShippingCost,
+      discountAmount: sanitizedDiscount,
+      totalAmount: sanitizedTotal,
+      promoCode: promoCode || undefined,
+      paymentMethod: "card",
+      paymentStatus: 'PENDING',
+      deliveryMethod: deliveryMethod || undefined,
+      idempotencyKey,
+      shippingAddressId: addressId,
+      shippingAddress,
+      webhookProcessed: false,
+      items: orderItems,
     });
 
     // Create Stripe checkout session with validated items
@@ -222,20 +224,33 @@ export async function POST(req: NextRequest) {
     });
 
     // Update order with Stripe session ID
-    await prisma.order.update({
-      where: { id: order.id },
-      data: { 
-        stripeSessionId: checkoutSession.id,
-        stripePaymentIntentId: checkoutSession.payment_intent as string || null,
-      },
+    await firestoreDB.update<Order>(COLLECTIONS.ORDERS, order.id, { 
+      stripeSessionId: checkoutSession.id,
+      stripePaymentIntentId: (checkoutSession.payment_intent as string) || undefined,
     });
 
-    // Increment promo code usage if applicable
+    // Increment promo code usage if applicable (ATOMIC)
     if (promoCode) {
-      await prisma.promoCode.update({
-        where: { code: promoCode.toUpperCase() },
-        data: { usedCount: { increment: 1 } },
-      });
+      try {
+        const promos = await firestoreDB.getMany<PromoCode>(
+          COLLECTIONS.PROMO_CODES,
+          { orderBy: "code", equalTo: promoCode.toUpperCase(), limitToFirst: 1 }
+        );
+        if (promos.length > 0) {
+          const promo = promos[0];
+          // Use Firebase transaction for atomic increment
+          const { database } = await import("@/app/lib/firebase/config");
+          const { ref, runTransaction } = await import("firebase/database");
+          
+          const promoRef = ref(database, `${COLLECTIONS.PROMO_CODES}/${promo.id}/usedCount`);
+          await runTransaction(promoRef, (currentCount) => {
+            return (currentCount || 0) + 1;
+          });
+        }
+      } catch (error) {
+        console.error('Failed to increment promo code usage:', error);
+        // Don't fail the order if promo increment fails
+      }
     }
 
     return NextResponse.json({ url: checkoutSession.url });

@@ -5,6 +5,9 @@ const nextConfig = {
   images: {
     unoptimized: true, // Set to false if using Next.js Image Optimization
   },
+  webpack: (config) => {
+    return config
+  },
 }
 
 export default nextConfig

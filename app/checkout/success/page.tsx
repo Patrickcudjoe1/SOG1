@@ -67,8 +67,14 @@ export default function CheckoutSuccess() {
       if (!response.ok) {
         throw new Error("Failed to fetch order details");
       }
-      const data = await response.json();
-      setOrder(data);
+      const result = await response.json();
+      
+      // Handle API response structure
+      if (result.success && result.data) {
+        setOrder(result.data);
+      } else {
+        throw new Error("Invalid response format");
+      }
     } catch (err) {
       console.error("Error fetching order:", err);
       setError("Failed to load order details");
@@ -79,11 +85,11 @@ export default function CheckoutSuccess() {
 
   if (loading) {
     return (
-      <main className="w-full min-h-screen">
+      <main className="w-full min-h-screen bg-white dark:bg-gray-950 transition-colors">
         <Navbar />
         <section className="w-full min-h-[60vh] flex items-center justify-center py-20 px-6">
           <div className="text-center">
-            <p className="text-sm font-light text-gray-600">Loading order details...</p>
+            <p className="text-sm font-light text-gray-600 dark:text-gray-400">Loading order details...</p>
           </div>
         </section>
         <Footer />
@@ -93,16 +99,16 @@ export default function CheckoutSuccess() {
 
   if (error || !order) {
     return (
-      <main className="w-full min-h-screen">
+      <main className="w-full min-h-screen bg-white dark:bg-gray-950 transition-colors">
         <Navbar />
         <section className="w-full min-h-[60vh] flex items-center justify-center py-20 px-6">
           <div className="text-center max-w-md">
             <XCircle size={64} className="mx-auto mb-8 text-red-500" />
-            <h1 className="text-3xl md:text-4xl font-light tracking-widest uppercase mb-4">Order Error</h1>
-            <p className="text-sm font-light text-gray-600 mb-8">
+            <h1 className="text-3xl md:text-4xl font-light tracking-widest uppercase mb-4 dark:text-white">Order Error</h1>
+            <p className="text-sm font-light text-gray-600 dark:text-gray-400 mb-8">
               {error || "Unable to load order details. Please contact support if you have completed payment."}
             </p>
-            <Link href="/account" className="inline-block btn-outline">
+            <Link href="/account" className="inline-block btn-outline dark:text-white dark:border-white dark:hover:bg-white dark:hover:text-black">
               View Orders
             </Link>
           </div>
@@ -113,7 +119,7 @@ export default function CheckoutSuccess() {
   }
 
   return (
-    <main className="w-full min-h-screen">
+    <main className="w-full min-h-screen bg-white dark:bg-gray-950 transition-colors">
       <Navbar />
       <section className="w-full py-12 md:py-20 px-4 md:px-6 lg:px-12">
         <div className="max-w-3xl mx-auto">
@@ -123,29 +129,33 @@ export default function CheckoutSuccess() {
             className="text-center mb-12"
           >
             <CheckCircle size={64} className="mx-auto mb-6 text-green-600" />
-            <h1 className="text-3xl md:text-4xl font-light tracking-widest uppercase mb-4">Order Confirmed</h1>
-            <p className="text-sm font-light text-gray-600 mb-2">
+            <h1 className="text-3xl md:text-4xl font-light tracking-widest uppercase mb-4 dark:text-white">Order Confirmed</h1>
+            <p className="text-sm font-light text-gray-600 dark:text-gray-400 mb-2">
               Thank you for your purchase! Your order has been received and is being processed.
             </p>
-            <p className="text-xs font-light text-gray-500">Order Number: {order.orderNumber}</p>
+            <p className="text-xs font-light text-gray-500 dark:text-gray-500">Order Number: {order.orderNumber}</p>
           </motion.div>
 
-          <div className="border border-gray-200 p-6 md:p-8 mb-8">
+          <div className="border border-gray-200 dark:border-gray-700 p-6 md:p-8 mb-8 bg-white dark:bg-gray-900 transition-colors">
             <div className="flex items-center gap-3 mb-6">
-              <Package size={20} className="text-gray-600" />
-              <h2 className="text-lg font-light tracking-wide">Order Details</h2>
+              <Package size={20} className="text-gray-600 dark:text-gray-400" />
+              <h2 className="text-lg font-light tracking-wide dark:text-white">Order Details</h2>
             </div>
 
             <div className="space-y-4 mb-6">
-              {order.items.map((item, idx) => (
-                <div key={idx} className="flex justify-between text-sm border-b border-gray-100 pb-3">
-                  <div>
-                    <p className="font-light">{item.productName}</p>
-                    <p className="text-xs text-gray-600">Quantity: {item.quantity}</p>
+              {order.items && order.items.length > 0 ? (
+                order.items.map((item, idx) => (
+                  <div key={idx} className="flex justify-between text-sm border-b border-gray-100 pb-3">
+                    <div>
+                      <p className="font-light">{item.productName}</p>
+                      <p className="text-xs text-gray-600">Quantity: {item.quantity}</p>
+                    </div>
+                    <p className="font-light">{formatCurrency(item.price * item.quantity)}</p>
                   </div>
-                  <p className="font-light">{formatCurrency(item.price * item.quantity)}</p>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm text-gray-600">No items found</p>
+              )}
             </div>
 
             <div className="border-t border-gray-200 pt-4">

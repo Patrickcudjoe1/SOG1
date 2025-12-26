@@ -1,6 +1,4 @@
-import { PrismaClient, Order, OrderStatus, PaymentStatus } from "@prisma/client"
-
-const prisma = new PrismaClient()
+import { adminDB, COLLECTIONS, Order, OrderItem, Address, OrderStatus, PaymentStatus } from "../firebase/admin-db"
 
 export interface CreateOrderData {
   userId?: string | null
@@ -56,69 +54,66 @@ export class OrderService {
    */
   static async createOrder(data: CreateOrderData): Promise<Order> {
     const orderNumber = this.generateOrderNumber()
+    const orderId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const addressId = `addr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
     // Create shipping address first
-    const shippingAddress = await prisma.address.create({
-      data: {
-        userId: data.userId || null,
+    const shippingAddress = await adminDB.create<Address>(
+      COLLECTIONS.ADDRESSES,
+      addressId,
+      {
+        userId: data.userId ?? undefined,
         fullName: data.shipping.fullName,
         email: data.shipping.email,
-        phone: data.shipping.phone || null,
+        phone: data.shipping.phone ?? undefined,
         addressLine1: data.shipping.addressLine1,
-        addressLine2: data.shipping.addressLine2 || null,
+        addressLine2: data.shipping.addressLine2 ?? undefined,
         city: data.shipping.city,
-        region: data.shipping.region || null,
+        region: data.shipping.region ?? undefined,
         postalCode: data.shipping.postalCode,
         country: data.shipping.country || "Ghana",
         isDefault: false,
-      },
-    })
+      }
+    )
 
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        userId: data.userId || null,
-        email: data.email,
-        phone: data.phone || null,
-        status: OrderStatus.PENDING,
-        subtotal: data.subtotal,
-        shippingCost: data.shippingCost,
-        discountAmount: data.discountAmount,
-        totalAmount: data.totalAmount,
-        promoCode: data.promoCode || null,
-        paymentMethod: data.paymentMethod,
-        paymentStatus: PaymentStatus.PENDING,
-        deliveryMethod: data.deliveryMethod || null,
-        idempotencyKey: data.idempotencyKey,
-        stripeSessionId: data.stripeSessionId || null,
-        paystackReference: data.paystackReference || null,
-        mobileMoneyTransactionId: data.mobileMoneyTransactionId || null,
-        mobileMoneyProvider: data.mobileMoneyProvider || null,
-        mobileMoneyPhone: data.mobileMoneyPhone || null,
-        shippingAddressId: shippingAddress.id,
-        items: {
-          create: data.items.map((item) => ({
-            productId: item.productId,
-            productName: item.productName,
-            productImage: item.productImage || null,
-            price: item.price,
-            quantity: item.quantity,
-            size: item.size || null,
-            color: item.color || null,
-          })),
-        },
-      },
-      include: {
-        items: true,
-        shippingAddress: true,
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
+    // Create order items
+    const orderItems: OrderItem[] = data.items.map((item, index) => ({
+      id: `item_${orderId}_${index}`,
+      orderId,
+      productId: item.productId,
+      productName: item.productName,
+      productImage: item.productImage ?? undefined,
+      price: item.price,
+      quantity: item.quantity,
+      size: item.size ?? undefined,
+      color: item.color ?? undefined,
+      createdAt: new Date(),
+    }))
+
+    const order = await adminDB.create<Order>(COLLECTIONS.ORDERS, orderId, {
+      orderNumber,
+      userId: data.userId ?? undefined,
+      email: data.email,
+      phone: data.phone ?? undefined,
+      status: 'PENDING',
+      subtotal: data.subtotal,
+      shippingCost: data.shippingCost,
+      discountAmount: data.discountAmount,
+      totalAmount: data.totalAmount,
+      promoCode: data.promoCode ?? undefined,
+      paymentMethod: data.paymentMethod,
+      paymentStatus: 'PENDING',
+      deliveryMethod: data.deliveryMethod,
+      idempotencyKey: data.idempotencyKey,
+      stripeSessionId: data.stripeSessionId ?? undefined,
+      paystackReference: data.paystackReference ?? undefined,
+      mobileMoneyTransactionId: data.mobileMoneyTransactionId ?? undefined,
+      mobileMoneyProvider: data.mobileMoneyProvider ?? undefined,
+      mobileMoneyPhone: data.mobileMoneyPhone ?? undefined,
+      shippingAddressId: addressId,
+      shippingAddress,
+      webhookProcessed: false,
+      items: orderItems,
     })
 
     return order
@@ -128,24 +123,24 @@ export class OrderService {
    * Get order by ID
    */
   static async getOrderById(orderId: string, userId?: string) {
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-      include: {
-        items: true,
-        shippingAddress: true,
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-    })
+    const order = await adminDB.get<Order>(COLLECTIONS.ORDERS, orderId)
+    
+    if (!order) return null
 
     // Check if user has access to this order
-    if (order && userId && order.userId !== userId) {
+    if (userId && order.userId && order.userId !== userId) {
       return null
+    }
+
+    // Get shipping address if exists
+    if (order.shippingAddressId) {
+      const address = await adminDB.get<Address>(
+        COLLECTIONS.ADDRESSES,
+        order.shippingAddressId
+      )
+      if (address) {
+        order.shippingAddress = address
+      }
     }
 
     return order
@@ -155,22 +150,14 @@ export class OrderService {
    * Get order by order number
    */
   static async getOrderByOrderNumber(orderNumber: string, userId?: string) {
-    const order = await prisma.order.findUnique({
-      where: { orderNumber },
-      include: {
-        items: true,
-        shippingAddress: true,
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-    })
+    const orders = await adminDB.getMany<Order>(
+      COLLECTIONS.ORDERS,
+      { orderBy: 'orderNumber', equalTo: orderNumber, limitToFirst: 1 }
+    )
+    
+    const order = orders[0] || null
 
-    if (order && userId && order.userId !== userId) {
+    if (order && userId && order.userId && order.userId !== userId) {
       return null
     }
 
@@ -181,19 +168,20 @@ export class OrderService {
    * Get orders for a user
    */
   static async getUserOrders(userId: string, limit = 50, offset = 0) {
-    const [orders, total] = await Promise.all([
-      prisma.order.findMany({
-        where: { userId },
-        include: {
-          items: true,
-          shippingAddress: true,
-        },
-        orderBy: { createdAt: "desc" },
-        take: limit,
-        skip: offset,
-      }),
-      prisma.order.count({ where: { userId } }),
-    ])
+    const allOrders = await adminDB.getMany<Order>(
+      COLLECTIONS.ORDERS,
+      { orderBy: 'userId', equalTo: userId }
+    )
+
+    // Sort by date descending
+    allOrders.sort((a, b) => {
+      const aTime = typeof a.createdAt === 'string' ? new Date(a.createdAt).getTime() : a.createdAt.getTime()
+      const bTime = typeof b.createdAt === 'string' ? new Date(b.createdAt).getTime() : b.createdAt.getTime()
+      return bTime - aTime
+    })
+
+    const total = allOrders.length
+    const orders = allOrders.slice(offset, offset + limit)
 
     return {
       orders,
@@ -212,13 +200,12 @@ export class OrderService {
     status: OrderStatus,
     paymentStatus?: PaymentStatus
   ) {
-    return await prisma.order.update({
-      where: { id: orderId },
-      data: {
-        status,
-        ...(paymentStatus && { paymentStatus }),
-      },
-    })
+    const updateData: any = { status }
+    if (paymentStatus) {
+      updateData.paymentStatus = paymentStatus
+    }
+    await adminDB.update<Order>(COLLECTIONS.ORDERS, orderId, updateData)
+    return await adminDB.get<Order>(COLLECTIONS.ORDERS, orderId)
   }
 
   /**
@@ -229,48 +216,44 @@ export class OrderService {
     paymentStatus: PaymentStatus,
     stripePaymentIntentId?: string
   ) {
-    return await prisma.order.update({
-      where: { id: orderId },
-      data: {
-        paymentStatus,
-        ...(stripePaymentIntentId && { stripePaymentIntentId }),
-        webhookProcessed: true,
-      },
-    })
+    const updateData: any = {
+      paymentStatus,
+      webhookProcessed: true,
+    }
+    if (stripePaymentIntentId) {
+      updateData.stripePaymentIntentId = stripePaymentIntentId
+    }
+    await adminDB.update<Order>(COLLECTIONS.ORDERS, orderId, updateData)
+    return await adminDB.get<Order>(COLLECTIONS.ORDERS, orderId)
   }
 
   /**
    * Check for duplicate order by idempotency key
    */
   static async checkDuplicateOrder(idempotencyKey: string) {
-    return await prisma.order.findUnique({
-      where: { idempotencyKey },
-    })
+    const orders = await adminDB.getMany<Order>(
+      COLLECTIONS.ORDERS,
+      { orderBy: 'idempotencyKey', equalTo: idempotencyKey, limitToFirst: 1 }
+    )
+    return orders[0] || null
   }
 
   /**
    * Get order statistics
    */
   static async getOrderStats(userId?: string) {
-    const where = userId ? { userId } : {}
+    const constraints = userId ? { orderBy: 'userId', equalTo: userId } : undefined
+    const orders = await adminDB.getMany<Order>(COLLECTIONS.ORDERS, constraints)
 
-    const [total, pending, processing, completed, cancelled] = await Promise.all([
-      prisma.order.count({ where }),
-      prisma.order.count({ where: { ...where, status: "PENDING" } }),
-      prisma.order.count({ where: { ...where, status: "PROCESSING" } }),
-      prisma.order.count({ where: { ...where, status: "DELIVERED" } }),
-      prisma.order.count({ where: { ...where, status: "CANCELLED" } }),
-    ])
+    const total = orders.length
+    const pending = orders.filter(o => o.status === 'PENDING').length
+    const processing = orders.filter(o => o.status === 'PROCESSING').length
+    const completed = orders.filter(o => o.status === 'DELIVERED').length
+    const cancelled = orders.filter(o => o.status === 'CANCELLED').length
 
-    const revenue = await prisma.order.aggregate({
-      where: {
-        ...where,
-        paymentStatus: "COMPLETED",
-      },
-      _sum: {
-        totalAmount: true,
-      },
-    })
+    const revenue = orders
+      .filter(o => o.paymentStatus === 'COMPLETED')
+      .reduce((sum, o) => sum + o.totalAmount, 0)
 
     return {
       total,
@@ -278,7 +261,7 @@ export class OrderService {
       processing,
       completed,
       cancelled,
-      revenue: revenue._sum.totalAmount || 0,
+      revenue,
     }
   }
 }

@@ -1,5 +1,6 @@
 "use client"
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { getCart, saveCart } from '@/app/lib/cart-storage';
 
 export interface CartItem {
   id: string;
@@ -26,8 +27,6 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const CART_STORAGE_KEY = 'sog_cart';
-
 // Helper to generate unique cart item key
 const getCartItemKey = (item: CartItem): string => {
   return `${item.id}-${item.size || 'no-size'}-${item.color || 'no-color'}`;
@@ -43,14 +42,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load cart from localStorage on mount
+  // Load cart from localStorage on mount and when user changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
-        const savedCart = localStorage.getItem(CART_STORAGE_KEY);
-        if (savedCart) {
-          setCart(JSON.parse(savedCart));
-        }
+        // Cart will be loaded via auth state change in AuthProvider
+        // This is just initial load for guest users
+        const loadedCart = getCart();
+        setCart(loadedCart);
       } catch (error) {
         console.error('Error loading cart from localStorage:', error);
       } finally {
@@ -63,7 +62,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (isLoaded && typeof window !== 'undefined') {
       try {
-        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+        saveCart(cart);
       } catch (error) {
         console.error('Error saving cart to localStorage:', error);
       }
@@ -118,9 +117,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const clearCart = useCallback(() => {
     setCart([]);
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(CART_STORAGE_KEY);
-    }
   }, []);
 
   const getCartTotal = useCallback(() => {
