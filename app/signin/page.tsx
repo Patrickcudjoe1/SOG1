@@ -1,15 +1,12 @@
 "use client"
 
 import type React from "react"
-import { useState, Suspense, useEffect } from "react"
+import { useState, Suspense } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Eye, EyeOff } from "lucide-react"
 import Navbar from "../components/navbar"
 import { motion } from "framer-motion"
-import { signInWithEmail } from "../lib/firebase/auth"
-import { useAuth } from "../components/AuthProvider"
-import AuthSuccessModal from "../components/AuthSuccessModal"
 
 function SignInForm() {
   const [email, setEmail] = useState("")
@@ -20,17 +17,6 @@ function SignInForm() {
   
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user } = useAuth()
-
-  const [showSuccessModal, setShowSuccessModal] = useState(false)
-  const [userName, setUserName] = useState("")
-
-  // Redirect to homepage if already authenticated (not to /account)
-  useEffect(() => {
-    if (user && !showSuccessModal) {
-      router.replace("/")
-    }
-  }, [user, router, showSuccessModal])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,36 +24,37 @@ function SignInForm() {
     setLoading(true)
 
     try {
-      const userCredential = await signInWithEmail(email, password)
-      
-      // Clear password field for security
-      setPassword("")
-      
-      // Get user name for modal
-      setUserName(userCredential.user.displayName || "")
-      
-      // Show success modal
-      setShowSuccessModal(true)
+      const response = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || "Invalid email or password. Please check your credentials and try again.")
+        return
+      }
+
+      if (data.success) {
+        const callbackUrl = searchParams.get("callbackUrl") || "/account"
+        router.push(callbackUrl)
+        router.refresh()
+      }
     } catch (err: any) {
+      console.error("Sign in exception:", err)
       setError(err.message || "An error occurred. Please try again.")
+    } finally {
       setLoading(false)
     }
   }
 
-  const callbackUrl = searchParams.get("callbackUrl") || "/"
-
   return (
-    <>
-      <AuthSuccessModal 
-        isOpen={showSuccessModal}
-        type="login"
-        userName={userName}
-        onClose={() => setShowSuccessModal(false)}
-        redirectTo={callbackUrl}
-      />
-      
-      <main className="w-full min-h-screen bg-white flex flex-col">
-        <Navbar forceDark={true} />
+    <main className="w-full min-h-screen bg-white flex flex-col">
+      <Navbar  />
 
       <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-12 pt-20 sm:pt-24 md:pt-28 pb-8">
         <motion.div
@@ -110,13 +97,9 @@ function SignInForm() {
               <input
                 type="email"
                 value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value)
-                  setError("") // Clear error on input
-                }}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                disabled={loading}
-                className="w-full px-4 py-3 sm:py-3.5 border border-gray-300 rounded-lg text-sm sm:text-base bg-white focus:outline-none focus:border-black focus:ring-2 focus:ring-gray-200 transition-all duration-200 placeholder:text-gray-400 min-h-[48px] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-4 py-3 sm:py-3.5 border border-gray-300 rounded-lg text-sm sm:text-base bg-white focus:outline-none focus:border-black focus:ring-2 focus:ring-gray-200 transition-all duration-200 placeholder:text-gray-400 min-h-[48px]"
                 placeholder="you@example.com"
               />
             </div>
@@ -128,25 +111,15 @@ function SignInForm() {
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value)
-                    setError("") // Clear error on input
-                  }}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
-                  disabled={loading}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleSubmit(e as any)
-                    }
-                  }}
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:border-black focus:ring-2 focus:ring-gray-200 transition-all duration-200 placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:border-black focus:ring-2 focus:ring-gray-200 transition-all duration-200 placeholder:text-gray-400"
                   placeholder="Password*"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  disabled={loading}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors disabled:opacity-50"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -168,16 +141,9 @@ function SignInForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full px-6 py-3.5 sm:py-4 bg-black text-white rounded-lg hover:bg-gray-900 transition-all duration-300 text-sm sm:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed mt-6 min-h-[48px] flex items-center justify-center gap-2"
+              className="w-full px-6 py-3.5 sm:py-4 bg-black text-white rounded-lg hover:bg-gray-900 transition-all duration-300 text-sm sm:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed mt-6 min-h-[48px]"
             >
-              {loading ? (
-                <>
-                  <div className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-white border-r-transparent"></div>
-                  Signing in...
-                </>
-              ) : (
-                "Sign in"
-              )}
+              {loading ? "Signing in..." : "Sign in"}
             </button>
           </form>
 
@@ -191,7 +157,6 @@ function SignInForm() {
         </motion.div>
       </div>
     </main>
-    </>
   )
 }
 
@@ -199,7 +164,7 @@ export default function SignIn() {
   return (
     <Suspense fallback={
       <main className="w-full min-h-screen bg-white flex flex-col">
-        <Navbar forceDark={true} />
+        <Navbar  />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">Loading...</div>
         </div>

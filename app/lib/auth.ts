@@ -1,26 +1,43 @@
 import { redirect } from "next/navigation"
-import { auth } from "./firebase/config"
+import { getSessionFromToken, TokenPayload } from "./jwt"
+import { prisma } from "./db/prisma"
 
 export async function getSession() {
-  // Firebase handles auth client-side only
-  // This function is kept for compatibility but returns null on server
-  // Use useAuth() hook on client side instead
-  return null
+  const tokenPayload = await getSessionFromToken()
+  
+  if (!tokenPayload) {
+    return null
+  }
+
+  // Optionally verify user still exists in database
+  const user = await prisma.user.findUnique({
+    where: { id: tokenPayload.userId },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+    },
+  })
+
+  if (!user) {
+    return null
+  }
+
+  return {
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name || user.email?.split("@")[0] || null,
+      role: user.role,
+    },
+  }
 }
 
 export async function requireAuth() {
-  // Server-side auth check not supported with client-only Firebase
-  // Redirect to signin - actual auth check happens client-side
-  const user = auth.currentUser
-  if (!user) {
+  const session = await getSession()
+  if (!session) {
     redirect("/signin")
   }
-  return {
-    user: {
-      id: user.uid,
-      email: user.email || '',
-      name: user.displayName || user.email?.split("@")[0] || '',
-      role: 'USER',
-    },
-  }
+  return session
 }

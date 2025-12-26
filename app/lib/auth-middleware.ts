@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getSessionFromToken, verifyToken } from "./jwt"
-import { adminDB, COLLECTIONS, User } from "./firebase/admin-db"
+import { prisma } from "./db/prisma"
 import { unauthorizedResponse, errorResponse } from "./api/response"
 
 /**
@@ -26,7 +26,7 @@ export async function updateSession(request: NextRequest) {
   const protectedRoutes = ['/account', '/checkout']
   const isProtectedRoute = protectedRoutes.some((route) => request.nextUrl.pathname.startsWith(route))
 
-  // Routes that should redirect to homepage if already authenticated
+  // Routes that should redirect to account if already authenticated
   const authRoutes = ['/signin', '/signup']
   const isAuthRoute = authRoutes.some((route) => request.nextUrl.pathname.startsWith(route))
 
@@ -37,9 +37,9 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(signInUrl)
   }
 
-  // Redirect to homepage if accessing auth routes while authenticated
+  // Redirect to account if accessing auth routes while authenticated
   if (isAuthRoute && user) {
-    return NextResponse.redirect(new URL('/', request.url))
+    return NextResponse.redirect(new URL('/account', request.url))
   }
 
   return response
@@ -59,8 +59,16 @@ export async function requireAuth(req: NextRequest) {
       }
     }
 
-    // Verify user still exists in database
-    const user = await adminDB.get<User>(COLLECTIONS.USERS, tokenPayload.userId)
+    // Verify user still exists
+    const user = await prisma.user.findUnique({
+      where: { id: tokenPayload.userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+      },
+    })
 
     if (!user) {
       return {
@@ -79,6 +87,7 @@ export async function requireAuth(req: NextRequest) {
       },
     }
   } catch (error) {
+    console.error("Auth middleware error:", error)
     return {
       error: errorResponse("Authentication failed", 500),
       user: null,

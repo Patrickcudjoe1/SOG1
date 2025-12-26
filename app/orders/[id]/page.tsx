@@ -106,44 +106,44 @@ export default function OrderDetailsPage() {
   const getPaymentStatusColor = (status: string) => {
     switch (status.toUpperCase()) {
       case 'COMPLETED':
-        return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
+        return 'text-green-600 bg-green-50'
       case 'PENDING':
-        return 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
+        return 'text-yellow-600 bg-yellow-50'
       case 'FAILED':
-        return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20'
+        return 'text-red-600 bg-red-50'
       case 'REFUNDED':
-        return 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+        return 'text-blue-600 bg-blue-50'
       default:
-        return 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/20'
+        return 'text-gray-600 bg-gray-50'
     }
   }
 
   const getOrderStatusColor = (status: string) => {
     switch (status.toUpperCase()) {
       case 'DELIVERED':
-        return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
+        return 'text-green-600 bg-green-50'
       case 'SHIPPED':
-        return 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+        return 'text-blue-600 bg-blue-50'
       case 'PROCESSING':
-        return 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
+        return 'text-yellow-600 bg-yellow-50'
       case 'PENDING':
-        return 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20'
+        return 'text-orange-600 bg-orange-50'
       case 'CANCELLED':
       case 'REFUNDED':
-        return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20'
+        return 'text-red-600 bg-red-50'
       default:
-        return 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/20'
+        return 'text-gray-600 bg-gray-50'
     }
   }
 
   if (loading) {
     return (
-      <main className="w-full min-h-screen bg-white dark:bg-gray-950 transition-colors">
-        <Navbar forceDark={true} />
+      <main className="w-full min-h-screen bg-white">
+        <Navbar />
         <div className="w-full min-h-[calc(100vh-80px)] flex items-center justify-center">
           <div className="text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-black dark:border-white border-r-transparent"></div>
-            <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">Loading order details...</p>
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-black border-r-transparent"></div>
+            <p className="mt-4 text-sm text-gray-600">Loading order details...</p>
           </div>
         </div>
         <Footer />
@@ -153,16 +153,16 @@ export default function OrderDetailsPage() {
 
   if (error || !order) {
     return (
-      <main className="w-full min-h-screen bg-white dark:bg-gray-950 transition-colors">
-        <Navbar forceDark={true} />
+      <main className="w-full min-h-screen bg-white">
+        <Navbar />
         <div className="w-full min-h-[calc(100vh-80px)] flex items-center justify-center px-6">
           <div className="text-center max-w-md">
             <Package size={64} className="mx-auto mb-8 text-red-500" />
-            <h1 className="text-3xl md:text-4xl font-light tracking-widest uppercase mb-4 dark:text-white">Order Not Found</h1>
-            <p className="text-sm font-light text-gray-600 dark:text-gray-400 mb-8">
+            <h1 className="text-3xl md:text-4xl font-light tracking-widest uppercase mb-4">Order Not Found</h1>
+            <p className="text-sm font-light text-gray-600 mb-8">
               {error || "Unable to load order details."}
             </p>
-            <Link href="/account" className="inline-block px-6 py-3 border border-black dark:border-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-colors text-xs tracking-widest uppercase dark:text-white">
+            <Link href="/account" className="inline-block px-6 py-3 border border-black hover:bg-black hover:text-white transition-colors text-xs tracking-widest uppercase">
               Back to Account
             </Link>
           </div>
@@ -173,32 +173,32 @@ export default function OrderDetailsPage() {
   }
 
   return (
-    <main className="w-full min-h-screen bg-white dark:bg-gray-950 transition-colors">
-      <Navbar forceDark={true} />
+    <main className="w-full min-h-screen bg-white">
+      <Navbar />
       <section className="w-full py-16 md:py-20 px-6 md:px-12">
         <div className="max-w-4xl mx-auto">
           <Link 
             href="/account"
-            className="inline-flex items-center gap-2 mb-8 text-sm tracking-widest uppercase hover:opacity-60 transition-opacity dark:text-white"
+            className="inline-flex items-center gap-2 mb-8 text-sm tracking-widest uppercase hover:opacity-60 transition-opacity"
           >
             <ArrowLeft size={16} />
             Back to Account
           </Link>
 
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-light tracking-widest uppercase mb-4 dark:text-white">
+            <h1 className="text-3xl md:text-4xl font-light tracking-widest uppercase mb-4">
               Order Details
             </h1>
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center gap-2">
-                <Package size={20} className="text-gray-600 dark:text-gray-400" />
-                <span className="text-sm tracking-widest uppercase font-light dark:text-gray-300">
+                <Package size={20} className="text-gray-600" />
+                <span className="text-sm tracking-widest uppercase font-light">
                   {order.orderNumber}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <Calendar size={16} className="text-gray-600 dark:text-gray-400" />
-                <span className="text-xs text-gray-600 dark:text-gray-400">{formatDate(order.createdAt)}</span>
+                <Calendar size={16} className="text-gray-600" />
+                <span className="text-xs text-gray-600">{formatDate(order.createdAt)}</span>
               </div>
             </div>
           </div>
@@ -216,11 +216,11 @@ export default function OrderDetailsPage() {
           </div>
 
           {/* Order Items */}
-          <div className="border border-gray-200 dark:border-gray-700 p-6 mb-6 bg-white dark:bg-gray-900 transition-colors">
-            <h2 className="text-lg font-light tracking-wide mb-4 dark:text-white">Order Items</h2>
+          <div className="border border-gray-200 p-6 mb-6 bg-white">
+            <h2 className="text-lg font-light tracking-wide mb-4">Order Items</h2>
             <div className="space-y-4">
               {order.items && order.items.length > 0 && order.items.map((item) => (
-                <div key={item.id} className="flex items-center gap-4 pb-4 border-b border-gray-100 dark:border-gray-800 last:border-0 last:pb-0">
+                <div key={item.id} className="flex items-center gap-4 pb-4 border-b border-gray-100 last:border-0 last:pb-0">
                   {item.productImage && (
                     <div className="relative w-20 h-20 flex-shrink-0">
                       <Image
@@ -228,45 +228,45 @@ export default function OrderDetailsPage() {
                         alt={item.productName}
                         fill
                         sizes="80px"
-                        className="object-cover border border-gray-200 dark:border-gray-700"
+                        className="object-cover border border-gray-200"
                       />
                     </div>
                   )}
                   <div className="flex-1">
-                    <p className="text-sm font-light mb-1 dark:text-white">{item.productName}</p>
-                    <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
+                    <p className="text-sm font-light mb-1">{item.productName}</p>
+                    <div className="flex items-center gap-3 text-xs text-gray-600">
                       <span>Qty: {item.quantity}</span>
                       {item.size && <span>Size: {item.size}</span>}
                       {item.color && <span>Color: {item.color}</span>}
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-light dark:text-white">{formatCurrency(item.price * item.quantity)}</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">{formatCurrency(item.price)} each</p>
+                    <p className="text-sm font-light">{formatCurrency(item.price * item.quantity)}</p>
+                    <p className="text-xs text-gray-600">{formatCurrency(item.price)} each</p>
                   </div>
                 </div>
               ))}
             </div>
 
             {/* Order Summary */}
-            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 space-y-2">
+            <div className="mt-6 pt-6 border-t border-gray-200 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Subtotal</span>
-                <span className="dark:text-white">{formatCurrency(order.subtotal)}</span>
+                <span className="text-gray-600">Subtotal</span>
+                <span>{formatCurrency(order.subtotal)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Shipping</span>
-                <span className="dark:text-white">{formatCurrency(order.shippingCost)}</span>
+                <span className="text-gray-600">Shipping</span>
+                <span>{formatCurrency(order.shippingCost)}</span>
               </div>
               {order.discountAmount > 0 && (
-                <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
+                <div className="flex justify-between text-sm text-green-600">
                   <span>Discount</span>
                   <span>-{formatCurrency(order.discountAmount)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-lg font-light pt-2 border-t border-gray-200 dark:border-gray-700">
-                <span className="dark:text-white">Total</span>
-                <span className="dark:text-white">{formatCurrency(order.totalAmount)}</span>
+              <div className="flex justify-between text-lg font-light pt-2 border-t border-gray-200">
+                <span>Total</span>
+                <span>{formatCurrency(order.totalAmount)}</span>
               </div>
             </div>
           </div>
@@ -275,12 +275,12 @@ export default function OrderDetailsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Shipping Address */}
             {order.shippingAddress && (
-              <div className="border border-gray-200 dark:border-gray-700 p-6 bg-white dark:bg-gray-900 transition-colors">
+              <div className="border border-gray-200 p-6 bg-white">
                 <div className="flex items-center gap-2 mb-4">
-                  <MapPin size={20} className="text-gray-600 dark:text-gray-400" />
-                  <h2 className="text-lg font-light tracking-wide dark:text-white">Shipping Address</h2>
+                  <MapPin size={20} className="text-gray-600" />
+                  <h2 className="text-lg font-light tracking-wide">Shipping Address</h2>
                 </div>
-                <div className="text-sm space-y-1 text-gray-700 dark:text-gray-300">
+                <div className="text-sm space-y-1 text-gray-700">
                   <p className="font-light">{order.shippingAddress.fullName}</p>
                   <p>{order.shippingAddress.addressLine1}</p>
                   {order.shippingAddress.addressLine2 && <p>{order.shippingAddress.addressLine2}</p>}
@@ -293,25 +293,25 @@ export default function OrderDetailsPage() {
             )}
 
             {/* Payment & Delivery Info */}
-            <div className="border border-gray-200 dark:border-gray-700 p-6 bg-white dark:bg-gray-900 transition-colors">
+            <div className="border border-gray-200 p-6 bg-white">
               <div className="flex items-center gap-2 mb-4">
-                <CreditCard size={20} className="text-gray-600 dark:text-gray-400" />
-                <h2 className="text-lg font-light tracking-wide dark:text-white">Payment & Delivery</h2>
+                <CreditCard size={20} className="text-gray-600" />
+                <h2 className="text-lg font-light tracking-wide">Payment & Delivery</h2>
               </div>
               <div className="text-sm space-y-3">
                 <div>
-                  <p className="text-xs tracking-widest uppercase font-light text-gray-600 dark:text-gray-400 mb-1">Payment Method</p>
-                  <p className="text-gray-700 dark:text-gray-300">{formatStatus(order.paymentMethod)}</p>
+                  <p className="text-xs tracking-widest uppercase font-light text-gray-600 mb-1">Payment Method</p>
+                  <p className="text-gray-700">{formatStatus(order.paymentMethod)}</p>
                 </div>
                 {order.deliveryMethod && (
                   <div>
-                    <p className="text-xs tracking-widest uppercase font-light text-gray-600 dark:text-gray-400 mb-1">Delivery Method</p>
-                    <p className="text-gray-700 dark:text-gray-300">{formatStatus(order.deliveryMethod)}</p>
+                    <p className="text-xs tracking-widest uppercase font-light text-gray-600 mb-1">Delivery Method</p>
+                    <p className="text-gray-700">{formatStatus(order.deliveryMethod)}</p>
                   </div>
                 )}
                 <div>
-                  <p className="text-xs tracking-widest uppercase font-light text-gray-600 dark:text-gray-400 mb-1">Contact Email</p>
-                  <p className="text-gray-700 dark:text-gray-300">{order.email}</p>
+                  <p className="text-xs tracking-widest uppercase font-light text-gray-600 mb-1">Contact Email</p>
+                  <p className="text-gray-700">{order.email}</p>
                 </div>
               </div>
             </div>
@@ -321,13 +321,13 @@ export default function OrderDetailsPage() {
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <Link 
               href="/shop" 
-              className="inline-block px-6 py-3 border border-black dark:border-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-colors text-xs tracking-widest uppercase text-center dark:text-white"
+              className="inline-block px-6 py-3 border border-black hover:bg-black hover:text-white transition-colors text-xs tracking-widest uppercase text-center"
             >
               Continue Shopping
             </Link>
             <Link 
               href="/contact" 
-              className="inline-block px-6 py-3 border border-black dark:border-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-colors text-xs tracking-widest uppercase text-center dark:text-white"
+              className="inline-block px-6 py-3 border border-black hover:bg-black hover:text-white transition-colors text-xs tracking-widest uppercase text-center"
             >
               Contact Support
             </Link>

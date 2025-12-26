@@ -33,8 +33,6 @@
    THEME VARIABLES
 ================================ */
 
-@custom-variant dark (&:is(.dark *));
-
 :root {
   --font-heading: var(--font-heading);
   --font-body: var(--font-body);
@@ -73,40 +71,6 @@
   --sidebar-accent-foreground: #000000;
   --sidebar-border: #e5e5e5;
   --sidebar-ring: #666666;
-}
-
-.dark {
-  --background: #0a0a0a;
-  --foreground: #ffffff;
-  --card: #0a0a0a;
-  --card-foreground: #ffffff;
-  --popover: #0a0a0a;
-  --popover-foreground: #ffffff;
-  --primary: #ffffff;
-  --primary-foreground: #000000;
-  --secondary: #1a1a1a;
-  --secondary-foreground: #ffffff;
-  --muted: #1a1a1a;
-  --muted-foreground: #666666;
-  --accent: #1a1a1a;
-  --accent-foreground: #ffffff;
-  --destructive: #ef4444;
-  --destructive-foreground: #000000;
-  --input: #1a1a1a;
-  --ring: #333333;
-  --chart-1: #f59e0b;
-  --chart-2: #3b82f6;
-  --chart-3: #8b5cf6;
-  --chart-4: #ec4899;
-  --chart-5: #ef4444;
-  --sidebar: #000000;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #f59e0b;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1a1a1a;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #1a1a1a;
-  --sidebar-ring: #333333;
 }
 
 /* ================================
@@ -164,21 +128,6 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body), sans-serif;
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-
-  /* Dark mode input and form element overrides */
-  .dark input,
-  .dark textarea,
-  .dark select {
-    background-color: #1a1a1a;
-    color: #ffffff;
-    border-color: #333333;
-  }
-
-  .dark input::placeholder,
-  .dark textarea::placeholder {
-    color: #666666;
   }
 
   h1, h2, h3, h4, h5, h6 {

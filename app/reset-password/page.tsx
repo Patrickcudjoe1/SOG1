@@ -76,7 +76,7 @@ export default function ResetPassword() {
   if (!token) {
     return (
       <main className="w-full min-h-screen bg-white">
-        <Navbar forceDark={true} />
+        <Navbar  />
         <section className="w-full min-h-[80vh] flex items-center justify-center py-20 px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -99,7 +99,7 @@ export default function ResetPassword() {
   if (success) {
     return (
       <main className="w-full min-h-screen bg-white">
-        <Navbar forceDark={true} />
+        <Navbar  />
         <section className="w-full min-h-[80vh] flex items-center justify-center py-20 px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -120,7 +120,7 @@ export default function ResetPassword() {
 
   return (
     <main className="w-full min-h-screen bg-white">
-      <Navbar forceDark={true} />
+      <Navbar  />
       <section className="w-full min-h-[80vh] flex items-center justify-center py-20 px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

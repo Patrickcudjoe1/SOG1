@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { firestoreDB, COLLECTIONS, Order } from "@/app/lib/firebase/db";
+import { prisma } from "@/app/lib/db/prisma";
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -34,22 +34,17 @@ export async function POST(req: NextRequest) {
         const session = event.data.object as Stripe.Checkout.Session;
 
         // Find order by Stripe session ID
-        const orders = await firestoreDB.getMany<Order>(
-          COLLECTIONS.ORDERS,
-          { orderBy: "stripeSessionId", equalTo: session.id, limitToFirst: 1 }
-        );
+        const order = await prisma.order.findFirst({
+          where: { stripePaymentIntentId: session.id },
+        });
 
-        if (orders.length > 0) {
-          const order = orders[0];
-          // Check if already processed (idempotency)
-          if (order.webhookProcessed) {
-            return NextResponse.json({ received: true, message: "Already processed" });
-          }
-
-          await firestoreDB.update<Order>(COLLECTIONS.ORDERS, order.id, {
-            paymentStatus: "COMPLETED",
-            status: "PROCESSING",
-            webhookProcessed: true,
+        if (order) {
+          await prisma.order.update({
+            where: { id: order.id },
+            data: {
+              paymentStatus: "COMPLETED",
+              status: "PROCESSING",
+            },
           });
 
           // Send order confirmation email
@@ -70,15 +65,16 @@ export async function POST(req: NextRequest) {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         
         // Find order by payment intent ID
-        const orders = await firestoreDB.getMany<Order>(
-          COLLECTIONS.ORDERS,
-          { orderBy: "stripePaymentIntentId", equalTo: paymentIntent.id, limitToFirst: 1 }
-        );
+        const order = await prisma.order.findFirst({
+          where: { stripePaymentIntentId: paymentIntent.id },
+        });
 
-        if (orders.length > 0) {
-          const order = orders[0];
-          await firestoreDB.update<Order>(COLLECTIONS.ORDERS, order.id, {
-            paymentStatus: "FAILED",
+        if (order) {
+          await prisma.order.update({
+            where: { id: order.id },
+            data: {
+              paymentStatus: "FAILED",
+            },
           });
         }
         break;

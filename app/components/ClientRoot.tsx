@@ -2,20 +2,17 @@
 import { CartProvider } from "./CartContext";
 import { AuthProvider } from "./AuthProvider";
 import { CartSyncHandler } from "./CartSyncHandler";
-import { ThemeProvider } from "./ThemeProvider";
 import { Toaster } from "sonner";
 import React from "react";
 
 export default function ClientRoot({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <CartProvider>
-          <CartSyncHandler />
-          {children}
-          <Toaster position="top-center" richColors />
-        </CartProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <CartProvider>
+        <CartSyncHandler />
+        {children}
+        <Toaster position="top-center" richColors />
+      </CartProvider>
+    </AuthProvider>
   );
 }

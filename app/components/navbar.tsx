@@ -2,17 +2,15 @@
 
 import Link from "next/link"
 import { useState, useEffect } from "react"
-import { Menu, X, Search, User, ShoppingBag, ChevronRight, ChevronDown, Moon, Sun } from "lucide-react"
+import { Menu, X, Search, User, ShoppingBag, ChevronRight, ChevronDown } from "lucide-react"
 import { motion } from "framer-motion"
 import { useCart } from "./CartContext"
-import { useAuth } from "./AuthProvider"
-import { useTheme } from "./ThemeProvider"
 
 interface NavbarProps {
-  forceDark?: boolean
+
 }
 
-export default function SONOFGODNavbar({ forceDark = false }: NavbarProps) {
+export default function SONOFGODNavbar({}: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [mobileDropdowns, setMobileDropdowns] = useState({
@@ -21,8 +19,6 @@ export default function SONOFGODNavbar({ forceDark = false }: NavbarProps) {
     newArrivals: false,
   })
   const { cart } = useCart()
-  const { user } = useAuth()
-  const { theme, toggleTheme } = useTheme()
 
   const toggleMobileDropdown = (dropdown: 'featured' | 'collections' | 'newArrivals') => {
     setMobileDropdowns(prev => ({
@@ -31,30 +27,25 @@ export default function SONOFGODNavbar({ forceDark = false }: NavbarProps) {
     }))
   }
 
-  // Detect scroll (only if not forceDark)
+  // Detect scroll
   useEffect(() => {
-    if (forceDark) {
-      setScrolled(false) // Reset scrolled state when forceDark is enabled
-      return // Don't detect scroll when forceDark is enabled
-    }
-    
     const handleScroll = () => {
       setScrolled(window.scrollY > 50)
     }
 
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [forceDark])
+  }, [])
 
-  // Determine if navbar should be dark
-  const textColor = forceDark ? "text-white" : (scrolled ? "text-black" : "text-white")
-  const bgColor = forceDark ? "bg-black" : (scrolled ? "bg-white" : "bg-transparent")
+  // Determine navbar colors based on scroll
+  const textColor = scrolled ? "text-black" : "text-white"
+  const bgColor = scrolled ? "bg-white" : "bg-transparent"
 
   return (
     <>
       <nav
         className={`sog-nav fixed top-0 w-full z-50 transition-all duration-300
-          ${bgColor} ${forceDark ? "shadow-md" : (scrolled ? "shadow-md" : "shadow-none")}
+          ${bgColor} ${scrolled ? "shadow-md" : "shadow-none"}
         `}
       >
         <div className="max-w-full px-4 sm:px-6 md:px-12 py-3 md:py-4 transition-all duration-300">
@@ -69,7 +60,7 @@ export default function SONOFGODNavbar({ forceDark = false }: NavbarProps) {
                     opacity-0 invisible transition-all duration-300 ease-out
                     group-hover:opacity-100 group-hover:visible
                     backdrop-blur-xl
-                    ${forceDark ? "bg-black/40" : (scrolled ? "bg-white/30" : "bg-black/40")}
+                    ${scrolled ? "bg-white/30" : "bg-black/40"}
                   `}
                 />
                 
@@ -87,7 +78,7 @@ export default function SONOFGODNavbar({ forceDark = false }: NavbarProps) {
                     opacity-0 invisible group-hover:opacity-100 group-hover:visible
                     transition-all duration-200 ease-out
                     backdrop-blur-md
-                    ${forceDark ? "bg-black/80 text-white" : (scrolled ? "bg-white/90 text-black" : "bg-black/80 text-white")}
+                    ${scrolled ? "bg-white/90 text-black" : "bg-black/80 text-white"}
                   `}
               >
                   <div className="flex flex-col px-4 py-3 space-y-3 text-xs tracking-widest uppercase">
@@ -108,13 +99,13 @@ export default function SONOFGODNavbar({ forceDark = false }: NavbarProps) {
                     opacity-0 invisible transition-all duration-300 ease-out
                     group-hover:opacity-100 group-hover:visible
                     backdrop-blur-xl
-                    ${forceDark ? "bg-black/40" : (scrolled ? "bg-white/30" : "bg-black/40")}
+                    ${scrolled ? "bg-white/30" : "bg-black/40"}
                   `}
                 />
                 
   {/* COLLECTIONS BUTTON */}
   <Link
-    href=""
+    href="/shop"
                   className={`sog-link font-light uppercase transition-colors whitespace-nowrap relative z-50 flex items-center h-full ${textColor}`}
   >
     COLLECTIONS
@@ -126,7 +117,7 @@ export default function SONOFGODNavbar({ forceDark = false }: NavbarProps) {
       opacity-0 invisible group-hover:opacity-100 group-hover:visible
       transition-all duration-200 ease-out
                     backdrop-blur-md
-                    ${forceDark ? "bg-black/80 text-white" : (scrolled ? "bg-white/90 text-black" : "bg-black/80 text-white")}
+                    ${scrolled ? "bg-white/90 text-black" : "bg-black/80 text-white"}
     `}
   >
     <div className="flex flex-col px-4 py-3 space-y-3 text-xs tracking-widest uppercase">
@@ -147,13 +138,13 @@ export default function SONOFGODNavbar({ forceDark = false }: NavbarProps) {
                     opacity-0 invisible transition-all duration-300 ease-out
                     group-hover:opacity-100 group-hover:visible
                     backdrop-blur-xl
-                    ${forceDark ? "bg-black/40" : (scrolled ? "bg-white/30" : "bg-black/40")}
+                    ${scrolled ? "bg-white/30" : "bg-black/40"}
                   `}
                 />
                 
                 {/* NEW ARRIVALS BUTTON */}
               <Link
-                href="/"
+                href="/new-arrivals"
                   className={`sog-link font-light uppercase transition-colors whitespace-nowrap relative z-50 flex items-center h-full ${textColor}`}
               >
                 NEW ARRIVALS
@@ -165,7 +156,7 @@ export default function SONOFGODNavbar({ forceDark = false }: NavbarProps) {
                     opacity-0 invisible group-hover:opacity-100 group-hover:visible
                     transition-all duration-200 ease-out
                     backdrop-blur-md
-                    ${forceDark ? "bg-black/80 text-white" : (scrolled ? "bg-white/90 text-black" : "bg-black/80 text-white")}
+                    ${scrolled ? "bg-white/90 text-black" : "bg-black/80 text-white"}
                   `}
                 >
                   <div className="flex flex-col px-4 py-3 space-y-3 text-xs tracking-widest uppercase">
@@ -206,29 +197,12 @@ export default function SONOFGODNavbar({ forceDark = false }: NavbarProps) {
                 <Search size={15} />
               </Link>
 
-              <button
-                onClick={toggleTheme}
+              <Link
+                href="/account"
                 className={`w-8 h-8 hover:opacity-60 transition-opacity flex items-center justify-center ${textColor}`}
-                aria-label="Toggle theme"
               >
-                {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
-              </button>
-
-              {user ? (
-                <Link
-                  href="/account"
-                  className={`w-8 h-8 hover:opacity-60 transition-opacity flex items-center justify-center ${textColor}`}
-                >
-                  <User size={15} />
-                </Link>
-              ) : (
-                <Link
-                  href="/signin"
-                  className={`w-8 h-8 hover:opacity-60 transition-opacity flex items-center justify-center ${textColor}`}
-                >
-                  <User size={15} />
-                </Link>
-              )}
+                <User size={15} />
+              </Link>
 
               <Link
                 href="/cart"
@@ -457,13 +431,6 @@ export default function SONOFGODNavbar({ forceDark = false }: NavbarProps) {
 
             {/* Service/Account Links Section */}
             <div className="px-6 pb-6 space-y-4">
-              <button
-                onClick={toggleTheme}
-                className="w-full text-left flex items-center gap-3 text-sm tracking-widest uppercase hover:opacity-60 transition-opacity"
-              >
-                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-                <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
-              </button>
               <Link
                 href="/account"
                 className="block sog-link uppercase text-black hover:opacity-60 transition-opacity"

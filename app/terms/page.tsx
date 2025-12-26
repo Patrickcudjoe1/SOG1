@@ -4,7 +4,7 @@ import Footer from "../components/footer"
 export default function TermsOfService() {
   return (
     <main className="w-full min-h-screen bg-white">
-      <Navbar forceDark={true} />
+      <Navbar  />
       
       <section className="w-full py-24 px-6 md:px-12">
         <div className="max-w-4xl mx-auto">

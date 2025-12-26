@@ -51,11 +51,11 @@ export default function ProfileSection({ userId, initialName, initialEmail }: Pr
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-light tracking-widest uppercase dark:text-white">Profile Information</h2>
+        <h2 className="text-sm font-light tracking-widest uppercase Information</h2>
         {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 text-xs tracking-widest uppercase font-light hover:opacity-60 dark:text-white"
+            className="flex items-center gap-2 text-xs tracking-widest uppercase font-light hover:opacity-60
           >
             <Edit2 size={14} /> Edit
           </button>
@@ -63,33 +63,33 @@ export default function ProfileSection({ userId, initialName, initialEmail }: Pr
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm">{error}</div>
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>
       )}
 
       {success && (
-        <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-sm">{success}</div>
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 text-sm">{success}</div>
       )}
 
-      <div className="space-y-4 border-b border-gray-200 dark:border-gray-700 pb-8">
+      <div className="space-y-4 border-b border-gray-200 pb-8">
         <div>
-          <p className="text-xs text-gray-600 dark:text-gray-400 tracking-widest uppercase mb-1">Name</p>
+          <p className="text-xs text-gray-600 tracking-widest uppercase mb-1">Name</p>
           {isEditing ? (
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:border-black dark:focus:border-white transition-colors dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 bg-white text-sm focus:outline-none focus:border-black transition-colors
               placeholder="Your name"
             />
           ) : (
-            <p className="text-sm font-light dark:text-white">{name || "Not set"}</p>
+            <p className="text-sm font-light || "Not set"}</p>
           )}
         </div>
 
         <div>
-          <p className="text-xs text-gray-600 dark:text-gray-400 tracking-widest uppercase mb-1">Email</p>
-          <p className="text-sm font-light dark:text-white">{initialEmail}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Email cannot be changed</p>
+          <p className="text-xs text-gray-600 tracking-widest uppercase mb-1">Email</p>
+          <p className="text-sm font-light
+          <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
         </div>
 
         {isEditing && (
@@ -97,7 +97,7 @@ export default function ProfileSection({ userId, initialName, initialEmail }: Pr
             <button
               onClick={handleSave}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 text-xs tracking-widest uppercase font-light border border-black dark:border-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-colors disabled:opacity-60 dark:text-white"
+              className="flex items-center gap-2 px-4 py-2 text-xs tracking-widest uppercase font-light border border-black hover:bg-black hover:text-white transition-colors disabled:opacity-60
             >
               <Save size={14} /> {loading ? "Saving..." : "Save"}
             </button>
@@ -108,7 +108,7 @@ export default function ProfileSection({ userId, initialName, initialEmail }: Pr
                 setError("")
                 setSuccess("")
               }}
-              className="flex items-center gap-2 px-4 py-2 text-xs tracking-widest uppercase font-light border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors dark:text-white"
+              className="flex items-center gap-2 px-4 py-2 text-xs tracking-widest uppercase font-light border border-gray-300 hover:bg-gray-100 transition-colors
             >
               <X size={14} /> Cancel
             </button>

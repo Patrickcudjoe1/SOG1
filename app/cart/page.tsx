@@ -32,7 +32,7 @@ export default function Cart() {
   if (cart.length === 0) {
     return (
       <main className="w-full min-h-screen">
-        <Navbar forceDark={true} />
+        <Navbar  />
         <section className="w-full min-h-[60vh] flex items-center justify-center py-20 px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -54,7 +54,7 @@ export default function Cart() {
 
   return (
     <main className="w-full min-h-screen">
-      <Navbar forceDark={true} />
+      <Navbar  />
       <section className="w-full py-8 md:py-12 lg:py-20 px-4 md:px-6 lg:px-12">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-xl md:text-2xl lg:text-4xl font-light tracking-wide mb-6 md:mb-8 lg:mb-12">SHOPPING CART</h1>
