@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { Menu, X, Search, User, ShoppingBag, ChevronRight, ChevronDown } from "lucide-react"
@@ -188,10 +189,16 @@ export default function SONOFGODNavbar({}: NavbarProps) {
             {/* CENTER LOGO */}
             <Link
               href="/"
-              className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl uppercase tracking-tight transition-colors font-bold ${textColor}`}
-              style={{ fontFamily: 'var(--font-brand)', fontWeight: 700 }}
+              className="relative flex items-center justify-center h-full"
             >
-              SON OF GOD
+              <Image
+                src="/logo.png"
+                alt="SON OF GOD"
+                width={200}
+                height={60}
+                className="h-8 md:h-10 lg:h-12 w-auto object-contain"
+                priority
+              />
             </Link>
 
             {/* RIGHT NAV – DESKTOP */}
