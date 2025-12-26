@@ -75,33 +75,33 @@ export default function OrderHistory({ userId }: OrderHistoryProps) {
   const getPaymentStatusColor = (status: string) => {
     switch (status.toUpperCase()) {
       case 'COMPLETED':
-        return 'text-green-600
+        return 'text-green-600'
       case 'PENDING':
-        return 'text-yellow-600
+        return 'text-yellow-600'
       case 'FAILED':
-        return 'text-red-600
+        return 'text-red-600'
       case 'REFUNDED':
-        return 'text-blue-600
+        return 'text-blue-600'
       default:
-        return 'text-gray-600
+        return 'text-gray-600'
     }
   }
 
   const getOrderStatusColor = (status: string) => {
     switch (status.toUpperCase()) {
       case 'DELIVERED':
-        return 'text-green-600
+        return 'text-green-600'
       case 'SHIPPED':
-        return 'text-blue-600
+        return 'text-blue-600'
       case 'PROCESSING':
-        return 'text-yellow-600
+        return 'text-yellow-600'
       case 'PENDING':
-        return 'text-orange-600
+        return 'text-orange-600'
       case 'CANCELLED':
       case 'REFUNDED':
-        return 'text-red-600
+        return 'text-red-600'
       default:
-        return 'text-gray-600
+        return 'text-gray-600'
     }
   }
 
@@ -123,15 +123,15 @@ export default function OrderHistory({ userId }: OrderHistoryProps) {
 
   return (
     <div>
-      <h2 className="text-sm font-light tracking-widest uppercase mb-4 History</h2>
+      <h2 className="text-sm font-light tracking-widest uppercase mb-4">Order History</h2>
       <div className="space-y-6">
         {orders.map((order) => (
           <div key={order.id} className="border border-gray-200 p-4 bg-white transition-colors">
             <div className="flex items-start justify-between mb-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <Package size={16} className="text-gray-600 />
-                  <span className="text-xs tracking-widest uppercase font-light text-gray-600
+                  <Package size={16} className="text-gray-600" />
+                  <span className="text-xs tracking-widest uppercase font-light text-gray-600">
                     {order.orderNumber || `Order #${order.id.slice(0, 8)}`}
                   </span>
                 </div>
@@ -143,14 +143,14 @@ export default function OrderHistory({ userId }: OrderHistoryProps) {
                   <span className={`text-xs tracking-widest uppercase font-light ${getOrderStatusColor(order.status)}`}>
                     {formatStatus(order.status)}
                   </span>
-                  <span className="text-gray-300
+                  <span className="text-gray-300">|</span>
                   <span className={`text-xs tracking-widest uppercase font-light ${getPaymentStatusColor(order.paymentStatus)}`}>
                     {formatStatus(order.paymentStatus)}
                   </span>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-sm font-light mb-1
+                <div className="text-sm font-light mb-1">{formatCurrency(order.totalAmount)}</div>
               </div>
             </div>
 
@@ -164,13 +164,13 @@ export default function OrderHistory({ userId }: OrderHistoryProps) {
                         alt={item.productName}
                         fill
                         sizes="64px"
-                        className="object-cover border border-gray-200
+                        className="object-cover border border-gray-200"
                       />
                     </div>
                   )}
                   <div className="flex-1">
-                    <p className="text-sm font-light
-                    <p className="text-xs text-gray-600
+                    <p className="text-sm font-light">{item.productName}</p>
+                    <p className="text-xs text-gray-600">
                       Quantity: {item.quantity} × {formatCurrency(item.price)}
                     </p>
                   </div>
@@ -178,10 +178,10 @@ export default function OrderHistory({ userId }: OrderHistoryProps) {
               ))}
             </div>
 
-            <div className="mt-4 pt-4 border-t border-gray-100
+            <div className="mt-4 pt-4 border-t border-gray-100">
               <Link 
                 href={`/orders/${order.id}`}
-                className="inline-block text-xs tracking-widest uppercase font-light hover:opacity-60 transition-opacity
+                className="inline-block text-xs tracking-widest uppercase font-light hover:opacity-60 transition-opacity"
               >
                 View Details →
               </Link>

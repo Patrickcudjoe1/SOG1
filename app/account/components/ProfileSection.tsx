@@ -51,11 +51,11 @@ export default function ProfileSection({ userId, initialName, initialEmail }: Pr
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-light tracking-widest uppercase Information</h2>
+        <h2 className="text-sm font-light tracking-widest uppercase">Profile Information</h2>
         {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 text-xs tracking-widest uppercase font-light hover:opacity-60
+            className="flex items-center gap-2 text-xs tracking-widest uppercase font-light hover:opacity-60"
           >
             <Edit2 size={14} /> Edit
           </button>
@@ -78,17 +78,17 @@ export default function ProfileSection({ userId, initialName, initialEmail }: Pr
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 bg-white text-sm focus:outline-none focus:border-black transition-colors
+              className="w-full px-4 py-2 border border-gray-300 bg-white text-sm focus:outline-none focus:border-black transition-colors"
               placeholder="Your name"
             />
           ) : (
-            <p className="text-sm font-light || "Not set"}</p>
+            <p className="text-sm font-light">{name || "Not set"}</p>
           )}
         </div>
 
         <div>
           <p className="text-xs text-gray-600 tracking-widest uppercase mb-1">Email</p>
-          <p className="text-sm font-light
+          <p className="text-sm font-light">{initialEmail}</p>
           <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
         </div>
 
@@ -97,7 +97,7 @@ export default function ProfileSection({ userId, initialName, initialEmail }: Pr
             <button
               onClick={handleSave}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 text-xs tracking-widest uppercase font-light border border-black hover:bg-black hover:text-white transition-colors disabled:opacity-60
+              className="flex items-center gap-2 px-4 py-2 text-xs tracking-widest uppercase font-light border border-black hover:bg-black hover:text-white transition-colors disabled:opacity-60"
             >
               <Save size={14} /> {loading ? "Saving..." : "Save"}
             </button>
@@ -108,7 +108,7 @@ export default function ProfileSection({ userId, initialName, initialEmail }: Pr
                 setError("")
                 setSuccess("")
               }}
-              className="flex items-center gap-2 px-4 py-2 text-xs tracking-widest uppercase font-light border border-gray-300 hover:bg-gray-100 transition-colors
+              className="flex items-center gap-2 px-4 py-2 text-xs tracking-widest uppercase font-light border border-gray-300 hover:bg-gray-100 transition-colors"
             >
               <X size={14} /> Cancel
             </button>

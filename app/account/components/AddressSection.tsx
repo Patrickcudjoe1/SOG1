@@ -135,17 +135,17 @@ export default function AddressSection({ userId }: AddressSectionProps) {
   }
 
   if (loading) {
-    return <div className="text-sm font-light text-gray-600 addresses...</div>
+    return <div className="text-sm font-light text-gray-600">Loading addresses...</div>
   }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-light tracking-widest uppercase Addresses</h2>
+        <h2 className="text-sm font-light tracking-widest uppercase">Addresses</h2>
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 text-xs tracking-widest uppercase font-light hover:opacity-60
+            className="flex items-center gap-2 text-xs tracking-widest uppercase font-light hover:opacity-60"
           >
             <Plus size={14} /> Add Address
           </button>
@@ -160,7 +160,7 @@ export default function AddressSection({ userId }: AddressSectionProps) {
         <form onSubmit={handleSubmit} className="mb-6 p-4 border border-gray-200 bg-white space-y-4 transition-colors">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs tracking-widest uppercase font-light mb-2 Name</label>
+              <label className="block text-xs tracking-widest uppercase font-light mb-2">Name</label>
               <input
                 type="text"
                 required
@@ -298,7 +298,7 @@ export default function AddressSection({ userId }: AddressSectionProps) {
 
       <div className="space-y-4">
         {addresses.length === 0 ? (
-          <div className="text-sm font-light text-gray-600 addresses saved yet</div>
+          <div className="text-sm font-light text-gray-600">No addresses saved yet</div>
         ) : (
           addresses.map((address) => (
             <div key={address.id} className="p-4 border border-gray-200 bg-white relative transition-colors">
@@ -308,9 +308,9 @@ export default function AddressSection({ userId }: AddressSectionProps) {
                 </span>
               )}
               <div className="flex items-start gap-2 mb-2">
-                <MapPin size={16} className="mt-0.5 text-gray-600 />
+                <MapPin size={16} className="mt-0.5 text-gray-600" />
                 <div className="flex-1">
-                  <p className="text-sm font-light mb-1
+                  <p className="text-sm font-light mb-1">{address.fullName}</p>
                   <p className="text-xs text-gray-600 font-light">
                     {address.addressLine1}
                     {address.addressLine2 && `, ${address.addressLine2}`}
@@ -324,10 +324,10 @@ export default function AddressSection({ userId }: AddressSectionProps) {
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-100
+              <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-100">
                 <button
                   onClick={() => handleEdit(address)}
-                  className="flex items-center gap-1 text-xs tracking-widest uppercase font-light hover:opacity-60
+                  className="flex items-center gap-1 text-xs tracking-widest uppercase font-light hover:opacity-60"
                 >
                   <Edit2 size={12} /> Edit
                 </button>
