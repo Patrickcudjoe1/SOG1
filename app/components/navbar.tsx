@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useState, useEffect } from "react"
+import { usePathname } from "next/navigation"
 import { Menu, X, Search, User, ShoppingBag, ChevronRight, ChevronDown } from "lucide-react"
 import { motion } from "framer-motion"
 import { useCart } from "./CartContext"
@@ -19,6 +20,11 @@ export default function SONOFGODNavbar({}: NavbarProps) {
     newArrivals: false,
   })
   const { cart } = useCart()
+  const pathname = usePathname()
+
+  // Pages that should always have black navbar
+  const blackNavbarPages = ['/signin', '/signup', '/forgot-password', '/reset-password']
+  const isBlackNavbarPage = blackNavbarPages.includes(pathname || '')
 
   const toggleMobileDropdown = (dropdown: 'featured' | 'collections' | 'newArrivals') => {
     setMobileDropdowns(prev => ({
@@ -37,15 +43,15 @@ export default function SONOFGODNavbar({}: NavbarProps) {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // Determine navbar colors based on scroll
-  const textColor = scrolled ? "text-black" : "text-white"
-  const bgColor = scrolled ? "bg-white" : "bg-transparent"
+  // Determine navbar colors based on scroll and page type
+  const textColor = isBlackNavbarPage ? "text-white" : (scrolled ? "text-black" : "text-white")
+  const bgColor = isBlackNavbarPage ? "bg-black" : (scrolled ? "bg-white" : "bg-transparent")
 
   return (
     <>
       <nav
         className={`sog-nav fixed top-0 w-full z-50 transition-all duration-300
-          ${bgColor} ${scrolled ? "shadow-md" : "shadow-none"}
+          ${bgColor} ${(scrolled || isBlackNavbarPage) ? "shadow-md" : "shadow-none"}
         `}
       >
         <div className="max-w-full px-4 sm:px-6 md:px-12 py-3 md:py-4 transition-all duration-300">
@@ -60,7 +66,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                     opacity-0 invisible transition-all duration-300 ease-out
                     group-hover:opacity-100 group-hover:visible
                     backdrop-blur-xl
-                    ${scrolled ? "bg-white/30" : "bg-black/40"}
+                    ${isBlackNavbarPage ? "bg-black/40" : (scrolled ? "bg-white/30" : "bg-black/40")}
                   `}
                 />
                 
@@ -78,7 +84,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                     opacity-0 invisible group-hover:opacity-100 group-hover:visible
                     transition-all duration-200 ease-out
                     backdrop-blur-md
-                    ${scrolled ? "bg-white/90 text-black" : "bg-black/80 text-white"}
+                    ${isBlackNavbarPage ? "bg-black/80 text-white" : (scrolled ? "bg-white/90 text-black" : "bg-black/80 text-white")}
                   `}
               >
                   <div className="flex flex-col px-4 py-3 space-y-3 text-xs tracking-widest uppercase">
@@ -99,7 +105,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                     opacity-0 invisible transition-all duration-300 ease-out
                     group-hover:opacity-100 group-hover:visible
                     backdrop-blur-xl
-                    ${scrolled ? "bg-white/30" : "bg-black/40"}
+                    ${isBlackNavbarPage ? "bg-black/40" : (scrolled ? "bg-white/30" : "bg-black/40")}
                   `}
                 />
                 
@@ -117,7 +123,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
       opacity-0 invisible group-hover:opacity-100 group-hover:visible
       transition-all duration-200 ease-out
                     backdrop-blur-md
-                    ${scrolled ? "bg-white/90 text-black" : "bg-black/80 text-white"}
+                    ${isBlackNavbarPage ? "bg-black/80 text-white" : (scrolled ? "bg-white/90 text-black" : "bg-black/80 text-white")}
     `}
   >
     <div className="flex flex-col px-4 py-3 space-y-3 text-xs tracking-widest uppercase">
@@ -138,7 +144,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                     opacity-0 invisible transition-all duration-300 ease-out
                     group-hover:opacity-100 group-hover:visible
                     backdrop-blur-xl
-                    ${scrolled ? "bg-white/30" : "bg-black/40"}
+                    ${isBlackNavbarPage ? "bg-black/40" : (scrolled ? "bg-white/30" : "bg-black/40")}
                   `}
                 />
                 
@@ -156,7 +162,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                     opacity-0 invisible group-hover:opacity-100 group-hover:visible
                     transition-all duration-200 ease-out
                     backdrop-blur-md
-                    ${scrolled ? "bg-white/90 text-black" : "bg-black/80 text-white"}
+                    ${isBlackNavbarPage ? "bg-black/80 text-white" : (scrolled ? "bg-white/90 text-black" : "bg-black/80 text-white")}
                   `}
                 >
                   <div className="flex flex-col px-4 py-3 space-y-3 text-xs tracking-widest uppercase">
