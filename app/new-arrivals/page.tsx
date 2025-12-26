@@ -5,9 +5,11 @@ import Footer from "../components/footer"
 import ProductCard from "../components/product-card"
 import { products } from "../lib/products"
 import { useState } from "react"
+import { ChevronDown } from "lucide-react"
 
 export default function NewArrivals() {
   const [selectedCategory, setSelectedCategory] = useState<string>("All")
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   // Filter products to show only new arrivals
   const newArrivalProducts = products.filter((p) => p.isNewArrival === true)
@@ -34,18 +36,46 @@ export default function NewArrivals() {
       {categories.length > 1 && (
         <section className="w-full border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-12 py-6 md:py-8">
-            <div className="flex gap-8">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`text-xs tracking-widest uppercase font-light transition-opacity ${
-                    selectedCategory === category ? "text-black" : "text-gray-400 hover:text-gray-600"
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
+            <div className="relative inline-block">
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center gap-2 px-4 py-2 border border-black text-xs tracking-widest uppercase font-light hover:bg-black hover:text-white transition-all duration-300"
+              >
+                {selectedCategory}
+                <ChevronDown 
+                  size={14} 
+                  className={`transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+              
+              {isDropdownOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40"
+                    onClick={() => setIsDropdownOpen(false)}
+                  />
+                  <div className="absolute top-full left-0 mt-2 z-50 bg-white border border-black min-w-[200px] shadow-lg">
+                    <div className="flex flex-col">
+                      {categories.map((category) => (
+                        <button
+                          key={category}
+                          onClick={() => {
+                            setSelectedCategory(category)
+                            setIsDropdownOpen(false)
+                          }}
+                          className={`text-left px-4 py-3 text-xs tracking-widest uppercase font-light transition-colors ${
+                            selectedCategory === category 
+                              ? "bg-black text-white" 
+                              : "text-black hover:bg-gray-100"
+                          }`}
+                        >
+                          {category}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </section>
