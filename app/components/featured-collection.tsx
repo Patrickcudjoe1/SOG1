@@ -60,7 +60,7 @@ export default function FeaturedCollection() {
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white uppercase px-4 text-center"
           style={{ 
             fontFamily: 'var(--font-brand)',
-            fontWeight: 300,
+            fontWeight: 700,
             fontSize: 'clamp(1.75rem, 6vw, 3.5rem)',
             lineHeight: '1.4',
             letterSpacing: '0.05em',
