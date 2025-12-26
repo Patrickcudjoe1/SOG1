@@ -37,7 +37,7 @@ export default function NewCollection() {
         >
           {/* Heading - Centered */}
           <motion.h2 
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white uppercase px-4 text-center"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white uppercase px-4 text-center whitespace-nowrap"
             style={{ 
               fontFamily: 'var(--font-brand)',
               fontWeight: 700,
@@ -48,7 +48,7 @@ export default function NewCollection() {
             }}
           >
             <span className="block md:inline">The New</span>
-            <span className="block md:inline md:ml-2">Collection 777</span>
+            <span className="block md:inline md:ml-3">Collection 777</span>
           </motion.h2>
           
           {/* Buttons - At Bottom */}

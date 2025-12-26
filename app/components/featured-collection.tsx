@@ -57,7 +57,7 @@ export default function FeaturedCollection() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white uppercase px-4 text-center"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white uppercase px-4 text-center whitespace-nowrap"
           style={{ 
             fontFamily: 'var(--font-brand)',
             fontWeight: 700,
@@ -68,7 +68,7 @@ export default function FeaturedCollection() {
           }}
         >
           <span className="block md:inline">SOG Presence</span>
-          <span className="block md:inline md:ml-2">Collection</span>
+          <span className="block md:inline md:ml-3">Collection</span>
         </motion.h1>
 
         {/* Shop and Lookbook Buttons - At Bottom */}
