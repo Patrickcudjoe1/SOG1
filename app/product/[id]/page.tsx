@@ -18,7 +18,7 @@ export default function ProductPage() {
     return (
       <main className="w-full">
         <Navbar />
-        <section className="w-full py-20 px-6 md:px-12">
+        <section className="w-full py-20 px-6 md:px-12 pt-20 md:pt-24">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-3xl font-light tracking-wide mb-4">Product Not Found</h1>
             <p className="text-sm font-light text-gray-600">The product you're looking for doesn't exist.</p>
@@ -34,7 +34,7 @@ export default function ProductPage() {
       <Navbar />
 
       {/* Breadcrumb */}
-      <section className="w-full border-b border-gray-200">
+      <section className="w-full border-b border-gray-200 pt-20 md:pt-24">
         <div className="max-w-7xl mx-auto px-6 md:px-12 py-4">
           <div className="flex items-center gap-2 text-xs font-light tracking-wide">
             <a href="/shop" className="hover:opacity-60 transition-opacity">

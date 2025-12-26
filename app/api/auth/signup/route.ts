@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/app/lib/db/prisma'
-import bcrypt from 'bcryptjs'
-import { generateToken, setTokenCookie } from '@/app/lib/jwt'
+import { getAdminAuth, verifyIdToken } from '@/app/lib/firebase/admin'
 import { z } from 'zod'
 
 const signupSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  idToken: z.string().min(1, 'ID token is required'),
 })
 
 export async function POST(req: NextRequest) {
@@ -15,50 +11,40 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const validatedData = signupSchema.parse(body)
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email: validatedData.email },
-    })
+    // Verify the Firebase ID token
+    const decodedToken = await verifyIdToken(validatedData.idToken)
 
-    if (existingUser) {
+    if (!decodedToken) {
       return NextResponse.json(
-        { error: 'An account with this email already exists' },
-        { status: 400 }
+        { error: 'Invalid or expired token' },
+        { status: 401 }
       )
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(validatedData.password, 10)
+    // Get user details from Firebase
+    const adminAuth = getAdminAuth()
+    const firebaseUser = await adminAuth.getUser(decodedToken.uid)
 
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        email: validatedData.email,
-        name: validatedData.name,
-        password: hashedPassword,
-        role: 'USER',
-      },
-    })
-
-    // Generate token
-    const token = generateToken({
-      userId: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-    })
-
-    // Set cookie
-    await setTokenCookie(token)
-
-    return NextResponse.json({
+    // Create response with user info
+    const response = NextResponse.json({
       success: true,
       user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
+        id: firebaseUser.uid,
+        email: firebaseUser.email,
+        name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || null,
       },
     })
+
+    // Store the ID token in a cookie for session management
+    response.cookies.set('firebase-id-token', validatedData.idToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/',
+    })
+
+    return response
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

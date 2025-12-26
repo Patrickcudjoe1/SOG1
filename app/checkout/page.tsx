@@ -327,7 +327,7 @@ export default function Checkout() {
   return (
     <main className="w-full min-h-screen">
       <Navbar />
-      <section className="w-full py-8 md:py-12 lg:py-20 px-4 md:px-6 lg:px-12">
+      <section className="w-full py-8 md:py-12 lg:py-20 px-4 md:px-6 lg:px-12 pt-20 md:pt-24">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-xl md:text-2xl lg:text-4xl font-light tracking-wide mb-6 md:mb-8 lg:mb-12">CHECKOUT</h1>
 

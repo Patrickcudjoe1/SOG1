@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Eye, EyeOff } from "lucide-react"
 import Navbar from "../components/navbar"
 import { motion } from "framer-motion"
+import { signInWithEmail } from "../lib/firebase/auth"
 
 function SignInForm() {
   const [email, setEmail] = useState("")
@@ -24,12 +25,17 @@ function SignInForm() {
     setLoading(true)
 
     try {
+      // Sign in with Firebase client SDK
+      const userCredential = await signInWithEmail(email, password)
+      const idToken = await userCredential.user.getIdToken()
+
+      // Send ID token to server to verify and create session
       const response = await fetch("/api/auth/signin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ idToken }),
       })
 
       const data = await response.json()

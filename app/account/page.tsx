@@ -43,7 +43,7 @@ export default function Account() {
     <ProtectedRoute>
       <main className="w-full min-h-screen bg-white">
         <Navbar />
-        <section className="w-full py-16 md:py-20 px-6 md:px-12">
+        <section className="w-full py-16 md:py-20 px-6 md:px-12 pt-20 md:pt-24">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center justify-between mb-12">
               <h1 

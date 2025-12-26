@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { Eye, EyeOff } from "lucide-react"
 import Navbar from "../components/navbar"
 import { motion } from "framer-motion"
+import { signUpWithEmail } from "../lib/firebase/auth"
 
 export default function SignUp() {
   const [name, setName] = useState("")
@@ -37,12 +38,17 @@ export default function SignUp() {
     setLoading(true)
 
     try {
+      // Sign up with Firebase client SDK
+      const userCredential = await signUpWithEmail(email, password, name)
+      const idToken = await userCredential.user.getIdToken()
+
+      // Send ID token to server to verify and create session
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ idToken }),
       })
 
       const data = await response.json()

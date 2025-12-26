@@ -6,7 +6,7 @@ export default function ContactPage() {
   return (
     <main className="w-full">
       <Navbar />
-      <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-white pt-20 md:pt-24">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-5xl font-bold tracking-tight text-black mb-4 text-center">GET IN TOUCH</h1>
           <p className="text-lg text-stone-600 text-center mb-16">

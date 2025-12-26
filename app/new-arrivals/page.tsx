@@ -23,7 +23,7 @@ export default function NewArrivals() {
       <Navbar />
 
       {/* New Arrivals Header */}
-      <section className="w-full border-b border-gray-200">
+      <section className="w-full border-b border-gray-200 pt-20 md:pt-24">
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-12 py-8 md:py-16">
           <h1 className="text-2xl md:text-4xl lg:text-5xl font-light tracking-wide mb-3 md:mb-4">NEW ARRIVALS</h1>
           <p className="text-xs md:text-sm font-light text-gray-600 tracking-wide">Discover the latest additions to our collection</p>
