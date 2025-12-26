@@ -194,9 +194,9 @@ export default function SONOFGODNavbar({}: NavbarProps) {
               <Image
                 src="/logo.png"
                 alt="SON OF GOD"
-                width={200}
-                height={60}
-                className="h-8 md:h-10 lg:h-12 w-auto object-contain"
+                width={300}
+                height={80}
+                className="h-12 sm:h-14 md:h-16 lg:h-20 w-auto object-contain max-w-[200px] sm:max-w-[250px] md:max-w-[300px] lg:max-w-[350px]"
                 priority
               />
             </Link>
