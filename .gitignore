@@ -40,3 +40,7 @@ node_modules/.prisma
 
 # documentation files (exclude to keep repo clean)
 *.md
+# But keep essential setup files
+!.env.example
+!SETUP.md
+!README.md
