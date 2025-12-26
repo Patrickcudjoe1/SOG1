@@ -45,10 +45,10 @@ export default function SONOFGODNavbar({}: NavbarProps) {
   }, [])
 
   // Determine navbar colors based on scroll and page type
-  // For regular pages: white initially, black on scroll
+  // For regular pages: white background, text changes on scroll
   // For auth pages: always black
-  const textColor = isBlackNavbarPage ? "text-white" : (scrolled ? "text-white" : "text-black")
-  const bgColor = isBlackNavbarPage ? "bg-black" : (scrolled ? "bg-black" : "bg-white")
+  const textColor = isBlackNavbarPage ? "text-white" : (scrolled ? "text-black" : "text-black")
+  const bgColor = isBlackNavbarPage ? "bg-black" : "bg-white"
 
   return (
     <>
@@ -87,7 +87,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                     opacity-0 invisible group-hover:opacity-100 group-hover:visible
                     transition-all duration-200 ease-out
                     backdrop-blur-md
-                    ${isBlackNavbarPage ? "bg-black/80 text-white" : (scrolled ? "bg-black/80 text-white" : "bg-white/90 text-black")}
+                    ${isBlackNavbarPage ? "bg-black/80 text-white" : "bg-white/90 text-black"}
                   `}
               >
                   <div className="flex flex-col px-4 py-3 space-y-3 text-xs tracking-widest uppercase">
@@ -108,7 +108,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                     opacity-0 invisible transition-all duration-300 ease-out
                     group-hover:opacity-100 group-hover:visible
                     backdrop-blur-xl
-                    ${isBlackNavbarPage ? "bg-black/40" : (scrolled ? "bg-black/40" : "bg-white/30")}
+                    ${isBlackNavbarPage ? "bg-black/40" : "bg-white/30"}
                   `}
                 />
                 
@@ -126,7 +126,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
       opacity-0 invisible group-hover:opacity-100 group-hover:visible
       transition-all duration-200 ease-out
                     backdrop-blur-md
-                    ${isBlackNavbarPage ? "bg-black/80 text-white" : (scrolled ? "bg-black/80 text-white" : "bg-white/90 text-black")}
+                    ${isBlackNavbarPage ? "bg-black/80 text-white" : "bg-white/90 text-black"}
     `}
   >
     <div className="flex flex-col px-4 py-3 space-y-3 text-xs tracking-widest uppercase">
@@ -147,7 +147,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                     opacity-0 invisible transition-all duration-300 ease-out
                     group-hover:opacity-100 group-hover:visible
                     backdrop-blur-xl
-                    ${isBlackNavbarPage ? "bg-black/40" : (scrolled ? "bg-black/40" : "bg-white/30")}
+                    ${isBlackNavbarPage ? "bg-black/40" : "bg-white/30"}
                   `}
                 />
                 
@@ -165,7 +165,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                     opacity-0 invisible group-hover:opacity-100 group-hover:visible
                     transition-all duration-200 ease-out
                     backdrop-blur-md
-                    ${isBlackNavbarPage ? "bg-black/80 text-white" : (scrolled ? "bg-black/80 text-white" : "bg-white/90 text-black")}
+                    ${isBlackNavbarPage ? "bg-black/80 text-white" : "bg-white/90 text-black"}
                   `}
                 >
                   <div className="flex flex-col px-4 py-3 space-y-3 text-xs tracking-widest uppercase">
