@@ -61,7 +61,7 @@ export default function FeaturedCollection() {
           style={{ 
             fontFamily: 'var(--font-brand)',
             fontWeight: 700,
-            fontSize: 'clamp(1.75rem, 6vw, 3.5rem)',
+            fontSize: 'clamp(2rem, 7vw, 4.5rem)',
             lineHeight: '1.4',
             letterSpacing: '0.05em',
             textShadow: '0 2px 8px rgba(0,0,0,0.7)'
