@@ -64,6 +64,3 @@ export const auth = {
   requireAuth,
 }
 
-// Also export functions directly for convenience
-export { getSession, requireAuth }
-
