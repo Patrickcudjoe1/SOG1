@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import Navbar from "../components/navbar";
-import Footer from "../components/footer";
+import Navbar from "@/app/components/navbar";
+import Footer from "@/app/components/footer";
 import { useCart } from "../components/CartContext";
 import type { PaymentMethod } from "../components/PaymentMethodSelector";
 
