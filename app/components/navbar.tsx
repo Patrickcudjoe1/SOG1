@@ -114,7 +114,7 @@ export default function SONOFGODNavbar({ forceDark = false }: NavbarProps) {
                 
   {/* COLLECTIONS BUTTON */}
   <Link
-    href="/shop"
+    href=""
                   className={`sog-link font-light uppercase transition-colors whitespace-nowrap relative z-50 flex items-center h-full ${textColor}`}
   >
     COLLECTIONS
@@ -153,7 +153,7 @@ export default function SONOFGODNavbar({ forceDark = false }: NavbarProps) {
                 
                 {/* NEW ARRIVALS BUTTON */}
               <Link
-                href="/new-arrivals"
+                href="/"
                   className={`sog-link font-light uppercase transition-colors whitespace-nowrap relative z-50 flex items-center h-full ${textColor}`}
               >
                 NEW ARRIVALS
