@@ -52,7 +52,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
     <>
       <nav
         className={`sog-nav fixed top-0 w-full z-50 transition-all duration-300
-          ${bgColor} ${(scrolled || isBlackNavbarPage) ? "shadow-md" : "shadow-none"}
+          ${bgColor} ${scrolled ? "shadow-md" : "shadow-none"}
         `}
       >
         <div className="max-w-full px-4 sm:px-6 md:px-12 py-3 md:py-4 transition-all duration-300">
@@ -197,7 +197,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                 width={300}
                 height={80}
                 className={`h-12 sm:h-14 md:h-16 lg:h-20 w-auto object-contain max-w-[200px] sm:max-w-[250px] md:max-w-[300px] lg:max-w-[350px] transition-all duration-300 ${
-                  (isBlackNavbarPage || scrolled) ? "brightness-0 invert" : ""
+                  isBlackNavbarPage || !scrolled ? "brightness-0 invert" : ""
                 }`}
                 priority
               />
