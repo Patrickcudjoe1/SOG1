@@ -20,6 +20,7 @@ interface Order {
   orderNumber: string
   status: string
   paymentStatus: string
+  paymentMethod?: string
   totalAmount: number
   createdAt: string
   items: OrderItem[]
