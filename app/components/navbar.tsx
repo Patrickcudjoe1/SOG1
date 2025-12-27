@@ -24,7 +24,7 @@ export default function SONOFGODNavbar({ hasHeroSection }: NavbarProps) {
   const pathname = usePathname()
 
   // Pages that should always have black navbar
-  const blackNavbarPages = ['/signin', '/signup', '/forgot-password', '/reset-password', '/shop', '/explore']
+  const blackNavbarPages = ['/signin', '/signup', '/forgot-password', '/reset-password', '/shop', '/explore', '/cart']
   const isBlackNavbarPage = blackNavbarPages.includes(pathname || '')
 
   const toggleMobileDropdown = (dropdown: 'featured' | 'collections' | 'newArrivals') => {
