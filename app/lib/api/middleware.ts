@@ -1,7 +1,37 @@
 import { NextRequest, NextResponse } from "next/server"
+import { verifyIdToken } from "../firebase/admin"
 
-// Re-export from auth-middleware for backward compatibility
-export { requireAuth, requireAdmin, requireSuperAdmin } from "../auth-middleware"
+/**
+ * Require authentication for API routes
+ */
+export async function requireAuth(req: NextRequest) {
+  const firebaseToken = req.cookies.get('firebase-id-token')?.value
+  
+  if (!firebaseToken) {
+    return {
+      error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),
+      user: null,
+    }
+  }
+
+  const decodedToken = await verifyIdToken(firebaseToken)
+  
+  if (!decodedToken) {
+    return {
+      error: NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 }),
+      user: null,
+    }
+  }
+
+  return {
+    error: null,
+    user: {
+      id: decodedToken.uid,
+      email: decodedToken.email,
+      name: decodedToken.name || null,
+    },
+  }
+}
 
 /**
  * Rate limiting helper (simple in-memory version)

@@ -52,7 +52,9 @@ export default function AddressSection({ userId }: AddressSectionProps) {
       })
       if (res.ok) {
         const data = await res.json()
-        setAddresses(data.addresses || [])
+        setAddresses(data.data?.addresses || data.addresses || [])
+      } else {
+        console.error("Failed to fetch addresses:", res.status, res.statusText)
       }
     } catch (err) {
       console.error("Failed to fetch addresses:", err)
@@ -78,10 +80,13 @@ export default function AddressSection({ userId }: AddressSectionProps) {
 
       if (!res.ok) {
         const data = await res.json()
-        setError(data.error || "Failed to save address")
+        setError(data.error || data.message || "Failed to save address")
         return
       }
 
+      const result = await res.json()
+      console.log("✅ Address saved successfully:", result)
+      
       setShowForm(false)
       setEditingId(null)
       setFormData({

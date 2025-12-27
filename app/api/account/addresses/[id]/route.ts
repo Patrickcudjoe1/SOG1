@@ -1,95 +1,87 @@
-import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/app/lib/api/middleware";
-import { prisma } from "@/app/lib/db/prisma";
+import { NextRequest, NextResponse } from "next/server"
+import { adminDB, COLLECTIONS, Address } from "@/app/lib/firebase/admin-db"
+import { successResponse, errorResponse } from "@/app/lib/api/response"
+import { requireAuth } from "@/app/lib/api/middleware"
 
-// PATCH - Update an address
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { error, user } = await requireAuth(req);
+    const { error, user } = await requireAuth(req)
+    if (error) return error
 
-    if (error || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!user?.id) {
+      return errorResponse("User ID not found", 401)
     }
 
-    const { id } = await params;
-    const body = await req.json();
-    const { fullName, phone, addressLine1, addressLine2, city, state, postalCode, country, isDefault } = body;
-
-    // Verify address belongs to user
-    const existingAddress = await prisma.address.findUnique({
-      where: { id },
-    });
+    const { id } = await params
+    const existingAddress = await adminDB.get<Address>(COLLECTIONS.ADDRESSES, id)
 
     if (!existingAddress) {
-      return NextResponse.json({ error: "Address not found" }, { status: 404 });
+      return errorResponse("Address not found", 404)
     }
 
     if (existingAddress.userId !== user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+      return errorResponse("Unauthorized", 403)
     }
 
-    // If setting as default, unset other defaults
+    const body = await req.json()
+    const { isDefault } = body
+
+    // If setting as default, unset all other defaults
     if (isDefault) {
-      await prisma.address.updateMany({
-        where: { userId: user.id, isDefault: true, id: { not: id } },
-        data: { isDefault: false },
-      });
+      const addresses = await adminDB.getMany<Address>(
+        COLLECTIONS.ADDRESSES,
+        { orderBy: "userId", equalTo: user.id }
+      )
+
+      for (const addr of addresses) {
+        if (addr.isDefault && addr.id !== id) {
+          await adminDB.update<Address>(COLLECTIONS.ADDRESSES, addr.id, {
+            isDefault: false,
+          })
+        }
+      }
     }
 
-    const address = await prisma.address.update({
-      where: { id },
-      data: {
-        fullName: fullName || existingAddress.fullName,
-        phone: phone !== undefined ? phone : existingAddress.phone,
-        addressLine1: addressLine1 || existingAddress.addressLine1,
-        addressLine2: addressLine2 !== undefined ? addressLine2 : existingAddress.addressLine2,
-        city: city || existingAddress.city,
-        region: state !== undefined ? state : existingAddress.region,
-        postalCode: postalCode || existingAddress.postalCode,
-        country: country || existingAddress.country,
-        isDefault: isDefault !== undefined ? isDefault : existingAddress.isDefault,
-      },
-    });
+    const address = await adminDB.update<Address>(COLLECTIONS.ADDRESSES, id, body)
 
-    return NextResponse.json({ message: "Address updated successfully", address });
+    return successResponse({ address }, "Address updated successfully")
   } catch (error: any) {
-    console.error("Update address error:", error);
-    return NextResponse.json({ error: "Failed to update address" }, { status: 500 });
+    console.error("Update address error:", error)
+    return errorResponse(error.message || "Failed to update address", 500)
   }
 }
 
-// DELETE - Delete an address
-export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { error, user } = await requireAuth(req);
+    const { error, user } = await requireAuth(req)
+    if (error) return error
 
-    if (error || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!user?.id) {
+      return errorResponse("User ID not found", 401)
     }
 
-    const { id } = await params;
-
-    // Verify address belongs to user
-    const existingAddress = await prisma.address.findUnique({
-      where: { id },
-    });
+    const { id } = await params
+    const existingAddress = await adminDB.get<Address>(COLLECTIONS.ADDRESSES, id)
 
     if (!existingAddress) {
-      return NextResponse.json({ error: "Address not found" }, { status: 404 });
+      return errorResponse("Address not found", 404)
     }
 
     if (existingAddress.userId !== user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+      return errorResponse("Unauthorized", 403)
     }
 
-    await prisma.address.delete({
-      where: { id },
-    });
+    await adminDB.delete(COLLECTIONS.ADDRESSES, id)
 
-    return NextResponse.json({ message: "Address deleted successfully" });
+    return successResponse(null, "Address deleted successfully")
   } catch (error: any) {
-    console.error("Delete address error:", error);
-    return NextResponse.json({ error: "Failed to delete address" }, { status: 500 });
+    console.error("Delete address error:", error)
+    return errorResponse(error.message || "Failed to delete address", 500)
   }
 }
-

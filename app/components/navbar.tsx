@@ -6,12 +6,13 @@ import { usePathname } from "next/navigation"
 import { Menu, X, Search, User, ShoppingBag, ChevronRight, ChevronDown } from "lucide-react"
 import { motion } from "framer-motion"
 import { useCart } from "./CartContext"
+import { DarkModeToggle } from "./DarkModeToggle"
 
 interface NavbarProps {
-
+  hasHeroSection?: boolean // Pages with dark hero backgrounds
 }
 
-export default function SONOFGODNavbar({}: NavbarProps) {
+export default function SONOFGODNavbar({ hasHeroSection = false }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [mobileDropdowns, setMobileDropdowns] = useState({
@@ -25,6 +26,9 @@ export default function SONOFGODNavbar({}: NavbarProps) {
   // Pages that should always have black navbar
   const blackNavbarPages = ['/signin', '/signup', '/forgot-password', '/reset-password']
   const isBlackNavbarPage = blackNavbarPages.includes(pathname || '')
+  
+  // For pages without hero sections, treat as if already scrolled (white bg, black text)
+  const effectiveScrolled = hasHeroSection ? scrolled : true
 
   const toggleMobileDropdown = (dropdown: 'featured' | 'collections' | 'newArrivals') => {
     setMobileDropdowns(prev => ({
@@ -44,15 +48,21 @@ export default function SONOFGODNavbar({}: NavbarProps) {
   }, [])
 
   // Determine navbar colors based on scroll and page type
-  const textColor = isBlackNavbarPage ? "text-white" : (scrolled ? "text-black" : "text-white")
-  const bgColor = isBlackNavbarPage ? "bg-black" : (scrolled ? "bg-white" : "bg-transparent")
+  // For pages without hero sections, always show visible navbar (dark text on white bg)
+  const textColor = isBlackNavbarPage 
+    ? "text-white" 
+    : (hasHeroSection && !scrolled ? "text-white" : "text-foreground")
+  const bgColor = isBlackNavbarPage 
+    ? "bg-black" 
+    : (hasHeroSection && !scrolled ? "bg-white/5 backdrop-blur-sm" : "bg-background border-b border-border")
 
   return (
     <>
       <nav
-        className={`sog-nav fixed top-0 w-full z-50 transition-all duration-300
-          ${bgColor} ${(scrolled || isBlackNavbarPage) ? "shadow-md" : "shadow-none"}
+        className={`sog-nav fixed top-0 w-full z-50 transition-all duration-500
+          ${bgColor} ${(effectiveScrolled || isBlackNavbarPage) ? "shadow-sm" : "shadow-none"}
         `}
+        style={hasHeroSection && !scrolled ? { backdropFilter: 'blur(8px)' } : undefined}
       >
         <div className="max-w-full px-4 sm:px-6 md:px-12 py-3 md:py-4 transition-all duration-300">
           <div className="flex items-center justify-center relative h-12 md:h-14">
@@ -66,14 +76,14 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                     opacity-0 invisible transition-all duration-300 ease-out
                     group-hover:opacity-100 group-hover:visible
                     backdrop-blur-xl
-                    ${isBlackNavbarPage ? "bg-black/40" : (scrolled ? "bg-white/30" : "bg-black/40")}
+                    ${isBlackNavbarPage ? "bg-black/40" : (effectiveScrolled ? "bg-background/30" : "bg-black/40")}
                   `}
                 />
                 
                 {/* FEATURED BUTTON */}
               <Link
                 href="/"
-                  className={`sog-link font-light uppercase transition-colors whitespace-nowrap relative z-50 flex items-center h-full ${textColor}`}
+                  className={`sog-link font-light uppercase transition-colors whitespace-nowrap relative z-50 flex items-center h-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${textColor}`}
               >
                   FEATURED
               </Link>
@@ -84,7 +94,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                     opacity-0 invisible group-hover:opacity-100 group-hover:visible
                     transition-all duration-200 ease-out
                     backdrop-blur-md
-                    ${isBlackNavbarPage ? "bg-black/80 text-white" : (scrolled ? "bg-white/90 text-black" : "bg-black/80 text-white")}
+                    ${isBlackNavbarPage ? "bg-black/80 text-white" : (effectiveScrolled ? "bg-card/95 text-foreground border border-border" : "bg-black/80 text-white")}
                   `}
               >
                   <div className="flex flex-col px-4 py-3 space-y-3 text-xs tracking-widest uppercase">
@@ -112,7 +122,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
   {/* COLLECTIONS BUTTON */}
   <Link
     href="/shop"
-                  className={`sog-link font-light uppercase transition-colors whitespace-nowrap relative z-50 flex items-center h-full ${textColor}`}
+                  className={`sog-link font-light uppercase transition-colors whitespace-nowrap relative z-50 flex items-center h-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${textColor}`}
   >
     COLLECTIONS
   </Link>
@@ -120,11 +130,11 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                 {/* COLLECTIONS DROPDOWN */}
   <div
                   className={`absolute left-0 top-full mt-6 w-48 z-50
-      opacity-0 invisible group-hover:opacity-100 group-hover:visible
-      transition-all duration-200 ease-out
+                    opacity-0 invisible group-hover:opacity-100 group-hover:visible
+                    transition-all duration-200 ease-out
                     backdrop-blur-md
-                    ${isBlackNavbarPage ? "bg-black/80 text-white" : (scrolled ? "bg-white/90 text-black" : "bg-black/80 text-white")}
-    `}
+                    ${isBlackNavbarPage ? "bg-black/80 text-white" : (effectiveScrolled ? "bg-card/95 text-foreground border border-border" : "bg-black/80 text-white")}
+                  `}
   >
     <div className="flex flex-col px-4 py-3 space-y-3 text-xs tracking-widest uppercase">
                     <Link href="/presence" className="hover:opacity-60">
@@ -151,7 +161,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                 {/* NEW ARRIVALS BUTTON */}
               <Link
                 href="/new-arrivals"
-                  className={`sog-link font-light uppercase transition-colors whitespace-nowrap relative z-50 flex items-center h-full ${textColor}`}
+                  className={`sog-link font-light uppercase transition-colors whitespace-nowrap relative z-50 flex items-center h-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${textColor}`}
               >
                 NEW ARRIVALS
               </Link>
@@ -162,7 +172,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                     opacity-0 invisible group-hover:opacity-100 group-hover:visible
                     transition-all duration-200 ease-out
                     backdrop-blur-md
-                    ${isBlackNavbarPage ? "bg-black/80 text-white" : (scrolled ? "bg-white/90 text-black" : "bg-black/80 text-white")}
+                    ${isBlackNavbarPage ? "bg-black/80 text-white" : (effectiveScrolled ? "bg-card/95 text-foreground border border-border" : "bg-black/80 text-white")}
                   `}
                 >
                   <div className="flex flex-col px-4 py-3 space-y-3 text-xs tracking-widest uppercase">
@@ -196,23 +206,25 @@ export default function SONOFGODNavbar({}: NavbarProps) {
 
             {/* RIGHT NAV – DESKTOP */}
             <div className="hidden md:flex items-center gap-6 absolute right-0">
+              <DarkModeToggle variant={effectiveScrolled ? "adaptive" : "light"} />
+              
               <Link
                 href="/search"
-                className={`w-8 h-8 hover:opacity-60 transition-opacity flex items-center justify-center ${textColor}`}
+                className={`w-8 h-8 hover:opacity-60 transition-opacity flex items-center justify-center focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-sm ${textColor}`}
               >
                 <Search size={15} />
               </Link>
 
               <Link
                 href="/account"
-                className={`w-8 h-8 hover:opacity-60 transition-opacity flex items-center justify-center ${textColor}`}
+                className={`w-8 h-8 hover:opacity-60 transition-opacity flex items-center justify-center focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-sm ${textColor}`}
               >
                 <User size={15} />
               </Link>
 
               <Link
                 href="/cart"
-                className={`w-8 h-8 hover:opacity-60 relative transition-opacity flex items-center justify-center ${textColor}`}
+                className={`w-8 h-8 hover:opacity-60 relative transition-opacity flex items-center justify-center focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-sm ${textColor}`}
               >
                 <ShoppingBag size={15} />
                 {cart.length > 0 && (
@@ -224,17 +236,19 @@ export default function SONOFGODNavbar({}: NavbarProps) {
             </div>
 
             {/* RIGHT NAV – MOBILE */}
-            <div className="md:hidden absolute right-0 flex items-center gap-3">
+            <div className="md:hidden absolute right-0 flex items-center gap-2">
+              <DarkModeToggle variant={effectiveScrolled ? "adaptive" : "light"} />
+              
               <Link
                 href="/search"
-                className={`w-10 h-10 hover:opacity-60 flex items-center justify-center ${textColor}`}
+                className={`w-10 h-10 hover:opacity-60 flex items-center justify-center focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-sm ${textColor}`}
               >
                 <Search size={18} />
               </Link>
 
               <Link
                 href="/cart"
-                className={`w-10 h-10 hover:opacity-60 relative flex items-center justify-center ${textColor}`}
+                className={`w-10 h-10 hover:opacity-60 relative flex items-center justify-center focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-sm ${textColor}`}
               >
                 <ShoppingBag size={18} />
                 {cart.length > 0 && (
@@ -264,7 +278,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-            className={`md:hidden fixed top-0 left-0 right-0 bottom-0 z-50 bg-white overflow-y-auto`}
+            className={`md:hidden fixed top-0 left-0 right-0 bottom-0 z-50 bg-background overflow-y-auto`}
           >
             {/* Close Button */}
             <div className="flex justify-end p-6">
@@ -273,7 +287,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                   setMobileOpen(false)
                   setMobileDropdowns({ featured: false, collections: false, newArrivals: false })
                 }}
-                className="text-black hover:opacity-60 transition-opacity"
+                className="text-foreground hover:opacity-60 transition-opacity"
               >
                 <X size={24} />
               </button>
@@ -285,7 +299,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
               <div className="relative">
                 <button
                   onClick={() => toggleMobileDropdown('featured')}
-                  className="w-full flex items-center justify-between sog-link uppercase text-black hover:opacity-60 transition-opacity"
+                  className="w-full flex items-center justify-between sog-link uppercase text-foreground hover:opacity-60 transition-opacity"
                 >
                   <span>FEATURED</span>
                   <motion.div
@@ -306,10 +320,10 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                   transition={{ duration: 0.2, ease: 'easeInOut' }}
                   className="overflow-hidden"
                 >
-                  <div className="pt-3 pl-4 space-y-3 backdrop-blur-md bg-white/90">
+                  <div className="pt-3 pl-4 space-y-3 backdrop-blur-md bg-card/90">
                     <Link
                       href="/caps"
-                      className="block text-xs tracking-widest uppercase hover:opacity-60 transition-opacity"
+                      className="block text-xs tracking-widest uppercase text-foreground hover:opacity-60 transition-opacity focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                       onClick={() => {
                         setMobileOpen(false)
                         setMobileDropdowns({ featured: false, collections: false, newArrivals: false })
@@ -319,7 +333,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                     </Link>
                     <Link
                       href="/tote-bags"
-                      className="block text-xs tracking-widest uppercase hover:opacity-60 transition-opacity"
+                      className="block text-xs tracking-widest uppercase hover:opacity-60 transition-opacity focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                       onClick={() => {
                         setMobileOpen(false)
                         setMobileDropdowns({ featured: false, collections: false, newArrivals: false })
@@ -335,7 +349,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
               <div className="relative">
                 <button
                   onClick={() => toggleMobileDropdown('collections')}
-                  className="w-full flex items-center justify-between sog-link uppercase text-black hover:opacity-60 transition-opacity"
+                  className="w-full flex items-center justify-between sog-link uppercase text-foreground hover:opacity-60 transition-opacity"
                 >
                   <span>COLLECTIONS</span>
                   <motion.div
@@ -356,10 +370,10 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                   transition={{ duration: 0.2, ease: 'easeInOut' }}
                   className="overflow-hidden"
                 >
-                  <div className="pt-3 pl-4 space-y-3 backdrop-blur-md bg-white/90">
+                  <div className="pt-3 pl-4 space-y-3 backdrop-blur-md bg-card/90">
                     <Link
                       href="/presence"
-                      className="block text-xs tracking-widest uppercase hover:opacity-60 transition-opacity"
+                      className="block text-xs tracking-widest uppercase text-foreground hover:opacity-60 transition-opacity"
                       onClick={() => {
                         setMobileOpen(false)
                         setMobileDropdowns({ featured: false, collections: false, newArrivals: false })
@@ -385,7 +399,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
               <div className="relative">
                 <button
                   onClick={() => toggleMobileDropdown('newArrivals')}
-                  className="w-full flex items-center justify-between sog-link uppercase text-black hover:opacity-60 transition-opacity"
+                  className="w-full flex items-center justify-between sog-link uppercase text-foreground hover:opacity-60 transition-opacity"
                 >
                   <span>NEW ARRIVALS</span>
                   <motion.div
@@ -406,10 +420,10 @@ export default function SONOFGODNavbar({}: NavbarProps) {
                   transition={{ duration: 0.2, ease: 'easeInOut' }}
                   className="overflow-hidden"
                 >
-                  <div className="pt-3 pl-4 space-y-3 backdrop-blur-md bg-white/90">
+                  <div className="pt-3 pl-4 space-y-3 backdrop-blur-md bg-card/90">
                     <Link
                       href="/hoodies"
-                      className="block text-xs tracking-widest uppercase hover:opacity-60 transition-opacity"
+                      className="block text-xs tracking-widest uppercase text-foreground hover:opacity-60 transition-opacity"
                       onClick={() => {
                         setMobileOpen(false)
                         setMobileDropdowns({ featured: false, collections: false, newArrivals: false })
@@ -439,7 +453,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
             <div className="px-6 pb-6 space-y-4">
               <Link
                 href="/account"
-                className="block sog-link uppercase text-black hover:opacity-60 transition-opacity"
+                className="block sog-link uppercase text-foreground hover:opacity-60 transition-opacity"
                 onClick={() => {
                   setMobileOpen(false)
                   setMobileDropdowns({ featured: false, collections: false, newArrivals: false })
@@ -450,7 +464,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
 
               <Link
                 href="/contact"
-                className="block sog-link uppercase text-black hover:opacity-60 transition-opacity"
+                className="block sog-link uppercase text-foreground hover:opacity-60 transition-opacity"
                 onClick={() => {
                   setMobileOpen(false)
                   setMobileDropdowns({ featured: false, collections: false, newArrivals: false })
@@ -461,7 +475,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
 
           <Link
                 href="/client-services"
-                className="block sog-link uppercase text-black hover:opacity-60 transition-opacity"
+                className="block sog-link uppercase text-foreground hover:opacity-60 transition-opacity"
                 onClick={() => {
                   setMobileOpen(false)
                   setMobileDropdowns({ featured: false, collections: false, newArrivals: false })
@@ -472,7 +486,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
 
           <Link
                 href="/legal"
-                className="block sog-link uppercase text-black hover:opacity-60 transition-opacity"
+                className="block sog-link uppercase text-foreground hover:opacity-60 transition-opacity"
                 onClick={() => {
                   setMobileOpen(false)
                   setMobileDropdowns({ featured: false, collections: false, newArrivals: false })
@@ -483,7 +497,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
 
           <Link
                 href="/supply-chains-act"
-                className="block sog-link uppercase text-black hover:opacity-60 transition-opacity"
+                className="block sog-link uppercase text-foreground hover:opacity-60 transition-opacity"
                 onClick={() => {
                   setMobileOpen(false)
                   setMobileDropdowns({ featured: false, collections: false, newArrivals: false })
@@ -494,7 +508,7 @@ export default function SONOFGODNavbar({}: NavbarProps) {
 
             <Link
                 href="/social"
-                className="block sog-link uppercase text-black hover:opacity-60 transition-opacity"
+                className="block sog-link uppercase text-foreground hover:opacity-60 transition-opacity"
                 onClick={() => {
                   setMobileOpen(false)
                   setMobileDropdowns({ featured: false, collections: false, newArrivals: false })

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
-import { firestoreDB, COLLECTIONS, Product } from "@/app/lib/firebase/db"
+import { COLLECTIONS, Product } from "@/app/lib/firebase/db"
 import { requireAdmin } from "@/app/lib/api/admin-middleware"
 import { successResponse, errorResponse } from "@/app/lib/api/response"
+import { getAdminDatabase } from "@/app/lib/firebase/admin"
 
 /**
  * GET /api/admin/products
@@ -10,15 +11,26 @@ import { successResponse, errorResponse } from "@/app/lib/api/response"
 export async function GET(req: NextRequest) {
   try {
     const { error } = await requireAdmin(req)
-    if (error) return error
+    if (error) {
+      return errorResponse(error, 401)
+    }
 
     const { searchParams } = new URL(req.url)
     const limit = parseInt(searchParams.get("limit") || "100")
     const offset = parseInt(searchParams.get("offset") || "0")
     const search = searchParams.get("search") || ""
 
-    // Get all products
-    let products = await firestoreDB.getMany<Product>(COLLECTIONS.PRODUCTS)
+    // Get all products using Admin SDK
+    const db = getAdminDatabase()
+    const productsRef = db.ref(COLLECTIONS.PRODUCTS)
+    const snapshot = await productsRef.get()
+    
+    let products: Product[] = []
+    if (snapshot.exists()) {
+      snapshot.forEach((childSnapshot) => {
+        products.push(childSnapshot.val() as Product)
+      })
+    }
 
     // Apply search filter
     if (search) {
@@ -59,7 +71,9 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const { error } = await requireAdmin(req)
-    if (error) return error
+    if (error) {
+      return errorResponse(error, 401)
+    }
 
     const body = await req.json()
     const {
@@ -95,22 +109,28 @@ export async function POST(req: NextRequest) {
     // Generate product ID
     const productId = `prod_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-    // Create product
-    const product = await firestoreDB.create<Product>(
-      COLLECTIONS.PRODUCTS,
-      productId,
-      {
-        name,
-        description,
-        price: parseFloat(price),
-        image: image || [],
-        category,
-        subCategory,
-        sizes: sizes || {},
-        bestseller: bestseller || false,
-        inStock: inStock !== undefined ? inStock : true,
-      }
-    )
+    // Create product using Admin SDK
+    const db = getAdminDatabase()
+    const productRef = db.ref(`${COLLECTIONS.PRODUCTS}/${productId}`)
+    
+    const timestamp = new Date().toISOString()
+    const productData = {
+      id: productId,
+      name,
+      description,
+      price: parseFloat(price),
+      image: image || [],
+      category,
+      subCategory,
+      sizes: sizes || {},
+      bestseller: bestseller || false,
+      inStock: inStock !== undefined ? inStock : true,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    }
+    
+    await productRef.set(productData)
+    const product = productData as Product
 
     return NextResponse.json(
       {

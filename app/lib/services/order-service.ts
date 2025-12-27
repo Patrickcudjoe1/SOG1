@@ -239,6 +239,28 @@ export class OrderService {
   }
 
   /**
+   * Get order by idempotency key (alias for checkDuplicateOrder)
+   */
+  static async getOrderByIdempotencyKey(idempotencyKey: string) {
+    return await this.checkDuplicateOrder(idempotencyKey)
+  }
+
+  /**
+   * Update order
+   */
+  static async updateOrder(orderId: string, data: Partial<Order>) {
+    await adminDB.update<Order>(COLLECTIONS.ORDERS, orderId, data)
+    return await adminDB.get<Order>(COLLECTIONS.ORDERS, orderId)
+  }
+
+  /**
+   * Delete order (for rollback on payment failure)
+   */
+  static async deleteOrder(orderId: string) {
+    await adminDB.delete(COLLECTIONS.ORDERS, orderId)
+  }
+
+  /**
    * Get order statistics
    */
   static async getOrderStats(userId?: string) {

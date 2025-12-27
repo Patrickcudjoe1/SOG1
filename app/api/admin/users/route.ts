@@ -10,7 +10,9 @@ import { requireAdmin } from "@/app/lib/api/admin-middleware"
 export async function GET(req: NextRequest) {
   try {
     const { error } = await requireAdmin(req)
-    if (error) return error
+    if (error) {
+      return errorResponse(error, 401)
+    }
 
     const { searchParams } = new URL(req.url)
     const limit = parseInt(searchParams.get("limit") || "50")
@@ -19,11 +21,16 @@ export async function GET(req: NextRequest) {
 
     const result = await AdminService.getUsers(limit, offset, search)
 
-    return successResponse(result.users, "Users retrieved successfully", {
-      total: result.total,
-      limit: result.limit,
-      hasMore: result.hasMore,
-    })
+    return successResponse(
+      {
+        users: result.users,
+        total: result.total,
+        limit: result.limit,
+        offset: result.offset,
+        hasMore: result.hasMore,
+      },
+      "Users retrieved successfully"
+    )
   } catch (error: any) {
     console.error("Get users error:", error)
     return errorResponse(error.message || "Failed to retrieve users", 500)

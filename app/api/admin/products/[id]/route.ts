@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
-import { firestoreDB, COLLECTIONS, Product } from "@/app/lib/firebase/db"
+import { COLLECTIONS, Product } from "@/app/lib/firebase/db"
 import { requireAdmin } from "@/app/lib/api/admin-middleware"
 import {
   successResponse,
   errorResponse,
   notFoundResponse,
 } from "@/app/lib/api/response"
+import { getAdminDatabase } from "@/app/lib/firebase/admin"
 
 /**
  * GET /api/admin/products/[id]
@@ -17,15 +18,20 @@ export async function GET(
 ) {
   try {
     const { error } = await requireAdmin(req)
-    if (error) return error
+    if (error) {
+      return errorResponse(error, 401)
+    }
 
     const { id } = await params
-    const product = await firestoreDB.get<Product>(COLLECTIONS.PRODUCTS, id)
+    const db = getAdminDatabase()
+    const productRef = db.ref(`${COLLECTIONS.PRODUCTS}/${id}`)
+    const snapshot = await productRef.get()
 
-    if (!product) {
+    if (!snapshot.exists()) {
       return notFoundResponse("Product")
     }
 
+    const product = snapshot.val() as Product
     return successResponse(product, "Product retrieved successfully")
   } catch (error: any) {
     console.error("Get product error:", error)
@@ -43,18 +49,19 @@ export async function PATCH(
 ) {
   try {
     const { error } = await requireAdmin(req)
-    if (error) return error
+    if (error) {
+      return errorResponse(error, 401)
+    }
 
     const { id } = await params
     const body = await req.json()
 
-    // Check if product exists
-    const existingProduct = await firestoreDB.get<Product>(
-      COLLECTIONS.PRODUCTS,
-      id
-    )
+    // Check if product exists using Admin SDK
+    const db = getAdminDatabase()
+    const productRef = db.ref(`${COLLECTIONS.PRODUCTS}/${id}`)
+    const snapshot = await productRef.get()
 
-    if (!existingProduct) {
+    if (!snapshot.exists()) {
       return notFoundResponse("Product")
     }
 
@@ -77,8 +84,14 @@ export async function PATCH(
     if (body.bestseller !== undefined) updateData.bestseller = body.bestseller
     if (body.inStock !== undefined) updateData.inStock = body.inStock
 
-    await firestoreDB.update<Product>(COLLECTIONS.PRODUCTS, id, updateData)
-    const product = await firestoreDB.get<Product>(COLLECTIONS.PRODUCTS, id)
+    // Update using Admin SDK
+    await productRef.update({
+      ...updateData,
+      updatedAt: new Date().toISOString(),
+    })
+    
+    const updatedSnapshot = await productRef.get()
+    const product = updatedSnapshot.val() as Product
 
     return successResponse(product, "Product updated successfully")
   } catch (error: any) {
@@ -97,19 +110,23 @@ export async function DELETE(
 ) {
   try {
     const { error } = await requireAdmin(req)
-    if (error) return error
+    if (error) {
+      return errorResponse(error, 401)
+    }
 
     const { id } = await params
 
-    // Check if product exists
-    const product = await firestoreDB.get<Product>(COLLECTIONS.PRODUCTS, id)
+    // Check if product exists using Admin SDK
+    const db = getAdminDatabase()
+    const productRef = db.ref(`${COLLECTIONS.PRODUCTS}/${id}`)
+    const snapshot = await productRef.get()
 
-    if (!product) {
+    if (!snapshot.exists()) {
       return notFoundResponse("Product")
     }
 
     // Delete product
-    await firestoreDB.delete(COLLECTIONS.PRODUCTS, id)
+    await productRef.remove()
 
     return successResponse({ id }, "Product deleted successfully")
   } catch (error: any) {

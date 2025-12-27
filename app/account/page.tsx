@@ -14,12 +14,12 @@ export default function Account() {
 
   if (loading) {
     return (
-      <main className="w-full min-h-screen bg-white">
+      <main className="w-full min-h-screen bg-background">
         <Navbar />
         <div className="w-full min-h-[calc(100vh-80px)] flex items-center justify-center">
           <div className="text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-black border-r-transparent"></div>
-            <p className="mt-4 text-sm text-gray-600">Loading...</p>
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-foreground border-r-transparent"></div>
+            <p className="mt-4 text-sm text-muted-foreground">Loading...</p>
           </div>
         </div>
       </main>
@@ -28,7 +28,7 @@ export default function Account() {
 
   if (!user) {
     return (
-      <main className="w-full min-h-screen bg-white">
+      <main className="w-full min-h-screen bg-background">
         <Navbar />
         <NotSignedInView />
       </main>
@@ -41,7 +41,7 @@ export default function Account() {
 
   return (
     <ProtectedRoute>
-      <main className="w-full min-h-screen bg-white">
+      <main className="w-full min-h-screen bg-background">
         <Navbar />
         <section className="w-full py-16 md:py-20 px-6 md:px-12 pt-20 md:pt-24">
           <div className="max-w-6xl mx-auto">

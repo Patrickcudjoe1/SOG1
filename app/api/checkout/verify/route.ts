@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { firestoreDB, COLLECTIONS, Order } from "@/app/lib/firebase/db"
+import { adminDB, COLLECTIONS, Order } from "@/app/lib/firebase/admin-db"
 
 /**
  * Verify payment status for an order
@@ -22,15 +22,15 @@ export async function GET(req: NextRequest) {
     let order: Order | null = null
 
     if (orderId) {
-      order = await firestoreDB.get<Order>(COLLECTIONS.ORDERS, orderId)
+      order = await adminDB.get<Order>(COLLECTIONS.ORDERS, orderId)
     } else if (sessionId) {
-      const orders = await firestoreDB.getMany<Order>(
+      const orders = await adminDB.getMany<Order>(
         COLLECTIONS.ORDERS,
         { orderBy: "stripeSessionId", equalTo: sessionId, limitToFirst: 1 }
       )
       order = orders[0] || null
     } else if (reference) {
-      const orders = await firestoreDB.getMany<Order>(
+      const orders = await adminDB.getMany<Order>(
         COLLECTIONS.ORDERS,
         { orderBy: "paystackReference", equalTo: reference, limitToFirst: 1 }
       )

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { adminDB, COLLECTIONS, User } from '@/app/lib/firebase/admin-db'
 import { verifyIdToken } from '@/app/lib/firebase/admin'
-import { generateToken, setTokenCookie } from '@/app/lib/jwt'
 
 export async function POST(req: NextRequest) {
   try {
@@ -52,19 +51,10 @@ export async function POST(req: NextRequest) {
       console.log('✅ User created:', user.id)
     }
 
-    // Generate JWT token for backend API authentication
-    const token = generateToken({
-      userId: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-    })
+    // Session is managed via firebase-id-token cookie (set in signin route)
+    console.log('✅ Session synced for user:', user.id)
 
-    // Set HTTP-only cookie
-    await setTokenCookie(token)
-    console.log('🍪 JWT cookie set for user:', user.id)
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       user: {
         id: user.id,
@@ -72,6 +62,17 @@ export async function POST(req: NextRequest) {
         name: user.name,
       },
     })
+
+    // Ensure the firebase-id-token cookie is set with proper settings
+    response.cookies.set('firebase-id-token', idToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/',
+    })
+
+    return response
   } catch (error: any) {
     console.error('❌ Session sync error:', error)
     

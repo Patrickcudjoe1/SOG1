@@ -66,11 +66,23 @@ export default function OrderDetailsPage() {
     }
 
     fetchOrderDetails()
-  }, [orderId])
+    
+    // Poll for payment status updates for pending orders
+    const interval = setInterval(() => {
+      if (order && order.paymentStatus === 'PENDING') {
+        fetchOrderDetails()
+      }
+    }, 5000)
+    
+    return () => clearInterval(interval)
+  }, [orderId, order?.paymentStatus])
 
   const fetchOrderDetails = async () => {
     try {
-      const response = await fetch(`/api/orders/${orderId}`)
+      const response = await fetch(`/api/orders/${orderId}`, {
+        cache: 'no-store',
+        credentials: 'same-origin'
+      })
       if (!response.ok) {
         throw new Error("Failed to fetch order details")
       }
@@ -103,42 +115,60 @@ export default function OrderDetailsPage() {
     return status.charAt(0) + status.slice(1).toLowerCase()
   }
 
-  const getPaymentStatusColor = (status: string) => {
+  const getPaymentStatusBadge = (status: string) => {
     switch (status.toUpperCase()) {
       case 'COMPLETED':
-        return 'text-green-600 bg-green-50'
+        return 'text-green-800 bg-green-100 border-green-200 dark:text-green-400 dark:bg-green-900/30 dark:border-green-800'
       case 'PENDING':
-        return 'text-yellow-600 bg-yellow-50'
+        return 'text-amber-800 bg-amber-100 border-amber-200 dark:text-amber-400 dark:bg-amber-900/30 dark:border-amber-800'
       case 'FAILED':
-        return 'text-red-600 bg-red-50'
+        return 'text-red-800 bg-red-100 border-red-200 dark:text-red-400 dark:bg-red-900/30 dark:border-red-800'
       case 'REFUNDED':
-        return 'text-blue-600 bg-blue-50'
+        return 'text-blue-800 bg-blue-100 border-blue-200 dark:text-blue-400 dark:bg-blue-900/30 dark:border-blue-800'
       default:
-        return 'text-gray-600 bg-gray-50'
+        return 'text-gray-800 bg-gray-100 border-gray-200 dark:text-gray-400 dark:bg-gray-900/30 dark:border-gray-800'
     }
   }
 
-  const getOrderStatusColor = (status: string) => {
+  const getOrderStatusBadge = (status: string) => {
     switch (status.toUpperCase()) {
       case 'DELIVERED':
-        return 'text-green-600 bg-green-50'
+        return 'text-green-800 bg-green-100 border-green-200 dark:text-green-400 dark:bg-green-900/30 dark:border-green-800'
       case 'SHIPPED':
-        return 'text-blue-600 bg-blue-50'
+        return 'text-blue-800 bg-blue-100 border-blue-200 dark:text-blue-400 dark:bg-blue-900/30 dark:border-blue-800'
       case 'PROCESSING':
-        return 'text-yellow-600 bg-yellow-50'
+        return 'text-amber-800 bg-amber-100 border-amber-200 dark:text-amber-400 dark:bg-amber-900/30 dark:border-amber-800'
       case 'PENDING':
-        return 'text-orange-600 bg-orange-50'
+        return 'text-orange-800 bg-orange-100 border-orange-200 dark:text-orange-400 dark:bg-orange-900/30 dark:border-orange-800'
       case 'CANCELLED':
       case 'REFUNDED':
-        return 'text-red-600 bg-red-50'
+        return 'text-red-800 bg-red-100 border-red-200 dark:text-red-400 dark:bg-red-900/30 dark:border-red-800'
       default:
-        return 'text-gray-600 bg-gray-50'
+        return 'text-gray-800 bg-gray-100 border-gray-200 dark:text-gray-400 dark:bg-gray-900/30 dark:border-gray-800'
+    }
+  }
+
+  const getStatusIcon = (status: string) => {
+    switch (status.toUpperCase()) {
+      case 'COMPLETED':
+      case 'DELIVERED':
+        return '🟢'
+      case 'PROCESSING':
+      case 'SHIPPED':
+        return '🟡'
+      case 'PENDING':
+        return '🟠'
+      case 'FAILED':
+      case 'CANCELLED':
+        return '🔴'
+      default:
+        return '⚪'
     }
   }
 
   if (loading) {
     return (
-      <main className="w-full min-h-screen bg-white">
+      <main className="w-full min-h-screen bg-background">
         <Navbar />
         <div className="w-full min-h-[calc(100vh-80px)] flex items-center justify-center">
           <div className="text-center">
@@ -153,7 +183,7 @@ export default function OrderDetailsPage() {
 
   if (error || !order) {
     return (
-      <main className="w-full min-h-screen bg-white">
+      <main className="w-full min-h-screen bg-background">
         <Navbar />
         <div className="w-full min-h-[calc(100vh-80px)] flex items-center justify-center px-6">
           <div className="text-center max-w-md">
@@ -173,9 +203,9 @@ export default function OrderDetailsPage() {
   }
 
   return (
-    <main className="w-full min-h-screen bg-white">
+    <main className="w-full min-h-screen bg-background">
       <Navbar />
-      <section className="w-full py-16 md:py-20 px-6 md:px-12">
+      <section className="w-full py-16 md:py-20 px-6 md:px-12 pt-28 md:pt-32">
         <div className="max-w-4xl mx-auto">
           <Link 
             href="/account"
@@ -205,18 +235,24 @@ export default function OrderDetailsPage() {
 
           {/* Status Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            <div className={`p-4 rounded border ${getOrderStatusColor(order.status)}`}>
-              <div className="text-xs tracking-widest uppercase font-light mb-1">Order Status</div>
-              <div className="text-lg font-light tracking-wide">{formatStatus(order.status)}</div>
+            <div className={`p-4 rounded-sm border-2 ${getOrderStatusBadge(order.status)}`}>
+              <div className="text-xs tracking-widest uppercase font-semibold mb-2 opacity-75">Order Status</div>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">{getStatusIcon(order.status)}</span>
+                <span className="text-lg font-semibold tracking-wide">{formatStatus(order.status)}</span>
+              </div>
             </div>
-            <div className={`p-4 rounded border ${getPaymentStatusColor(order.paymentStatus)}`}>
-              <div className="text-xs tracking-widest uppercase font-light mb-1">Payment Status</div>
-              <div className="text-lg font-light tracking-wide">{formatStatus(order.paymentStatus)}</div>
+            <div className={`p-4 rounded-sm border-2 ${getPaymentStatusBadge(order.paymentStatus)}`}>
+              <div className="text-xs tracking-widest uppercase font-semibold mb-2 opacity-75">Payment Status</div>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">{getStatusIcon(order.paymentStatus)}</span>
+                <span className="text-lg font-semibold tracking-wide">{formatStatus(order.paymentStatus)}</span>
+              </div>
             </div>
           </div>
 
           {/* Order Items */}
-          <div className="border border-gray-200 p-6 mb-6 bg-white">
+          <div className="border border-border p-6 mb-6 bg-card rounded-sm">
             <h2 className="text-lg font-light tracking-wide mb-4">Order Items</h2>
             <div className="space-y-4">
               {order.items && order.items.length > 0 && order.items.map((item) => (
@@ -275,7 +311,7 @@ export default function OrderDetailsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Shipping Address */}
             {order.shippingAddress && (
-              <div className="border border-gray-200 p-6 bg-white">
+              <div className="border border-border p-6 bg-card rounded-sm">
                 <div className="flex items-center gap-2 mb-4">
                   <MapPin size={20} className="text-gray-600" />
                   <h2 className="text-lg font-light tracking-wide">Shipping Address</h2>
@@ -293,7 +329,7 @@ export default function OrderDetailsPage() {
             )}
 
             {/* Payment & Delivery Info */}
-            <div className="border border-gray-200 p-6 bg-white">
+            <div className="border border-border p-6 bg-card rounded-sm">
               <div className="flex items-center gap-2 mb-4">
                 <CreditCard size={20} className="text-gray-600" />
                 <h2 className="text-lg font-light tracking-wide">Payment & Delivery</h2>

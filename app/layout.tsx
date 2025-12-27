@@ -49,12 +49,13 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${playfairDisplay.variable} ${lato.variable} ${greatVibes.variable}`}
+      suppressHydrationWarning
     >
       <head>
         <meta charSet="utf-8" />
       </head>
 
-      <body className={`antialiased`}>
+      <body className="antialiased bg-background text-foreground">
         <ClientRoot>{children}</ClientRoot>
         <Analytics />
       </body>

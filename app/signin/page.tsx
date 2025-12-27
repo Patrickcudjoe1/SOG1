@@ -46,9 +46,12 @@ function SignInForm() {
       }
 
       if (data.success) {
+        // Force a hard navigation to ensure proper page load
         const callbackUrl = searchParams.get("callbackUrl") || "/account"
-        router.push(callbackUrl)
-        router.refresh()
+        console.log('✅ Sign in successful, redirecting to:', callbackUrl)
+        
+        // Use window.location for a full page reload to ensure middleware runs
+        window.location.href = callbackUrl
       }
     } catch (err: any) {
       console.error("Sign in exception:", err)

@@ -21,7 +21,7 @@ const NewCollection = dynamic(() => import("./components/new-collection"), {
 export default function Home() {
   return (
     <main className="w-full">
-      <Navbar />
+      <Navbar hasHeroSection={true} />
       <FeaturedCollection />
       <Hero />
       <NewCollection />

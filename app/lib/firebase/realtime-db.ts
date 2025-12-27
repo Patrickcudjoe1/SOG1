@@ -69,6 +69,8 @@ export interface Order {
   mobileMoneyPhone?: string
   idempotencyKey?: string
   webhookProcessed: boolean
+  emailSent?: boolean
+  paidAt?: Date | string
   items: OrderItem[]
   shippingAddressId?: string
   shippingAddress?: Address

@@ -25,21 +25,21 @@ export default function NewArrivals() {
       <Navbar />
 
       {/* New Arrivals Header */}
-      <section className="w-full border-b border-gray-200 pt-20 md:pt-24">
+      <section className="w-full border-b border-border pt-20 md:pt-24 bg-background">
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-12 py-8 md:py-16">
-          <h1 className="text-2xl md:text-4xl lg:text-5xl font-light tracking-wide mb-3 md:mb-4">NEW ARRIVALS</h1>
-          <p className="text-xs md:text-sm font-light text-gray-600 tracking-wide">Discover the latest additions to our collection</p>
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-light tracking-wide mb-3 md:mb-4 text-foreground">NEW ARRIVALS</h1>
+          <p className="text-xs md:text-sm font-light text-muted-foreground tracking-wide">Discover the latest additions to our collection</p>
         </div>
       </section>
 
       {/* Category Filter */}
       {categories.length > 1 && (
-        <section className="w-full border-b border-gray-200">
+        <section className="w-full border-b border-border bg-background">
           <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-12 py-6 md:py-8">
             <div className="relative inline-block">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2 px-4 py-2 border border-black text-xs tracking-widest uppercase font-light hover:bg-black hover:text-white transition-all duration-300"
+                className="flex items-center gap-2 px-4 py-2 border border-foreground text-xs tracking-widest uppercase font-light hover:bg-foreground hover:text-background transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
               >
                 {selectedCategory}
                 <ChevronDown 
@@ -54,7 +54,7 @@ export default function NewArrivals() {
                     className="fixed inset-0 z-40"
                     onClick={() => setIsDropdownOpen(false)}
                   />
-                  <div className="absolute top-full left-0 mt-2 z-50 bg-white border border-black min-w-[200px] shadow-lg">
+                  <div className="absolute top-full left-0 mt-2 z-50 bg-card border border-border min-w-[200px] shadow-lg">
                     <div className="flex flex-col">
                       {categories.map((category) => (
                         <button
@@ -63,10 +63,10 @@ export default function NewArrivals() {
                             setSelectedCategory(category)
                             setIsDropdownOpen(false)
                           }}
-                          className={`text-left px-4 py-3 text-xs tracking-widest uppercase font-light transition-colors ${
+                          className={`text-left px-4 py-3 text-xs tracking-widest uppercase font-light transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${
                             selectedCategory === category 
-                              ? "bg-black text-white" 
-                              : "text-black hover:bg-gray-100"
+                              ? "bg-foreground text-background" 
+                              : "text-foreground hover:bg-muted"
                           }`}
                         >
                           {category}

@@ -17,7 +17,9 @@ export async function PATCH(
 ) {
   try {
     const { error } = await requireSuperAdmin(req)
-    if (error) return error
+    if (error) {
+      return errorResponse(error, 401)
+    }
 
     const { id } = await params
     const body = await req.json()
@@ -46,7 +48,9 @@ export async function DELETE(
 ) {
   try {
     const { error } = await requireSuperAdmin(req)
-    if (error) return error
+    if (error) {
+      return errorResponse(error, 401)
+    }
 
     const { id } = await params
     await AdminService.deleteUser(id)

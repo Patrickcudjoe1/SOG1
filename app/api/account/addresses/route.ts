@@ -1,78 +1,95 @@
-import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/app/lib/api/middleware";
-import { prisma } from "@/app/lib/db/prisma";
+import { NextRequest, NextResponse } from "next/server"
+import { adminDB, COLLECTIONS, Address } from "@/app/lib/firebase/admin-db"
+import { successResponse, errorResponse } from "@/app/lib/api/response"
+import { requireAuth } from "@/app/lib/api/middleware"
 
-// GET - Fetch all addresses for the current user
 export async function GET(req: NextRequest) {
   try {
-    const { error, user } = await requireAuth(req);
+    const { error, user } = await requireAuth(req)
+    if (error) return error
 
-    if (error || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!user?.id) {
+      return errorResponse("User ID not found", 401)
     }
 
-    const addresses = await prisma.address.findMany({
-      where: { userId: user.id },
-      orderBy: [
-        { isDefault: "desc" },
-        { createdAt: "desc" },
-      ],
-    });
+    // Get user addresses
+    const addresses = await adminDB.getMany<Address>(
+      COLLECTIONS.ADDRESSES,
+      { orderBy: "userId", equalTo: user.id }
+    )
 
-    return NextResponse.json({ addresses });
+    return successResponse({ addresses })
   } catch (error: any) {
-    console.error("Fetch addresses error:", error);
-    return NextResponse.json({ error: "Failed to fetch addresses" }, { status: 500 });
+    console.error("Fetch addresses error:", error)
+    return errorResponse(error.message || "Failed to fetch addresses", 500)
   }
 }
 
-// POST - Create a new address
 export async function POST(req: NextRequest) {
   try {
-    const { error, user } = await requireAuth(req);
+    const { error, user } = await requireAuth(req)
+    if (error) return error
 
-    if (error || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!user?.id) {
+      return errorResponse("User ID not found", 401)
     }
 
-    const body = await req.json();
-    const { fullName, phone, addressLine1, addressLine2, city, state, postalCode, country, isDefault } = body;
+    const body = await req.json()
+    const {
+      fullName,
+      phone,
+      addressLine1,
+      addressLine2,
+      city,
+      state,
+      postalCode,
+      country,
+      isDefault,
+    } = body
 
     // Validation
-    if (!fullName || !addressLine1 || !city || !postalCode || !country) {
-      return NextResponse.json(
-        { error: "Full name, address line 1, city, postal code, and country are required" },
-        { status: 400 }
-      );
+    if (!fullName || !addressLine1 || !city || !postalCode) {
+      return errorResponse("Missing required fields", 400)
     }
 
-    // If setting as default, unset other defaults
+    // If this is set as default, unset all other defaults
     if (isDefault) {
-      await prisma.address.updateMany({
-        where: { userId: user.id, isDefault: true },
-        data: { isDefault: false },
-      });
+      const existingAddresses = await adminDB.getMany<Address>(
+        COLLECTIONS.ADDRESSES,
+        { orderBy: "userId", equalTo: user.id }
+      )
+
+      for (const addr of existingAddresses) {
+        if (addr.isDefault) {
+          await adminDB.update<Address>(COLLECTIONS.ADDRESSES, addr.id, {
+            isDefault: false,
+          })
+        }
+      }
     }
 
-    const address = await prisma.address.create({
-      data: {
+    // Create address
+    const addressId = `addr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const address = await adminDB.create<Address>(
+      COLLECTIONS.ADDRESSES,
+      addressId,
+      {
         userId: user.id,
         fullName,
-        phone: phone || null,
+        phone: phone || undefined,
         addressLine1,
-        addressLine2: addressLine2 || null,
+        addressLine2: addressLine2 || undefined,
         city,
-        region: state || null,
+        region: state || undefined,
         postalCode,
         country: country || "Ghana",
         isDefault: isDefault || false,
-      },
-    });
+      }
+    )
 
-    return NextResponse.json({ message: "Address created successfully", address }, { status: 201 });
+    return successResponse({ address }, "Address created successfully")
   } catch (error: any) {
-    console.error("Create address error:", error);
-    return NextResponse.json({ error: "Failed to create address" }, { status: 500 });
+    console.error("Create address error:", error)
+    return errorResponse(error.message || "Failed to create address", 500)
   }
 }
-

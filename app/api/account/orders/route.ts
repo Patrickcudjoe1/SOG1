@@ -18,11 +18,18 @@ export async function GET(req: NextRequest) {
 
     const result = await OrderService.getUserOrders(user.id, limit, offset);
 
-    return successResponse(result.orders, "Orders retrieved successfully", {
+    const response = successResponse(result.orders, "Orders retrieved successfully", {
       total: result.total,
       limit: result.limit,
       hasMore: result.hasMore,
     });
+
+    // Add cache control headers to prevent stale data
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+
+    return response;
   } catch (error: any) {
     console.error("Fetch orders error:", error);
     return errorResponse(error.message || "Failed to fetch orders", 500);

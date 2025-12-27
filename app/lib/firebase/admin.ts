@@ -21,13 +21,26 @@ export function getAdminApp(): App {
     }
 
     // Validate environment variables
-    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
-    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY
+    const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL
     const databaseURL = process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL
 
+    // Support both direct private key and Base64 encoded (for Vercel)
+    let privateKey: string | undefined
+    if (process.env.FIREBASE_ADMIN_PRIVATE_KEY_BASE64) {
+      // Decode from Base64 (Vercel-friendly)
+      privateKey = Buffer.from(process.env.FIREBASE_ADMIN_PRIVATE_KEY_BASE64, 'base64').toString('utf-8')
+    } else if (process.env.FIREBASE_ADMIN_PRIVATE_KEY) {
+      // Use direct key with newline replacement
+      privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY.replace(/\\n/g, '\n')
+    }
+
     if (!projectId || !clientEmail || !privateKey) {
-      throw new Error('Missing Firebase Admin credentials. Check .env.local file.')
+      console.error('❌ Missing Firebase Admin credentials:')
+      console.error('  - Project ID:', projectId ? '✅' : '❌')
+      console.error('  - Client Email:', clientEmail ? '✅' : '❌')
+      console.error('  - Private Key:', privateKey ? '✅' : '❌')
+      throw new Error('Missing Firebase Admin credentials. Check environment variables.')
     }
 
     console.log('🔧 Initializing Firebase Admin SDK...')
@@ -41,7 +54,7 @@ export function getAdminApp(): App {
       credential: cert({
         projectId,
         clientEmail,
-        privateKey: privateKey.replace(/\\n/g, '\n'),
+        privateKey,
       }),
       databaseURL,
     })

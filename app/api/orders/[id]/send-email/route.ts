@@ -1,123 +1,67 @@
 import { NextRequest, NextResponse } from "next/server"
-import { firestoreDB, COLLECTIONS, Order, Address } from "@/app/lib/firebase/db"
+import { adminDB, COLLECTIONS, Order, Address } from "@/app/lib/firebase/admin-db"
+import { sendOrderEmails } from "@/app/lib/email/sendOrderEmails"
 
+/**
+ * Send order confirmation emails
+ * This endpoint is called by the webhook after payment confirmation
+ */
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
-    const order = await firestoreDB.get<Order>(COLLECTIONS.ORDERS, id)
+
+    // Get order details
+    const order = await adminDB.get<Order>(COLLECTIONS.ORDERS, id)
 
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 })
     }
 
+    // Check if email already sent (duplicate prevention)
+    if ((order as any).emailSent) {
+      console.log(`📧 Email already sent for order ${order.orderNumber}, skipping`)
+      return NextResponse.json({ 
+        success: true, 
+        message: "Email already sent",
+        duplicate: true 
+      })
+    }
+
     // Get shipping address if exists
     let shippingAddress = order.shippingAddress
     if (!shippingAddress && order.shippingAddressId) {
-      const address = await firestoreDB.get<Address>(
+      const address = await adminDB.get<Address>(
         COLLECTIONS.ADDRESSES,
         order.shippingAddressId
       )
       shippingAddress = address || undefined
     }
 
-    // In production, use a proper email service like SendGrid, Resend, or AWS SES
-    // For now, we'll just log the email content
-    const emailContent = {
-      to: order.email,
-      subject: `Order Confirmation - ${order.orderNumber}`,
-      html: `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <title>Order Confirmation</title>
-          </head>
-          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h1 style="color: #000; border-bottom: 2px solid #000; padding-bottom: 10px;">
-              Order Confirmation
-            </h1>
-            
-            <p>Thank you for your purchase! Your order has been received and is being processed.</p>
-            
-            <div style="background: #f5f5f5; padding: 20px; margin: 20px 0;">
-              <h2 style="margin-top: 0;">Order Details</h2>
-              <p><strong>Order Number:</strong> ${order.orderNumber}</p>
-              <p><strong>Status:</strong> ${order.status}</p>
-              <p><strong>Total:</strong> ₵${order.totalAmount.toFixed(2)}</p>
-            </div>
-            
-            <h2>Items Ordered</h2>
-            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-              <thead>
-                <tr style="border-bottom: 2px solid #000;">
-                  <th style="text-align: left; padding: 10px;">Item</th>
-                  <th style="text-align: center; padding: 10px;">Quantity</th>
-                  <th style="text-align: right; padding: 10px;">Price</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${order.items
-                  ?.map(
-                    (item) => `
-                  <tr style="border-bottom: 1px solid #ddd;">
-                    <td style="padding: 10px;">${item.productName}</td>
-                    <td style="text-align: center; padding: 10px;">${item.quantity}</td>
-                    <td style="text-align: right; padding: 10px;">₵${(item.price * item.quantity).toFixed(2)}</td>
-                  </tr>
-                `
-                  )
-                  .join("")}
-              </tbody>
-            </table>
-            
-            ${
-              shippingAddress
-                ? `
-              <h2>Shipping Address</h2>
-              <div style="background: #f5f5f5; padding: 15px; margin: 20px 0;">
-                <p>${shippingAddress.fullName}</p>
-                <p>${shippingAddress.addressLine1}</p>
-                ${shippingAddress.addressLine2 ? `<p>${shippingAddress.addressLine2}</p>` : ""}
-                <p>${shippingAddress.city}, ${shippingAddress.region || ""} ${shippingAddress.postalCode}</p>
-                <p>${shippingAddress.country}</p>
-                ${shippingAddress.phone ? `<p>Phone: ${shippingAddress.phone}</p>` : ""}
-              </div>
-            `
-                : ""
-            }
-            
-            <p style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
-              You will receive shipping updates via email. If you have any questions, please contact our customer service.
-            </p>
-            
-            <p style="margin-top: 20px; font-size: 12px; color: #666;">
-              Son of God - Christian Clothing Brand
-            </p>
-          </body>
-        </html>
-      `,
+    // Send emails
+    const result = await sendOrderEmails(order, shippingAddress)
+
+    if (result.success) {
+      // Mark email as sent
+      await adminDB.update<Order>(COLLECTIONS.ORDERS, id, {
+        emailSent: true,
+      } as any)
+
+      console.log(`✅ Email sent successfully for order ${order.orderNumber}`)
+      return NextResponse.json({ success: true, message: "Emails sent successfully" })
+    } else {
+      console.error(`❌ Failed to send email for order ${order.orderNumber}:`, result.error)
+      return NextResponse.json(
+        { error: result.error || "Failed to send emails" },
+        { status: 500 }
+      )
     }
-
-    // TODO: Integrate with actual email service
-    // Example with Resend:
-    // const resend = new Resend(process.env.RESEND_API_KEY);
-    // await resend.emails.send({
-    //   from: 'orders@sonofgod.com',
-    //   to: emailContent.to,
-    //   subject: emailContent.subject,
-    //   html: emailContent.html,
-    // });
-
-    console.log("Order confirmation email:", emailContent)
-
-    return NextResponse.json({ success: true, message: "Email sent" })
   } catch (error: any) {
-    console.error("Error sending email:", error)
+    console.error("Send email error:", error)
     return NextResponse.json(
-      { error: "Failed to send email" },
+      { error: error.message || "Failed to send emails" },
       { status: 500 }
     )
   }

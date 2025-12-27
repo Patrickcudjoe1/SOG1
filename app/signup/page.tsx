@@ -16,6 +16,7 @@ export default function SignUp() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   
@@ -24,6 +25,11 @@ export default function SignUp() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+
+    if (!agreedToTerms) {
+      setError("You must agree to the Terms and Conditions to create an account")
+      return
+    }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match")
@@ -170,10 +176,41 @@ export default function SignUp() {
               </div>
             </div>
 
+            {/* Terms and Conditions Checkbox */}
+            <div className="flex items-start space-x-3 pt-2">
+              <div className="flex items-center h-5 mt-0.5">
+                <input
+                  id="terms"
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="w-4 h-4 border-2 border-gray-300 rounded bg-white focus:ring-2 focus:ring-gray-200 focus:ring-offset-0 cursor-pointer checked:bg-black checked:border-black transition-colors"
+                />
+              </div>
+              <label htmlFor="terms" className="text-sm text-gray-600 cursor-pointer select-none">
+                I agree to the{" "}
+                <Link 
+                  href="/terms" 
+                  target="_blank"
+                  className="text-black underline hover:text-gray-600 transition-colors"
+                >
+                  Terms and Conditions
+                </Link>
+                {" "}and{" "}
+                <Link 
+                  href="/privacy" 
+                  target="_blank"
+                  className="text-black underline hover:text-gray-600 transition-colors"
+                >
+                  Privacy Policy
+                </Link>
+              </label>
+            </div>
+
             {/* Create Account Button */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !agreedToTerms}
               className="w-full px-6 py-3.5 sm:py-4 bg-black text-white rounded-lg hover:bg-gray-900 transition-all duration-300 text-sm sm:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed mt-6 min-h-[48px]"
             >
               {loading ? "Creating account..." : "Create account"}

@@ -85,11 +85,11 @@ export default function GalleryPage() {
   }
 
   return (
-    <main className="w-full bg-white min-h-screen">
+    <main className="w-full bg-background min-h-screen">
       <Navbar />
       
       {/* Minimalist Lookbook Grid */}
-      <section className="w-full py-12 md:py-16 lg:py-20 px-4 md:px-6 lg:px-8">
+      <section className="w-full py-12 md:py-16 lg:py-20 px-4 md:px-6 lg:px-8 pt-20 md:pt-24">
         <div className="max-w-[1400px] mx-auto">
           {/* Responsive Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 lg:gap-4">

@@ -2,6 +2,40 @@ import { NextRequest, NextResponse } from "next/server"
 import { AdminService } from "@/app/lib/services/admin-service"
 import { successResponse, notFoundResponse, errorResponse } from "@/app/lib/api/response"
 import { requireAdmin } from "@/app/lib/api/admin-middleware"
+import { getAdminDatabase } from "@/app/lib/firebase/admin"
+import { COLLECTIONS, Order } from "@/app/lib/firebase/db"
+
+/**
+ * GET /api/admin/orders/[id]
+ * Get order details
+ */
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { error } = await requireAdmin(req)
+    if (error) {
+      return errorResponse(error, 401)
+    }
+
+    const { id } = await params
+    const db = getAdminDatabase()
+    const orderRef = db.ref(`${COLLECTIONS.ORDERS}/${id}`)
+    const snapshot = await orderRef.get()
+
+    if (!snapshot.exists()) {
+      return notFoundResponse("Order")
+    }
+
+    const order = snapshot.val() as Order
+
+    return successResponse(order, "Order retrieved successfully")
+  } catch (error: any) {
+    console.error("Get order error:", error)
+    return errorResponse(error.message || "Failed to get order", 500)
+  }
+}
 
 /**
  * PATCH /api/admin/orders/[id]
@@ -13,7 +47,9 @@ export async function PATCH(
 ) {
   try {
     const { error } = await requireAdmin(req)
-    if (error) return error
+    if (error) {
+      return errorResponse(error, 401)
+    }
 
     const { id } = await params
     const body = await req.json()
@@ -36,4 +72,3 @@ export async function PATCH(
     return errorResponse(error.message || "Failed to update order status", 500)
   }
 }
-

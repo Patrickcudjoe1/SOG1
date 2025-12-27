@@ -6,14 +6,14 @@ export default function AboutPage() {
   return (
     <main className="w-full">
       <Navbar />
-      <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-background pt-28 md:pt-32">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <Cross2 size={64} className="text-black mx-auto mb-8" />
-            <h1 className="text-5xl font-bold tracking-tight text-black mb-6">OUR MISSION</h1>
+            <Cross2 size={64} className="text-foreground mx-auto mb-8" />
+            <h1 className="text-5xl font-bold tracking-tight text-foreground mb-6">OUR MISSION</h1>
           </div>
 
-          <div className="space-y-8 text-lg text-stone-700 leading-relaxed">
+          <div className="space-y-8 text-lg text-muted-foreground leading-relaxed">
             <p>
               SON OF GOD exists to glorify Christ through timeless design — clothing that reflects inner faith and
               divine identity. We believe that what you wear is a statement of who you are.

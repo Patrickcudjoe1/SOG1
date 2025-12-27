@@ -37,33 +37,22 @@ export default function CheckoutSuccess() {
       return;
     }
 
-    // If we have a Stripe session ID, verify payment first
-    if (sessionId) {
-      fetch(`/api/checkout/verify?session_id=${sessionId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success) {
-            fetchOrderDetails();
-          } else {
-            setError("Payment verification failed");
-            setLoading(false);
-          }
-        })
-        .catch((err) => {
-          console.error("Verification error:", err);
-          // Still try to fetch order details
-          fetchOrderDetails();
-        });
-    } else {
+    // Add a small delay to allow webhook to process
+    const timer = setTimeout(() => {
       fetchOrderDetails();
-    }
-  }, [orderId, sessionId]);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [orderId]);
 
   const fetchOrderDetails = async () => {
     if (!orderId) return;
 
     try {
-      const response = await fetch(`/api/orders/${orderId}`);
+      const response = await fetch(`/api/orders/${orderId}`, {
+        cache: 'no-store',
+        credentials: 'same-origin',
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch order details");
       }
@@ -72,6 +61,23 @@ export default function CheckoutSuccess() {
       // Handle API response structure
       if (result.success && result.data) {
         setOrder(result.data);
+        
+        // If payment is still pending, keep polling for up to 15 seconds
+        if (result.data.paymentStatus === 'PENDING') {
+          const elapsed = Date.now() - (window as any).__orderFetchStart || 0;
+          if (!((window as any).__orderFetchStart)) {
+            (window as any).__orderFetchStart = Date.now();
+          }
+          
+          if (elapsed < 15000) {
+            setTimeout(() => {
+              fetchOrderDetails();
+            }, 2000);
+          }
+        } else {
+          // Payment completed or failed, stop polling
+          delete (window as any).__orderFetchStart;
+        }
       } else {
         throw new Error("Invalid response format");
       }
@@ -119,9 +125,9 @@ export default function CheckoutSuccess() {
   }
 
   return (
-    <main className="w-full min-h-screen bg-white">
+    <main className="w-full min-h-screen bg-background">
       <Navbar />
-      <section className="w-full py-12 md:py-20 px-4 md:px-6 lg:px-12">
+      <section className="w-full py-12 md:py-20 px-4 md:px-6 lg:px-12 pt-20 md:pt-24">
         <div className="max-w-3xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -136,7 +142,7 @@ export default function CheckoutSuccess() {
             <p className="text-xs font-light text-gray-500">Order Number: {order.orderNumber}</p>
           </motion.div>
 
-          <div className="border border-gray-200 p-6 md:p-8 mb-8 bg-white">
+          <div className="border border-border p-6 md:p-8 mb-8 bg-card">
             <div className="flex items-center gap-3 mb-6">
               <Package size={20} className="text-gray-600" />
               <h2 className="text-lg font-light tracking-wide">Order Details</h2>
@@ -166,7 +172,7 @@ export default function CheckoutSuccess() {
             </div>
           </div>
 
-          <div className="border border-gray-200 p-6 md:p-8 mb-8">
+          <div className="border border-border p-6 md:p-8 mb-8 bg-card">
             <div className="flex items-center gap-3 mb-4">
               <Mail size={20} className="text-gray-600" />
               <h2 className="text-lg font-light tracking-wide">What's Next?</h2>

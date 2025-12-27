@@ -10,7 +10,9 @@ import { requireAdmin } from "@/app/lib/api/admin-middleware"
 export async function GET(req: NextRequest) {
   try {
     const { error } = await requireAdmin(req)
-    if (error) return error
+    if (error) {
+      return errorResponse(error, 401)
+    }
 
     const { searchParams } = new URL(req.url)
     const limit = parseInt(searchParams.get("limit") || "50")

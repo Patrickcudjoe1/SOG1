@@ -69,6 +69,12 @@ export default function Checkout() {
       .then(data => {
         if (data?.user) {
           setSession({ user: data.user });
+          // Auto-fill user information
+          setFormData(prev => ({
+            ...prev,
+            fullName: data.user.displayName || data.user.name || prev.fullName,
+            email: data.user.email || prev.email,
+          }));
         }
       })
       .catch(() => {
@@ -130,6 +136,12 @@ export default function Checkout() {
               setUseNewAddress(false);
               fillFormFromAddress(defaultAddress);
             }
+          } else {
+            // No saved addresses, but ensure email is filled
+            setFormData(prev => ({
+              ...prev,
+              email: session.user.email || prev.email,
+            }));
           }
         })
         .catch((err) => console.error("Failed to fetch addresses:", err));
