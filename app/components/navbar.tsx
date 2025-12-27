@@ -24,7 +24,7 @@ export default function SONOFGODNavbar({ hasHeroSection }: NavbarProps) {
   const pathname = usePathname()
 
   // Pages that should always have black navbar
-  const blackNavbarPages = ['/signin', '/signup', '/forgot-password', '/reset-password']
+  const blackNavbarPages = ['/signin', '/signup', '/forgot-password', '/reset-password', '/shop', '/explore']
   const isBlackNavbarPage = blackNavbarPages.includes(pathname || '')
 
   const toggleMobileDropdown = (dropdown: 'featured' | 'collections' | 'newArrivals') => {
@@ -51,9 +51,10 @@ export default function SONOFGODNavbar({ hasHeroSection }: NavbarProps) {
   return (
     <>
       <nav
-        className={`sog-nav fixed top-0 w-full z-50 transition-all duration-300
+        className={`sog-nav fixed top-0 left-0 right-0 w-full z-[60] transition-all duration-300
           ${bgColor} ${scrolled ? "shadow-md" : "shadow-none"}
         `}
+        style={{ position: 'fixed' }}
       >
         <div className="max-w-full px-4 sm:px-6 md:px-12 py-3 md:py-4 transition-all duration-300">
           <div className="flex items-center justify-center relative h-12 md:h-14">
