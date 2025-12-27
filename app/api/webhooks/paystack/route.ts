@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
         const data = event.data
         const reference = data.reference
 
-        const order = await findOrderByPaystackReference(reference)
+        const order = await findOrderByPaystackReferenceAdmin(reference)
 
         if (order) {
           await adminDB.update<Order>(COLLECTIONS.ORDERS, order.id, {
