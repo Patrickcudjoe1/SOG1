@@ -8,10 +8,10 @@ import { adminDB, COLLECTIONS } from "@/app/lib/firebase/admin-db"
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const orderId = params.id
+    const { id: orderId } = await params
 
     // Get order
     const order = await adminDB.get(COLLECTIONS.ORDERS, orderId)
@@ -112,10 +112,10 @@ export async function GET(
  */
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const orderId = params.id
+    const { id: orderId } = await params
 
     // Get order
     const order = await adminDB.get(COLLECTIONS.ORDERS, orderId)
