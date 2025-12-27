@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import crypto from "crypto"
 
 import { adminDB, COLLECTIONS, Order } from "@/app/lib/firebase/admin-db"
-import { findOrderByPaystackReference } from "@/app/lib/firebase/queries"
+import { findOrderByPaystackReferenceAdmin } from "@/app/lib/firebase/admin-queries"
 
 const paystackSecretKey = process.env.PAYSTACK_SECRET_KEY
 
@@ -60,8 +60,8 @@ export async function POST(req: NextRequest) {
         const data = event.data
         const reference = data.reference
 
-        // Find order by Paystack reference
-        const order = await findOrderByPaystackReference(reference)
+        // Find order by Paystack reference (using admin SDK to bypass auth)
+        const order = await findOrderByPaystackReferenceAdmin(reference)
 
         if (!order) {
           console.error(`❌ Order not found for Paystack reference: ${reference}`)
