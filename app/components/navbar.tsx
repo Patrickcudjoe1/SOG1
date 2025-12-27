@@ -9,10 +9,10 @@ import { motion } from "framer-motion"
 import { useCart } from "./CartContext"
 
 interface NavbarProps {
-
+  hasHeroSection?: boolean
 }
 
-export default function SONOFGODNavbar({}: NavbarProps) {
+export default function SONOFGODNavbar({ hasHeroSection }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [mobileDropdowns, setMobileDropdowns] = useState({

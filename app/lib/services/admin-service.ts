@@ -117,8 +117,8 @@ export class AdminService {
         let ordersCount = 0
         let addressesCount = 0
         
-        ordersSnapshot.forEach(() => ordersCount++)
-        addressesSnapshot.forEach(() => addressesCount++)
+        ordersSnapshot.forEach(() => { ordersCount++ })
+        addressesSnapshot.forEach(() => { addressesCount++ })
         
         return {
           ...user,
