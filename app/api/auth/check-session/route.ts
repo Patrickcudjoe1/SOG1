@@ -1,27 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSessionFromToken } from '@/app/lib/jwt'
-import { firestoreDB, COLLECTIONS, User } from '@/app/lib/firebase/db'
+import { verifyIdToken } from '@/app/lib/firebase/admin'
+import { getAdminDatabase } from '@/app/lib/firebase/admin'
+
+interface User {
+  id: string
+  email: string
+  name: string
+  role?: string
+}
 
 export async function GET(req: NextRequest) {
   try {
-    const tokenPayload = await getSessionFromToken()
+    // Get Firebase ID token from Authorization header or cookie
+    let firebaseToken = req.headers.get('Authorization')?.replace('Bearer ', '')
+    
+    if (!firebaseToken) {
+      firebaseToken = req.cookies.get('firebase-id-token')?.value
+    }
 
-    if (!tokenPayload) {
+    if (!firebaseToken) {
       return NextResponse.json({
         authenticated: false,
         message: 'No session found'
       })
     }
 
-    // Verify user exists
-    const user = await firestoreDB.get<User>(COLLECTIONS.USERS, tokenPayload.userId)
+    // Verify token using Admin SDK
+    const decodedToken = await verifyIdToken(firebaseToken)
+    if (!decodedToken) {
+      return NextResponse.json({
+        authenticated: false,
+        message: 'Invalid or expired token'
+      })
+    }
 
-    if (!user) {
+    // Get user from Realtime Database using Admin SDK
+    const db = getAdminDatabase()
+    const userRef = db.ref(`users/${decodedToken.uid}`)
+    const snapshot = await userRef.get()
+    
+    if (!snapshot.exists()) {
       return NextResponse.json({
         authenticated: false,
         message: 'User not found'
       })
     }
+
+    const user = snapshot.val() as User
 
     return NextResponse.json({
       authenticated: true,
