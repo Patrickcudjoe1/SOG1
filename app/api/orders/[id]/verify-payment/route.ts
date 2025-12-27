@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
 import { adminDB, COLLECTIONS } from "@/app/lib/firebase/admin-db"
 
+interface Order {
+  id: string
+  orderNumber: string
+  paymentStatus: string
+  status: string
+  paystackReference?: string
+  webhookProcessed?: boolean
+  paidAt?: string
+}
+
 /**
  * DEBUG ENDPOINT: Verify and manually update payment status
  * Use this temporarily to check order status and manually mark as paid if needed
@@ -14,7 +24,7 @@ export async function GET(
     const { id: orderId } = await params
 
     // Get order
-    const order = await adminDB.get(COLLECTIONS.ORDERS, orderId)
+    const order = await adminDB.get(COLLECTIONS.ORDERS, orderId) as Order | null
 
     if (!order) {
       return NextResponse.json(
@@ -118,7 +128,7 @@ export async function POST(
     const { id: orderId } = await params
 
     // Get order
-    const order = await adminDB.get(COLLECTIONS.ORDERS, orderId)
+    const order = await adminDB.get(COLLECTIONS.ORDERS, orderId) as Order | null
 
     if (!order) {
       return NextResponse.json(
