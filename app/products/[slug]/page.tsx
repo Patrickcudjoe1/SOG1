@@ -96,18 +96,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <section className="w-full border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 md:px-12 py-4">
           <div className="flex items-center gap-2 text-xs font-light tracking-wide">
-            <Link href="/shop" className="hover:opacity-60 transition-opacity">
+            <Link href="/shop" className="text-gray-900 hover:opacity-60 transition-opacity">
               SHOP
             </Link>
             <span className="text-gray-400">/</span>
             <Link
               href={`/${product.category.toLowerCase().replace(/\s+/g, "-")}`}
-              className="text-gray-600 hover:opacity-60 transition-opacity"
+              className="text-gray-600 hover:text-gray-900 transition-colors"
             >
               {product.category}
             </Link>
             <span className="text-gray-400">/</span>
-            <span className="text-gray-600">{product.name}</span>
+            <span className="text-gray-900">{product.name}</span>
           </div>
           {/* Mobile back button */}
           <div className="md:hidden mt-3">
@@ -132,7 +132,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       {relatedProducts.length > 0 && (
         <section className="w-full border-t border-gray-200 py-16 px-6 md:px-12">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-2xl font-light tracking-wide mb-12">YOU MAY ALSO LIKE</h2>
+            <h2 className="text-2xl font-light tracking-wide mb-12 text-gray-900">YOU MAY ALSO LIKE</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">
               {relatedProducts.map((relatedProduct) => {
                 const relatedSlug = getProductSlug(relatedProduct)
@@ -150,8 +150,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     <p className="text-xs tracking-widest uppercase font-light text-gray-600 mb-2">
                       {relatedProduct.category}
                     </p>
-                    <h3 className="text-sm tracking-wide font-light mb-2">{relatedProduct.name}</h3>
-                    <p className="text-sm font-light">{formatCurrency(relatedProduct.price)}</p>
+                    <h3 className="text-sm tracking-wide font-light mb-2 text-gray-900">{relatedProduct.name}</h3>
+                    <p className="text-sm font-light text-gray-900">{formatCurrency(relatedProduct.price)}</p>
                   </Link>
                 )
               })}

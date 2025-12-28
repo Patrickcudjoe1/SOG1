@@ -25,7 +25,9 @@ export default function SONOFGODNavbar({ hasHeroSection }: NavbarProps) {
 
   // Pages that should always have black navbar
   const blackNavbarPages = ['/signin', '/signup', '/forgot-password', '/reset-password', '/shop', '/explore', '/cart']
-  const isBlackNavbarPage = blackNavbarPages.includes(pathname || '')
+  // Also include product detail pages (dynamic routes starting with /products/)
+  const isProductDetailPage = pathname?.startsWith('/products/')
+  const isBlackNavbarPage = blackNavbarPages.includes(pathname || '') || isProductDetailPage
 
   const toggleMobileDropdown = (dropdown: 'featured' | 'collections' | 'newArrivals') => {
     setMobileDropdowns(prev => ({
