@@ -183,7 +183,7 @@ export default function Hero() {
                   transition={{ duration: 0.4, ease: "easeInOut" }}
                   className="absolute inset-4"
                 >
-                  <Link href="/jerseys" className="block w-full h-full">
+                  <Link href="/jerseys" className="block w-full h-full relative">
                     <Image
                       src={products[currentIndex].image}
                       alt={products[currentIndex].title}

@@ -200,6 +200,7 @@ export default function SONOFGODNavbar({ hasHeroSection }: NavbarProps) {
                 className={`h-12 sm:h-14 md:h-16 lg:h-20 w-auto object-contain max-w-[200px] sm:max-w-[250px] md:max-w-[300px] lg:max-w-[350px] transition-all duration-300 ${
                   isBlackNavbarPage || !scrolled ? "brightness-0 invert" : ""
                 }`}
+                style={{ width: "auto", height: "100%" }}
                 priority
               />
             </Link>
