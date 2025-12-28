@@ -1,6 +1,7 @@
 "use client"
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { getCart, saveCart } from '@/app/lib/cart-storage';
+import { useAuth } from './AuthProvider';
 
 export interface CartItem {
   id: string;
@@ -41,14 +42,15 @@ export function useCart() {
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const { user } = useAuth();
 
   // Load cart from localStorage on mount and when user changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
-        // Cart will be loaded via auth state change in AuthProvider
-        // This is just initial load for guest users
-        const loadedCart = getCart();
+        // Load cart based on user ID (or guest cart if no user)
+        const userId = user?.uid;
+        const loadedCart = getCart(userId);
         setCart(loadedCart);
       } catch (error) {
         console.error('Error loading cart from localStorage:', error);
@@ -56,18 +58,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsLoaded(true);
       }
     }
-  }, []);
+  }, [user?.uid]); // Reload when user changes
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
     if (isLoaded && typeof window !== 'undefined') {
       try {
-        saveCart(cart);
+        const userId = user?.uid;
+        saveCart(cart, userId);
       } catch (error) {
         console.error('Error saving cart to localStorage:', error);
       }
     }
-  }, [cart, isLoaded]);
+  }, [cart, isLoaded, user?.uid]);
 
   const addToCart = useCallback((item: CartItem) => {
     setCart((current) => {
@@ -117,7 +120,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const clearCart = useCallback(() => {
     setCart([]);
-  }, []);
+    // Also clear from localStorage
+    if (typeof window !== 'undefined' && isLoaded) {
+      try {
+        const userId = user?.uid;
+        saveCart([], userId);
+      } catch (error) {
+        console.error('Error clearing cart from localStorage:', error);
+      }
+    }
+  }, [user?.uid, isLoaded]);
 
   const getCartTotal = useCallback(() => {
     return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
