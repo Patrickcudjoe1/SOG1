@@ -17,17 +17,17 @@ export default function ContactPage() {
             <div className="text-center">
               <Mail size={40} className="text-foreground mx-auto mb-4" />
               <h3 className="font-semibold text-foreground mb-2">Email</h3>
-              <p className="text-muted-foreground">hello@sonofgod.com</p>
+              <p className="text-muted-foreground">contact@sonofgod.com</p>
             </div>
             <div className="text-center">
               <Phone size={40} className="text-foreground mx-auto mb-4" />
               <h3 className="font-semibold text-foreground mb-2">Phone</h3>
-              <p className="text-muted-foreground">+1 (555) 123-4567</p>
+              <p className="text-muted-foreground">+233 54 000 0000</p>
             </div>
             <div className="text-center">
               <MapPin size={40} className="text-foreground mx-auto mb-4" />
               <h3 className="font-semibold text-foreground mb-2">Location</h3>
-              <p className="text-muted-foreground">New York, NY</p>
+              <p className="text-muted-foreground">Accra, Ghana</p>
             </div>
           </div>
 
