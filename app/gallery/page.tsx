@@ -90,6 +90,14 @@ export default function GalleryPage() {
   }
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Close when clicking the backdrop (not the image)
+    if (e.target === e.currentTarget) {
+      handleCloseOverlay()
+    }
+  }
+
+  const handleBackdropTouch = (e: React.TouchEvent<HTMLDivElement>) => {
+    // Close when tapping the backdrop on mobile
     if (e.target === e.currentTarget) {
       handleCloseOverlay()
     }
@@ -225,11 +233,15 @@ export default function GalleryPage() {
             transition={{ duration: 0.3 }}
             className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md"
             onClick={handleBackdropClick}
+            onTouchEnd={handleBackdropTouch}
           >
             {/* Close Button */}
             <button
-              onClick={handleCloseOverlay}
-              className="absolute top-4 right-4 md:top-6 md:right-6 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200 backdrop-blur-sm"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleCloseOverlay()
+              }}
+              className="absolute top-4 right-4 md:top-6 md:right-6 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-all duration-200 backdrop-blur-sm touch-manipulation"
               aria-label="Close overlay"
             >
               <X size={24} className="md:w-6 md:h-6" strokeWidth={2} />
@@ -275,6 +287,7 @@ export default function GalleryPage() {
                 transition={{ duration: 0.3, ease: "easeOut" }}
                 className="relative w-full h-full max-w-7xl max-h-full flex items-center justify-center"
                 onClick={(e) => e.stopPropagation()}
+                onTouchEnd={(e) => e.stopPropagation()}
               >
                 <Image
                   src={selectedImage.image}
