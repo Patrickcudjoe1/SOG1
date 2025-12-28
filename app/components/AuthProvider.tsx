@@ -47,23 +47,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }),
           })
           
-          const data = await response.json()
+          let data
+          try {
+            data = await response.json()
+          } catch (parseError) {
+            // If response is not JSON, create a simple error object
+            data = { error: `HTTP ${response.status}: ${response.statusText}` }
+          }
           
           if (response.ok) {
-            console.log('✅ Session synced successfully:', data)
+            console.log('✅ Session synced successfully')
             // Only set user after successful sync
             setUser(firebaseUser)
           } else {
-            console.error('❌ Session sync failed:', {
-              status: response.status,
-              statusText: response.statusText,
-              error: data.error || 'Unknown error',
-              data
-            })
+            // Only log errors that are not expected (like 401 for expired tokens)
+            if (response.status !== 401) {
+              console.warn('⚠️ Session sync failed:', {
+                status: response.status,
+                error: data?.error || 'Unknown error'
+              })
+            }
             
-            // If token expired, try to refresh and retry once
-            if (response.status === 401 && data.error?.includes('expired')) {
-              console.log('🔄 Token expired, refreshing and retrying...')
+            // If token expired or invalid, try to refresh and retry once
+            if (response.status === 401) {
               try {
                 const freshToken = await firebaseUser.getIdToken(true)
                 const retryResponse = await fetch('/api/auth/sync-session', {
@@ -78,17 +84,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   }),
                 })
                 
-                const retryData = await retryResponse.json()
                 if (retryResponse.ok) {
-                  console.log('✅ Session synced successfully on retry:', retryData)
+                  console.log('✅ Session synced successfully on retry')
                   setUser(firebaseUser)
                 } else {
-                  console.error('❌ Retry also failed:', retryData)
-                  setUser(firebaseUser) // Still set user
+                  // Silently fail - user will still be set
+                  setUser(firebaseUser)
                 }
               } catch (retryError) {
-                console.error('❌ Retry failed:', retryError)
-                setUser(firebaseUser) // Still set user
+                // Silently fail - user will still be set
+                setUser(firebaseUser)
               }
             } else {
               // For other errors, still set user but session may not work
@@ -96,9 +101,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
           }
         } catch (error) {
-          console.error('❌ Failed to sync session:', error)
-          // Still set user but session may not work
-          setUser(firebaseUser)
+          // Only log unexpected errors (not network errors)
+          if (error instanceof TypeError && error.message.includes('fetch')) {
+            // Network error - silently handle
+            setUser(firebaseUser)
+          } else {
+            console.warn('⚠️ Session sync error:', error instanceof Error ? error.message : 'Unknown error')
+            setUser(firebaseUser)
+          }
         }
       } else {
         // Clear backend session when user signs out

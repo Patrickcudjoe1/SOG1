@@ -24,7 +24,7 @@ export default function SONOFGODNavbar({ hasHeroSection }: NavbarProps) {
   const pathname = usePathname()
 
   // Pages that should always have black navbar
-  const blackNavbarPages = ['/signin', '/signup', '/forgot-password', '/reset-password', '/shop', '/explore', '/cart']
+  const blackNavbarPages = ['/signin', '/signup', '/forgot-password', '/reset-password', '/shop', '/explore', '/cart', '/gallery']
   // Also include product detail pages (dynamic routes starting with /products/)
   const isProductDetailPage = pathname?.startsWith('/products/')
   const isBlackNavbarPage = blackNavbarPages.includes(pathname || '') || isProductDetailPage
