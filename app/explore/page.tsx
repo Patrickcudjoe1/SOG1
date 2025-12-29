@@ -65,6 +65,14 @@ export default function ExplorePage() {
   }
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Close when clicking directly on the backdrop (not on children)
+    if (e.target === e.currentTarget) {
+      handleCloseOverlay()
+    }
+  }
+
+  const handleBackdropTouch = (e: React.TouchEvent<HTMLDivElement>) => {
+    // Close when tapping directly on the backdrop (not on children)
     if (e.target === e.currentTarget) {
       handleCloseOverlay()
     }
@@ -98,7 +106,7 @@ export default function ExplorePage() {
                 >
                   <span className="block">SON OF</span>
                   <span className="block">GOD</span>
-                  <span className="block">PRESENCE</span>
+                  <span className="block">CLOTHING </span>
                   
                 </h1>
 
@@ -144,7 +152,7 @@ export default function ExplorePage() {
       {/* Minimalist Fashion Lookbook Grid */}
       <section className="w-full bg-white">
         <div className="max-w-[1320px] mx-auto px-6 md:px-20 lg:px-24 pt-12 md:pt-2 lg:pt-4 pb-24 md:pb-32 lg:pb-36">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 md:gap-x-10 gap-y-12 md:gap-y-14">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 md:gap-x-10 gap-y-8 md:gap-y-14">
             {exploreImages.map((item) => {
               const isHovered = hoveredIndex === item.index
               const isTapped = tappedIndex === item.index
@@ -156,7 +164,7 @@ export default function ExplorePage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: item.index * 0.05 }}
                   viewport={{ once: true }}
-                  className="relative w-full h-[60vh] md:h-[70vh] min-h-[400px] md:min-h-[500px] overflow-hidden group cursor-pointer"
+                  className="relative w-full h-[70vh] md:h-[75vh] min-h-[450px] md:min-h-[550px] overflow-hidden group cursor-pointer"
                   onMouseEnter={() => setHoveredIndex(item.index)}
                   onMouseLeave={() => setHoveredIndex(null)}
                   onClick={() => handleImageClick(item)}
@@ -194,27 +202,35 @@ export default function ExplorePage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md"
+            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md backdrop-overlay"
+            id="backdrop"
             onClick={handleBackdropClick}
+            onTouchEnd={handleBackdropTouch}
           >
             {/* Close Button */}
             <button
-              onClick={handleCloseOverlay}
-              className="absolute top-4 right-4 md:top-6 md:right-6 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200 backdrop-blur-sm"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleCloseOverlay()
+              }}
+              className="absolute top-4 right-4 md:top-6 md:right-6 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-all duration-200 backdrop-blur-sm touch-manipulation"
               aria-label="Close overlay"
             >
               <X size={24} className="md:w-6 md:h-6" strokeWidth={2} />
             </button>
 
             {/* Image Container */}
-            <div className="absolute inset-0 flex items-center justify-center p-4 md:p-8 lg:p-12">
+            <div 
+              className="absolute inset-0 flex items-center justify-center p-4 md:p-8 lg:p-12"
+              onClick={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => e.stopPropagation()}
+            >
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
-                className="relative w-full h-full max-w-7xl max-h-full flex items-center justify-center"
-                onClick={(e) => e.stopPropagation()}
+                className="relative w-full h-full max-w-7xl max-h-full flex items-center justify-center image-container"
               >
                 <Image
                   src={selectedImage.src}

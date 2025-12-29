@@ -90,14 +90,14 @@ export default function GalleryPage() {
   }
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Close when clicking the backdrop (not the image)
+    // Close when clicking directly on the backdrop (not on children)
     if (e.target === e.currentTarget) {
       handleCloseOverlay()
     }
   }
 
   const handleBackdropTouch = (e: React.TouchEvent<HTMLDivElement>) => {
-    // Close when tapping the backdrop on mobile
+    // Close when tapping directly on the backdrop (not on children)
     if (e.target === e.currentTarget) {
       handleCloseOverlay()
     }
@@ -154,7 +154,7 @@ export default function GalleryPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 lg:gap-4"
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-3 lg:gap-4"
             >
               {filteredImages.map((item, idx) => {
               const isHovered = hoveredId === item.id
@@ -166,8 +166,7 @@ export default function GalleryPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: idx * 0.05 }}
-                    className="relative overflow-hidden group cursor-pointer bg-gray-100"
-                    style={{ aspectRatio: '3/4' }}
+                    className="relative overflow-hidden group cursor-pointer bg-gray-100 aspect-[4/5] md:aspect-[3/4]"
                     onMouseEnter={() => setHoveredId(item.id)}
                     onMouseLeave={() => setHoveredId(null)}
                     onClick={() => handleImageClick(item)}
@@ -231,7 +230,8 @@ export default function GalleryPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md"
+            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md backdrop-overlay"
+            id="backdrop"
             onClick={handleBackdropClick}
             onTouchEnd={handleBackdropTouch}
           >
@@ -278,16 +278,18 @@ export default function GalleryPage() {
             )}
 
             {/* Image Container */}
-            <div className="absolute inset-0 flex items-center justify-center p-4 md:p-8 lg:p-12">
+            <div 
+              className="absolute inset-0 flex items-center justify-center p-4 md:p-8 lg:p-12"
+              onClick={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => e.stopPropagation()}
+            >
               <motion.div
                 key={selectedImage.id}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
-                className="relative w-full h-full max-w-7xl max-h-full flex items-center justify-center"
-                onClick={(e) => e.stopPropagation()}
-                onTouchEnd={(e) => e.stopPropagation()}
+                className="relative w-full h-full max-w-7xl max-h-full flex items-center justify-center image-container"
               >
                 <Image
                   src={selectedImage.image}
