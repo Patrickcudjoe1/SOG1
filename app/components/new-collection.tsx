@@ -16,7 +16,7 @@ export default function NewCollection() {
           className="absolute inset-0 w-full h-full"
         >
           <Image
-            src="/SOG_132.jpg"
+            src="/SOG 3.jpg"
             alt="Lookbook"
             fill
             sizes="100vw"
