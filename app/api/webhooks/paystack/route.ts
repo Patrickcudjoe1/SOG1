@@ -60,16 +60,30 @@ export async function POST(req: NextRequest) {
         const data = event.data
         const reference = data.reference
 
+        console.log('📥 Paystack webhook received - charge.success')
+        console.log('   Reference:', reference)
+        console.log('   Status:', data.status)
+        console.log('   Gateway Response:', data.gateway_response)
+        console.log('   Amount:', data.amount / 100, 'GHS')
+
         // Find order by Paystack reference (using admin SDK to bypass auth)
         const order = await findOrderByPaystackReferenceAdmin(reference)
 
         if (!order) {
           console.error(`❌ Order not found for Paystack reference: ${reference}`)
+          console.error('   This could mean:')
+          console.error('   1. Order was not created before payment')
+          console.error('   2. Reference mismatch between Paystack and our database')
+          console.error('   3. Database query failed to find the order')
           return NextResponse.json(
             { error: "Order not found" },
             { status: 404 }
           )
         }
+
+        console.log('✅ Order found:', order.orderNumber)
+        console.log('   Current payment status:', order.paymentStatus)
+        console.log('   Webhook processed before:', order.webhookProcessed || false)
 
         // 🛑 Idempotency check (prevents double processing)
         if (order.webhookProcessed && order.paymentStatus === "COMPLETED") {
@@ -89,28 +103,43 @@ export async function POST(req: NextRequest) {
         ) {
           const now = new Date().toISOString()
 
-          // ✅ UPDATE ORDER (THIS WAS NOT RUNNING BEFORE)
-          await adminDB.update<Order>(COLLECTIONS.ORDERS, order.id, {
-            paymentStatus: "COMPLETED",
-            status: "PROCESSING",
-            paidAt: now,
-            webhookProcessed: true,
-            updatedAt: now,
-          })
+          console.log(`🔄 Updating order ${order.orderNumber} to COMPLETED...`)
 
-          console.log(`✅ Payment COMPLETED for order ${order.orderNumber}`)
-          console.log(`   Reference: ${reference}`)
-          console.log(`   Amount: ₵${order.totalAmount}`)
+          try {
+            // ✅ UPDATE ORDER
+            await adminDB.update<Order>(COLLECTIONS.ORDERS, order.id, {
+              paymentStatus: "COMPLETED",
+              status: "PROCESSING",
+              paidAt: now,
+              webhookProcessed: true,
+              updatedAt: now,
+            })
 
-          // 📧 Trigger email sending (async, non-blocking)
-          fetch(
-            `${
-              process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-            }/api/orders/${order.id}/send-email`,
-            { method: "POST" }
-          ).catch((err) =>
-            console.error("❌ Failed to trigger email sending:", err)
-          )
+            console.log(`✅ Payment COMPLETED for order ${order.orderNumber}`)
+            console.log(`   Reference: ${reference}`)
+            console.log(`   Amount: ₵${order.totalAmount}`)
+            console.log(`   Paid at: ${now}`)
+
+            // 📧 Trigger email sending (async, non-blocking)
+            console.log('📧 Triggering confirmation email...')
+            fetch(
+              `${
+                process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+              }/api/orders/${order.id}/send-email`,
+              { method: "POST" }
+            ).catch((err) =>
+              console.error("❌ Failed to trigger email sending:", err)
+            )
+          } catch (updateError: any) {
+            console.error('❌ Failed to update order in database:', updateError)
+            console.error('   Order ID:', order.id)
+            console.error('   Error message:', updateError.message)
+            throw updateError
+          }
+        } else {
+          console.warn('⚠️ Payment status not successful')
+          console.warn('   Status:', data.status)
+          console.warn('   Gateway response:', data.gateway_response)
         }
 
         break

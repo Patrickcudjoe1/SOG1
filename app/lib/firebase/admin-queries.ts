@@ -27,11 +27,22 @@ export async function findOrderByStripeSessionAdmin(sessionId: string): Promise<
 
 // Find order by Paystack reference (admin)
 export async function findOrderByPaystackReferenceAdmin(reference: string): Promise<Order | null> {
-  const orders = await adminDB.getMany<Order>(COLLECTIONS.ORDERS, {
+  // Try searching by paystackReference first
+  let orders = await adminDB.getMany<Order>(COLLECTIONS.ORDERS, {
     orderBy: "paystackReference",
     equalTo: reference,
     limitToFirst: 1,
   })
+  
+  // If not found, try searching by orderNumber (fallback for when reference = orderNumber)
+  if (orders.length === 0) {
+    orders = await adminDB.getMany<Order>(COLLECTIONS.ORDERS, {
+      orderBy: "orderNumber",
+      equalTo: reference,
+      limitToFirst: 1,
+    })
+  }
+  
   return orders[0] || null
 }
 
