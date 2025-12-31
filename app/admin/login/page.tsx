@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import { Eye, EyeOff, Shield, Lock } from "lucide-react"
 import { motion } from "framer-motion"
 import { signInWithEmail } from "@/app/lib/firebase/auth"
@@ -88,6 +89,24 @@ export default function AdminLogin() {
       >
         <Card className="border-slate-700 bg-slate-800/50 backdrop-blur-xl shadow-2xl">
           <CardHeader className="space-y-4 text-center pb-8">
+            {/* Logo Image */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mx-auto mb-4"
+            >
+              <div className="relative w-32 h-20 md:w-40 md:h-24">
+                <Image
+                  src="/logo.png"
+                  alt="SON OF GOD Logo"
+                  fill
+                  className="object-contain brightness-0 invert"
+                  priority
+                />
+              </div>
+            </motion.div>
+
             {/* Admin Badge */}
             <motion.div
               initial={{ scale: 0 }}

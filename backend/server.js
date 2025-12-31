@@ -11,8 +11,6 @@ import orderRouter from "./routes/orderroute.js";
 const app = express();
 const port = process.env.PORT || 4000;
 
-connectCloudinary();
-
 app.use(express.json());
 
 const allowedOrigins = [
@@ -51,6 +49,13 @@ app.use("/api/orders", orderRouter);
 const start = async () => {
   try {
     await testConnection();
+    
+    // Initialize Cloudinary before starting server
+    const cloudinaryConnected = await connectCloudinary();
+    if (!cloudinaryConnected) {
+      console.warn("⚠️  Server starting without Cloudinary. Image uploads will fail.");
+    }
+    
     app.listen(port, () => {
       console.log(`Server running on PORT: ${port}`);
     });

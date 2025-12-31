@@ -11,7 +11,8 @@
     "migrate": "drizzle-kit migrate",
     "db:setup": "node setup-database.js",
     "db:check": "node check-database.js",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "test:cloudinary": "node test-cloudinary.js"
   },
   "author": "",
   "license": "ISC",
