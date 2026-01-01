@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { Eye, EyeOff, Shield, Lock } from "lucide-react"
+import { Eye, EyeOff, Lock } from "lucide-react"
 import { motion } from "framer-motion"
 import { signInWithEmail } from "@/app/lib/firebase/auth"
 import { Button } from "@/components/ui/button"
@@ -77,17 +77,14 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-10" />
-      
+    <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md relative z-10"
       >
-        <Card className="border-slate-700 bg-slate-800/50 backdrop-blur-xl shadow-2xl">
+        <Card className="border-white/20 bg-white shadow-2xl">
           <CardHeader className="space-y-4 text-center pb-8">
             {/* Logo Image */}
             <motion.div
@@ -101,25 +98,15 @@ export default function AdminLogin() {
                   src="/logo.png"
                   alt="SON OF GOD Logo"
                   fill
-                  className="object-contain brightness-0 invert"
+                  className="object-contain"
                   priority
                 />
               </div>
             </motion.div>
-
-            {/* Admin Badge */}
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring" }}
-              className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/50"
-            >
-              <Shield className="w-8 h-8 text-white" />
-            </motion.div>
             
             <div>
-              <CardTitle className="text-2xl font-bold text-white">SOG Admin Portal</CardTitle>
-              <CardDescription className="text-slate-400 mt-2">
+              <CardTitle className="text-2xl font-bold text-black">SOG Admin Portal</CardTitle>
+              <CardDescription className="text-gray-600 mt-2">
                 Sign in to access the admin dashboard
               </CardDescription>
             </div>
@@ -131,7 +118,7 @@ export default function AdminLogin() {
                 <motion.div
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="p-4 bg-red-500/10 border border-red-500/50 text-red-400 text-sm rounded-lg flex items-start gap-2"
+                  className="p-4 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg flex items-start gap-2"
                 >
                   <Lock className="w-4 h-4 mt-0.5 flex-shrink-0" />
                   <span>{error}</span>
@@ -140,7 +127,7 @@ export default function AdminLogin() {
 
               {/* Email Input */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-slate-300">
+                <label className="block text-sm font-medium text-black">
                   Email Address
                 </label>
                 <Input
@@ -148,14 +135,14 @@ export default function AdminLogin() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-blue-500/20"
+                  className="bg-white border-gray-300 text-black placeholder:text-gray-400 focus:border-black focus:ring-black/20"
                   placeholder="admin@example.com"
                 />
               </div>
 
               {/* Password Input */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-slate-300">
+                <label className="block text-sm font-medium text-black">
                   Password
                 </label>
                 <div className="relative">
@@ -164,13 +151,13 @@ export default function AdminLogin() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-blue-500/20 pr-10"
+                    className="bg-white border-gray-300 text-black placeholder:text-gray-400 focus:border-black focus:ring-black/20 pr-10"
                     placeholder="Enter your password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors"
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -182,7 +169,7 @@ export default function AdminLogin() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-medium py-6 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30"
+                className="w-full bg-black hover:bg-gray-900 text-white font-medium py-6 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <span className="flex items-center gap-2">
@@ -199,11 +186,11 @@ export default function AdminLogin() {
             </form>
 
             {/* Security Notice */}
-            <div className="mt-6 p-4 bg-slate-900/50 border border-slate-700 rounded-lg">
+            <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
               <div className="flex items-start gap-3">
-                <Shield className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                <div className="text-xs text-slate-400 leading-relaxed">
-                  <p className="font-medium text-slate-300 mb-1">Secure Admin Access</p>
+                <Lock className="w-5 h-5 text-black flex-shrink-0 mt-0.5" />
+                <div className="text-xs text-gray-600 leading-relaxed">
+                  <p className="font-medium text-black mb-1">Secure Admin Access</p>
                   <p>
                     This portal is restricted to authorized administrators only. 
                     All login attempts are monitored and logged.
@@ -215,7 +202,7 @@ export default function AdminLogin() {
         </Card>
 
         {/* Footer */}
-        <p className="text-center text-sm text-slate-500 mt-6">
+        <p className="text-center text-sm text-gray-400 mt-6">
           © {new Date().getFullYear()} Admin Portal. All rights reserved.
         </p>
       </motion.div>
