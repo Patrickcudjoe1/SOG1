@@ -104,7 +104,7 @@ export default function AdminLogin() {
                 <Image
                   src="/logo.png"
                   alt="SON OF GOD Logo"
-                  fill
+                  fill 
                   className="object-contain"
                   priority
                 />

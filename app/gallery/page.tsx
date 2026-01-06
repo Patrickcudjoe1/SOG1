@@ -100,15 +100,17 @@ export default function GalleryPage() {
   }
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Close when clicking directly on the backdrop (not on children)
-    if (e.target === e.currentTarget) {
+    // Close when clicking on the backdrop itself (not on children)
+    const target = e.target as HTMLElement
+    if (target.id === 'backdrop' || target.classList.contains('backdrop-overlay')) {
       handleCloseOverlay()
     }
   }
 
   const handleBackdropTouch = (e: React.TouchEvent<HTMLDivElement>) => {
-    // Close when tapping directly on the backdrop (not on children)
-    if (e.target === e.currentTarget) {
+    // Close when tapping on the backdrop itself (not on children)
+    const target = e.target as HTMLElement
+    if (target.id === 'backdrop' || target.classList.contains('backdrop-overlay')) {
       handleCloseOverlay()
     }
   }
@@ -243,15 +245,21 @@ export default function GalleryPage() {
             className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md backdrop-overlay"
             id="backdrop"
             onClick={handleBackdropClick}
-            onTouchEnd={handleBackdropTouch}
+            onTouchStart={handleBackdropTouch}
           >
             {/* Close Button */}
             <button
               onClick={(e) => {
+                e.preventDefault()
                 e.stopPropagation()
                 handleCloseOverlay()
               }}
-              className="absolute top-4 right-4 md:top-6 md:right-6 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-all duration-200 backdrop-blur-sm touch-manipulation"
+              onTouchStart={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                handleCloseOverlay()
+              }}
+              className="absolute top-4 right-4 md:top-6 md:right-6 z-[60] w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-all duration-200 backdrop-blur-sm touch-manipulation cursor-pointer"
               aria-label="Close overlay"
             >
               <X size={24} className="md:w-6 md:h-6" strokeWidth={2} />
@@ -262,10 +270,16 @@ export default function GalleryPage() {
               <>
                 <button
                   onClick={(e) => {
+                    e.preventDefault()
                     e.stopPropagation()
                     navigateImage('prev')
                   }}
-                  className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200 backdrop-blur-sm"
+                  onTouchStart={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    navigateImage('prev')
+                  }}
+                  className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-[60] w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-all duration-200 backdrop-blur-sm cursor-pointer touch-manipulation"
                   aria-label="Previous image"
                 >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -274,10 +288,16 @@ export default function GalleryPage() {
                 </button>
                 <button
                   onClick={(e) => {
+                    e.preventDefault()
                     e.stopPropagation()
                     navigateImage('next')
                   }}
-                  className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200 backdrop-blur-sm"
+                  onTouchStart={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    navigateImage('next')
+                  }}
+                  className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-[60] w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-all duration-200 backdrop-blur-sm cursor-pointer touch-manipulation"
                   aria-label="Next image"
                 >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -289,9 +309,7 @@ export default function GalleryPage() {
 
             {/* Image Container */}
             <div 
-              className="absolute inset-0 flex items-center justify-center p-4 md:p-8 lg:p-12"
-              onClick={(e) => e.stopPropagation()}
-              onTouchEnd={(e) => e.stopPropagation()}
+              className="absolute inset-0 flex items-center justify-center p-4 md:p-8 lg:p-12 pointer-events-none"
             >
               <motion.div
                 key={selectedImage.id}
@@ -299,7 +317,9 @@ export default function GalleryPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
-                className="relative w-full h-full max-w-7xl max-h-full flex items-center justify-center image-container"
+                className="relative w-full h-full max-w-7xl max-h-full flex items-center justify-center image-container pointer-events-auto"
+                onClick={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
               >
                 <Image
                   src={selectedImage.image}
@@ -334,7 +354,7 @@ export default function GalleryPage() {
             </div>
 
             {/* Image Counter */}
-            <div className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-10 text-white text-sm md:text-base font-light tracking-widest">
+            <div className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-[60] text-white text-sm md:text-base font-light tracking-widest pointer-events-none">
               {filteredImages.findIndex(img => img.id === selectedImage.id) + 1} / {filteredImages.length}
             </div>
           </motion.div>
