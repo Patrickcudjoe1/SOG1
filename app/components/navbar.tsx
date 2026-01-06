@@ -171,7 +171,7 @@ export default function SONOFGODNavbar({ hasHeroSection }: NavbarProps) {
                 >
                   <div className="flex flex-col px-4 py-3 space-y-3 text-xs tracking-widest uppercase">
                     <Link href="/hoodies" className="hover:opacity-60">
-                      HOODIES
+                      HOODIES/SWEATSHIRTS
                     </Link>
                     <Link href="/jerseys" className="hover:opacity-60">
                       JERSEYS

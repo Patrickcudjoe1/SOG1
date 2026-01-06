@@ -88,8 +88,13 @@ export function getAdminDatabase(): Database {
 // Verify ID token
 export async function verifyIdToken(idToken: string) {
   try {
+    if (!idToken || idToken.trim() === '') {
+      console.error('❌ Empty or invalid token provided')
+      return null
+    }
+
     const auth = getAdminAuth()
-    // Don't check revoked to avoid strict token expiration
+    // Verify token (checkRevoked = false to allow recently expired tokens)
     const decodedToken = await auth.verifyIdToken(idToken, false)
     console.log('✅ Token verified successfully for user:', decodedToken.uid)
     return decodedToken
@@ -98,9 +103,15 @@ export async function verifyIdToken(idToken: string) {
     if (error.code === 'auth/id-token-expired') {
       console.error('❌ Token expired - client needs to refresh token')
     } else if (error.code === 'auth/argument-error') {
-      console.error('❌ Invalid token format')
+      console.error('❌ Invalid token format:', error.message)
+    } else if (error.code === 'auth/invalid-credential') {
+      console.error('❌ Invalid credential - token may be malformed')
     } else {
-      console.error('❌ Token verification error:', error.code || error.message)
+      console.error('❌ Token verification error:', {
+        code: error.code,
+        message: error.message,
+        tokenLength: idToken?.length || 0
+      })
     }
     return null
   }

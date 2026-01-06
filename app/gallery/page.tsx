@@ -8,48 +8,58 @@ import { motion, AnimatePresence } from "framer-motion"
 
 interface GalleryImage {
   id: number
-  label: string
   image: string
   number: string
-  category: 'Presence' | 'Trinity'
+  category: 'Presence' | 'Harmony'
 }
 
-const categories: ('Presence' | 'Trinity')[] = ['Presence', 'Trinity']
+const categories: ('Presence' | 'Harmony')[] = ['Presence', 'Harmony']
 
 export default function GalleryPage() {
   const galleryImages: GalleryImage[] = [
-    // Presence Collection
-    { id: 13, label: "Wisdom", image: "/presence/ddd.jpg", number: "01", category: "Presence" },
-    { id: 14, label: "Mercy", image: "/presence/fff.jpg", number: "02", category: "Presence" },
-    { id: 15, label: "Glory", image: "/presence/shirt-black.png", number: "03", category: "Presence" },
-    { id: 16, label: "Honor", image: "/presence/shirt-pink.png", number: "04", category: "Presence" },
-    { id: 17, label: "Praise", image: "/presence/shirt-white.png", number: "05", category: "Presence" },
-    { id: 18, label: "Worship", image: "/presence/SOG_30.jpg", number: "06", category: "Presence" },
-    { id: 19, label: "Victory", image: "/gallery/SOG_90-1.jpg", number: "07", category: "Presence" },
-    { id: 20, label: "Crown", image: "/gallery/SOG-_30.jpg", number: "08", category: "Presence" },
-    
-    // Trinity Collection
-    { id: 21, label: "Crown", image: "/gallery/SOG14.jpg", number: "01", category: "Trinity" },
-    { id: 22, label: "Faith", image: "/gallery/SOG107.jpg", number: "02", category: "Trinity" },
-    { id: 23, label: "Grace", image: "/gallery/SOG999.jpg", number: "03", category: "Trinity" },
-    { id: 24, label: "Purpose", image: "/gallery/SOG_16.jpg", number: "04", category: "Trinity" },
-    { id: 25, label: "Light", image: "/gallery/SOG_142.jpg", number: "05", category: "Trinity" },
-    { id: 26, label: "Devotion", image: "/gallery/IMG_9419.JPG", number: "06", category: "Trinity" },
-    { id: 27, label: "Spirit", image: "/gallery/IMG_9422.JPG", number: "07", category: "Trinity" },
-    { id: 28, label: "Truth", image: "/gallery/IMG_9577.JPG", number: "08", category: "Trinity" },
-    { id: 29, label: "Love", image: "/gallery/IMG_2831.JPG", number: "09", category: "Trinity" },
-    { id: 30, label: "Peace", image: "/gallery/SOG-_43.jpg", number: "10", category: "Trinity" },
-    { id: 31, label: "Hope", image: "/gallery/SOG-3-Digit-Serial-Number-_17.jpg", number: "11", category: "Trinity" },
-    { id: 32, label: "Joy", image: "/gallery/SOG-3-Digit-Serial-Number-_23.jpg", number: "12", category: "Trinity" },
-    { id: 33, label: "Strength", image: "/gallery/SOG-3-Digit-Serial-Number-_37.jpg", number: "13", category: "Trinity" },
-    { id: 34, label: "Wisdom", image: "/gallery/SOG-3-Digit-Serial-Number-_54.jpg", number: "14", category: "Trinity" },
-    { id: 35, label: "Mercy", image: "/gallery/SOG_75-1.jpg", number: "15", category: "Trinity" },
-    { id: 36, label: "Glory", image: "/gallery/SOG-3-Digit-Serial-Number-_63.jpg", number: "16", category: "Trinity" },
-    { id: 37, label: "Honor", image: "/gallery/SOG_135.jpg", number: "17", category: "Trinity" },
-    { id: 38, label: "Praise", image: "/gallery/SOG_118.jpg", number: "18", category: "Trinity" },
+    // Presence Collection - Images from gallery folder
+    { id: 1, image: "/gallery/ddd.jpg", number: "01", category: "Presence" },
+    { id: 2, image: "/gallery/fff.jpg", number: "02", category: "Presence" },
+    { id: 3, image: "/gallery/SOG_90-1.jpg", number: "03", category: "Presence" },
+    { id: 4, image: "/gallery/SOG-_30.jpg", number: "04", category: "Presence" },
+    { id: 5, image: "/gallery/SOG_118.jpg", number: "05", category: "Presence" },
+    { id: 6, image: "/gallery/SOG_135.jpg", number: "06", category: "Presence" },
+    { id: 7, image: "/gallery/SOG_137.jpg", number: "07", category: "Presence" },
+    { id: 8, image: "/gallery/SOG_142.jpg", number: "08", category: "Presence" },
+    { id: 9, image: "/gallery/SOG_124.jpg", number: "09", category: "Presence" },
+    { id: 10, image: "/gallery/SOG_16.jpg", number: "10", category: "Presence" },
+    { id: 11, image: "/gallery/SOG_75-1.jpg", number: "11", category: "Presence" },
+    { id: 12, image: "/gallery/SOG_82r.jpg", number: "12", category: "Presence" },
+    { id: 13, image: "/gallery/SOG_88.jpg", number: "13", category: "Presence" },
+    { id: 14, image: "/gallery/SOG_99.jpg", number: "14", category: "Presence" },
+    { id: 15, image: "/gallery/SOG _67.jpg", number: "15", category: "Presence" },
+    { id: 16, image: "/gallery/SOG _74.jpg", number: "16", category: "Presence" },
+    { id: 17, image: "/gallery/SOG_1000.jpg", number: "17", category: "Presence" },
+    { id: 18, image: "/gallery/SOG_9.jpg", number: "18", category: "Presence" },
+  
+    // Harmony Collection - Images from gallery folder
+    { id: 21, image: "/gallery/SOG-_43.jpg", number: "01", category: "Harmony" },
+    { id: 22, image: "/gallery/SOG107.jpg", number: "02", category: "Harmony" },
+    { id: 23, image: "/gallery/SOG999.jpg", number: "03", category: "Harmony" },
+    { id: 24, image: "/gallery/SOG14.jpg", number: "04", category: "Harmony" },
+    { id: 25, image: "/gallery/SOG600.jpg", number: "05", category: "Harmony" },
+    { id: 26, image: "/gallery/SOG600-2.jpg", number: "06", category: "Harmony" },
+    { id: 27, image: "/gallery/SOG800.jpg", number: "07", category: "Harmony" },
+    { id: 28, image: "/gallery/SOG800-2.jpg", number: "08", category: "Harmony" },
+    { id: 29, image: "/gallery/IMG_2831.JPG", number: "09", category: "Harmony" },
+    { id: 30, image: "/gallery/IMG_9419.JPG", number: "10", category: "Harmony" },
+    { id: 31, image: "/gallery/IMG_9422.JPG", number: "11", category: "Harmony" },
+    { id: 32, image: "/gallery/IMG_9577.JPG", number: "12", category: "Harmony" },
+    { id: 33, image: "/gallery/SOG-3-Digit-Serial-Number-_17.jpg", number: "13", category: "Harmony" },
+    { id: 34, image: "/gallery/SOG-3-Digit-Serial-Number-_23.jpg", number: "14", category: "Harmony" },
+    { id: 35, image: "/gallery/SOG-3-Digit-Serial-Number-_37.jpg", number: "15", category: "Harmony" },
+    { id: 36, image: "/gallery/SOG-3-Digit-Serial-Number-_47.jpg", number: "16", category: "Harmony" },
+    { id: 37, image: "/gallery/SOG-3-Digit-Serial-Number-_54.jpg", number: "17", category: "Harmony" },
+    { id: 38, image: "/gallery/SOG-3-Digit-Serial-Number-_63.jpg", number: "18", category: "Harmony" },
+   
   ]
 
-  const [selectedCategory, setSelectedCategory] = useState<'Presence' | 'Trinity'>('Presence')
+  const [selectedCategory, setSelectedCategory] = useState<'Presence' | 'Harmony'>('Presence')
 
   const [hoveredId, setHoveredId] = useState<number | null>(null)
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null)
@@ -176,7 +186,7 @@ export default function GalleryPage() {
                   <div className="relative w-full h-full">
                     <Image
                       src={item.image || "/gallery/ddd.jpg"}
-                      alt={item.label}
+                      alt={`Gallery image ${item.number}`}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 33vw"
                       className="object-cover transition-all duration-700 group-hover:scale-105"
@@ -293,7 +303,7 @@ export default function GalleryPage() {
               >
                 <Image
                   src={selectedImage.image}
-                  alt={selectedImage.label}
+                  alt={`Gallery image ${selectedImage.number}`}
                   fill
                   sizes="100vw"
                   className="object-contain"
@@ -318,9 +328,6 @@ export default function GalleryPage() {
                     }}
                   >
                     Look {selectedImage.number}
-                  </div>
-                  <div className="text-white/80 text-sm md:text-base mt-2 font-light tracking-wide">
-                    {selectedImage.label}
                   </div>
                 </motion.div>
               </motion.div>

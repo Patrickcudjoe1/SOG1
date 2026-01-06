@@ -11,15 +11,29 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const validatedData = signinSchema.parse(body)
 
+    // Validate token format
+    if (!validatedData.idToken || validatedData.idToken.trim() === '') {
+      console.error('❌ Empty token received')
+      return NextResponse.json(
+        { error: 'Invalid token: Token is empty' },
+        { status: 401 }
+      )
+    }
+
+    console.log('🔐 Verifying token (length:', validatedData.idToken.length, ')')
+
     // Verify the Firebase ID token
     const decodedToken = await verifyIdToken(validatedData.idToken)
 
     if (!decodedToken) {
+      console.error('❌ Token verification failed')
       return NextResponse.json(
-        { error: 'Invalid or expired token' },
+        { error: 'Invalid or expired token. Please try logging in again.' },
         { status: 401 }
       )
     }
+
+    console.log('✅ Token verified for user:', decodedToken.uid)
 
     // Get user details from Firebase
     const adminAuth = getAdminAuth()

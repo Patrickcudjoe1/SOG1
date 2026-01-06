@@ -27,7 +27,9 @@ export default function AdminLogin() {
     try {
       // Sign in with Firebase
       const userCredential = await signInWithEmail(email, password)
-      const idToken = await userCredential.user.getIdToken()
+      
+      // Force refresh token to ensure it's fresh and not expired
+      const idToken = await userCredential.user.getIdToken(true)
 
       // Verify admin access with server
       const response = await fetch("/api/auth/signin", {
@@ -41,6 +43,11 @@ export default function AdminLogin() {
       const data = await response.json()
 
       if (!response.ok) {
+        console.error('❌ Signin failed:', {
+          status: response.status,
+          error: data.error,
+          data
+        })
         setError(data.error || "Invalid credentials")
         return
       }

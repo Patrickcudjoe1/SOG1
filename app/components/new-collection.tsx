@@ -47,8 +47,8 @@ export default function NewCollection() {
               textShadow: '0 2px 8px rgba(0,0,0,0.7)'
             }}
           >
-            <span className="block md:inline">The New</span>
-            <span className="block md:inline md:ml-3">Collection 777</span>
+            <span className="block md:inline">The SOG</span>
+            <span className="block md:inline md:ml-3">CLOTHING COLLECTION</span>
           </motion.h2>
           
           {/* Buttons - At Bottom */}

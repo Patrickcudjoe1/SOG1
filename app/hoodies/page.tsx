@@ -8,8 +8,8 @@ import type { Product } from "../lib/products"
 const hoodiesProducts: Product[] = [
   {
     id: "hoodie-1",
-    name: " HOODIE-BLACK",
-    price: 155,
+    name: " HOODIE-BLACK WITH CAP",
+    price: 500,
     image: "/hoodies/hoodie-1.jpg",
     category: "SON OF GOD ",
     description: "Essential pullover hoodie with premium cotton",
@@ -18,8 +18,8 @@ const hoodiesProducts: Product[] = [
   },
   {
     id: "hoodie-2",
-    name: " HOODIE-WHITE",
-    price: 175,
+    name: " HOODIE-WHITE WITH CAP",
+    price: 500,
     image: "/hoodies/hoodie-2.jpg",
     category: "SON OF GOD ",
     description: "Versatile zip-up hoodie for everyday wear",
@@ -28,18 +28,18 @@ const hoodiesProducts: Product[] = [
   },
   {
     id: "hoodie-3",
-    name: " HOODIE-CREAM",
-    price: 165,
+    name: " HOODIE-WHITE WITHOUT CAP",
+    price: 500,
     image: "/hoodies/hoodie-3.jpg",
     category: "SON OF GOD ",
     description: "Comfortable oversized fit hoodie",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-    colors: ["Black", "Gray", "Navy"],
+   
   },
   {
     id: "hoodie-4",
-    name: " HOODIE-NAVY",
-    price: 145,
+    name: " HOODIE-BLACK WITHOUT CAP",
+    price: 500,
     image: "/hoodies/hoodie-4.jpg",
     category: "SON OF GOD ",
     description: "Modern crop-length hoodie",
@@ -48,8 +48,8 @@ const hoodiesProducts: Product[] = [
   },
   {
     id: "hoodie-5",
-    name: " HOODIE-PINK",
-    price: 195,
+    name: " HOODIE-CREAM WITHOUT CAP",
+    price: 500,
     image: "/hoodies/hoodie-5.jpg",
     category: "SON OF GOD ",
     description: "Warm fleece-lined hoodie for cooler weather",
@@ -58,8 +58,8 @@ const hoodiesProducts: Product[] = [
   },
   {
     id: "hoodie-6",
-    name: " HOODIE-GREEN",
-    price: 160,
+    name: " HOODIE-BLACK WITH CAP",
+    price: 500,
     image: "/hoodies/hoodie-6.jpg",
     category: "SON OF GOD ",
     description: "Clean design hoodie with minimal branding",
