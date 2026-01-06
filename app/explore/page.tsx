@@ -28,6 +28,8 @@ export default function ExplorePage() {
     { src: "/explore/SOG 3 Digit Serial Number _41.jpg", index: 10 },
     { src: "/explore/SOG 3 Digit Serial Number _48.jpg", index: 11 },
     { src: "/explore/SOG 3 Digit Serial Number _80.jpg", index: 12 },
+    { src: "/explore/trinity-black-f.png", index: 13 },
+    { src: "/explore/trinity-brown-f.png", index: 14 },
   ]
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
