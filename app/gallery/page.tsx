@@ -317,9 +317,15 @@ export default function GalleryPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
-                className="relative w-full h-full max-w-7xl max-h-full flex items-center justify-center image-container pointer-events-auto"
-                onClick={(e) => e.stopPropagation()}
-                onTouchStart={(e) => e.stopPropagation()}
+                className="relative w-full h-full max-w-7xl max-h-full flex items-center justify-center image-container pointer-events-auto cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleCloseOverlay()
+                }}
+                onTouchStart={(e) => {
+                  e.stopPropagation()
+                  handleCloseOverlay()
+                }}
               >
                 <Image
                   src={selectedImage.image}
