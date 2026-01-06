@@ -152,7 +152,7 @@ export default function ExplorePage() {
       {/* Minimalist Fashion Lookbook Grid */}
       <section className="w-full bg-white">
         <div className="max-w-[1320px] mx-auto px-6 md:px-20 lg:px-24 pt-12 md:pt-2 lg:pt-4 pb-24 md:pb-32 lg:pb-36">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 md:gap-x-10 gap-y-8 md:gap-y-14">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-3 lg:gap-4">
             {exploreImages.map((item) => {
               const isHovered = hoveredIndex === item.index
               const isTapped = tappedIndex === item.index
@@ -164,27 +164,32 @@ export default function ExplorePage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: item.index * 0.05 }}
                   viewport={{ once: true }}
-                  className="relative w-full h-[70vh] md:h-[75vh] min-h-[450px] md:min-h-[550px] overflow-hidden group cursor-pointer"
+                  className="relative overflow-hidden group cursor-pointer bg-gray-100 aspect-[4/5] md:aspect-[3/4]"
                   onMouseEnter={() => setHoveredIndex(item.index)}
                   onMouseLeave={() => setHoveredIndex(null)}
                   onClick={() => handleImageClick(item)}
                   onTouchStart={() => handleImageTap(item.index)}
                 >
-                  <Image
-                    src={item.src}
-                    alt={`Editorial ${item.index + 1}`}
-                    fill
-                    sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 33vw"
-                    className="object-cover object-center transition-all duration-700 group-hover:scale-105"
-                    style={{
-                      filter: 'brightness(0.95) contrast(0.9) saturate(0.7)',
-                    }}
-                  />
+                  {/* Image with Muted Filter */}
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={item.src}
+                      alt={`Editorial ${item.index + 1}`}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 33vw"
+                      className="object-cover transition-all duration-700 group-hover:scale-105"
+                      style={{
+                        filter: 'brightness(0.95) contrast(0.9) saturate(0.8)',
+                      }}
+                    />
+                    {/* Cool grey/blue overlay for muted aesthetic */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-gray-900/5 to-gray-800/10 mix-blend-overlay" />
+                  </div>
                   
                   {/* Semi-transparent overlay on hover (desktop) or tap (mobile) */}
                   <div 
                     className={`absolute inset-0 bg-black/30 transition-opacity duration-300 ${
-                      isHovered || isTapped ? 'opacity-100' : 'opacity-0'
+                      isHovered || isTapped ? 'opacity-100' : 'opacity-0 md:opacity-0'
                     }`}
                   />
                 </motion.div>
