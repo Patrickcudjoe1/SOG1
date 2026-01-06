@@ -15,18 +15,19 @@ interface ExploreImage {
 
 export default function ExplorePage() {
   const exploreImages: ExploreImage[] = [
-    { src: "/gallery/ddd.jpg", index: 0 },
-    { src: "/gallery/fff.jpg", index: 1 },
-    { src: "/gallery/SOG107.jpg", index: 2 },
-    { src: "/gallery/SOG14.jpg", index: 3 },
-    { src: "/gallery/IMG_9419.JPG", index: 4 },
-    { src: "/gallery/IMG_9422.JPG", index: 5 },
-    { src: "/gallery/IMG_9577.JPG", index: 6 },
-    { src: "/gallery/IMG_2831.JPG", index: 7 },
-    { src: "/gallery/SOG-_30.jpg", index: 8 },
-    { src: "/gallery/SOG999.jpg", index: 9 },
-    { src: "/gallery/SOG_16.jpg", index: 10 },
-    { src: "/gallery/SOG_142.jpg", index: 11 },
+    { src: "/explore/SOG _31.jpg", index: 0 },
+    { src: "/explore/SOG _36.jpg", index: 1 },
+    { src: "/explore/SOG _38.jpg", index: 2 },
+    { src: "/explore/SOG _46.jpg", index: 3 },
+    { src: "/explore/SOG _61.jpg", index: 4 },
+    { src: "/explore/SOG _67.jpg", index: 5 },
+    { src: "/explore/SOG _74.jpg", index: 6 },
+    { src: "/explore/SOG _9.jpg", index: 7 },
+    { src: "/explore/SOG 3 Digit Serial Number _29.jpg", index: 8 },
+    { src: "/explore/SOG 3 Digit Serial Number _33.jpg", index: 9 },
+    { src: "/explore/SOG 3 Digit Serial Number _41.jpg", index: 10 },
+    { src: "/explore/SOG 3 Digit Serial Number _48.jpg", index: 11 },
+    { src: "/explore/SOG 3 Digit Serial Number _80.jpg", index: 12 },
   ]
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)

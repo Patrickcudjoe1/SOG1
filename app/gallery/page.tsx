@@ -10,10 +10,10 @@ interface GalleryImage {
   id: number
   image: string
   number: string
-  category: 'Presence' | 'Harmony'
+  category: 'Presence' | 'Trinity'
 }
 
-const categories: ('Presence' | 'Harmony')[] = ['Presence', 'Harmony']
+const categories: ('Presence' | 'Trinity')[] = ['Presence', 'Trinity']
 
 export default function GalleryPage() {
   const galleryImages: GalleryImage[] = [
@@ -37,29 +37,29 @@ export default function GalleryPage() {
     { id: 17, image: "/gallery/SOG_1000.jpg", number: "17", category: "Presence" },
     { id: 18, image: "/gallery/SOG_9.jpg", number: "18", category: "Presence" },
   
-    // Harmony Collection - Images from gallery folder
-    { id: 21, image: "/gallery/SOG-_43.jpg", number: "01", category: "Harmony" },
-    { id: 22, image: "/gallery/SOG107.jpg", number: "02", category: "Harmony" },
-    { id: 23, image: "/gallery/SOG999.jpg", number: "03", category: "Harmony" },
-    { id: 24, image: "/gallery/SOG14.jpg", number: "04", category: "Harmony" },
-    { id: 25, image: "/gallery/SOG600.jpg", number: "05", category: "Harmony" },
-    { id: 26, image: "/gallery/SOG600-2.jpg", number: "06", category: "Harmony" },
-    { id: 27, image: "/gallery/SOG800.jpg", number: "07", category: "Harmony" },
-    { id: 28, image: "/gallery/SOG800-2.jpg", number: "08", category: "Harmony" },
-    { id: 29, image: "/gallery/IMG_2831.JPG", number: "09", category: "Harmony" },
-    { id: 30, image: "/gallery/IMG_9419.JPG", number: "10", category: "Harmony" },
-    { id: 31, image: "/gallery/IMG_9422.JPG", number: "11", category: "Harmony" },
-    { id: 32, image: "/gallery/IMG_9577.JPG", number: "12", category: "Harmony" },
-    { id: 33, image: "/gallery/SOG-3-Digit-Serial-Number-_17.jpg", number: "13", category: "Harmony" },
-    { id: 34, image: "/gallery/SOG-3-Digit-Serial-Number-_23.jpg", number: "14", category: "Harmony" },
-    { id: 35, image: "/gallery/SOG-3-Digit-Serial-Number-_37.jpg", number: "15", category: "Harmony" },
-    { id: 36, image: "/gallery/SOG-3-Digit-Serial-Number-_47.jpg", number: "16", category: "Harmony" },
-    { id: 37, image: "/gallery/SOG-3-Digit-Serial-Number-_54.jpg", number: "17", category: "Harmony" },
-    { id: 38, image: "/gallery/SOG-3-Digit-Serial-Number-_63.jpg", number: "18", category: "Harmony" },
+    // Trinity Collection - Images from gallery folder
+    { id: 21, image: "/gallery/SOG-_43.jpg", number: "01", category: "Trinity" },
+    { id: 22, image: "/gallery/SOG107.jpg", number: "02", category: "Trinity" },
+    { id: 23, image: "/gallery/SOG999.jpg", number: "03", category: "Trinity" },
+    { id: 24, image: "/gallery/SOG14.jpg", number: "04", category: "Trinity" },
+    { id: 25, image: "/gallery/SOG600.jpg", number: "05", category: "Trinity" },
+    { id: 26, image: "/gallery/SOG600-2.jpg", number: "06", category: "Trinity" },
+    { id: 27, image: "/gallery/SOG800.jpg", number: "07", category: "Trinity" },
+    { id: 28, image: "/gallery/SOG800-2.jpg", number: "08", category: "Trinity" },
+    { id: 29, image: "/gallery/IMG_2831.JPG", number: "09", category: "Trinity" },
+    { id: 30, image: "/gallery/IMG_9419.JPG", number: "10", category: "Trinity" },
+    { id: 31, image: "/gallery/IMG_9422.JPG", number: "11", category: "Trinity" },
+    { id: 32, image: "/gallery/IMG_9577.JPG", number: "12", category: "Trinity" },
+    { id: 33, image: "/gallery/SOG-3-Digit-Serial-Number-_17.jpg", number: "13", category: "Trinity" },
+    { id: 34, image: "/gallery/SOG-3-Digit-Serial-Number-_23.jpg", number: "14", category: "Trinity" },
+    { id: 35, image: "/gallery/SOG-3-Digit-Serial-Number-_37.jpg", number: "15", category: "Trinity" },
+    { id: 36, image: "/gallery/SOG-3-Digit-Serial-Number-_47.jpg", number: "16", category: "Trinity" },
+    { id: 37, image: "/gallery/SOG-3-Digit-Serial-Number-_54.jpg", number: "17", category: "Trinity" },
+    { id: 38, image: "/gallery/SOG-3-Digit-Serial-Number-_63.jpg", number: "18", category: "Trinity" },
    
   ]
 
-  const [selectedCategory, setSelectedCategory] = useState<'Presence' | 'Harmony'>('Presence')
+  const [selectedCategory, setSelectedCategory] = useState<'Presence' | 'Trinity'>('Presence')
 
   const [hoveredId, setHoveredId] = useState<number | null>(null)
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null)
