@@ -9,7 +9,9 @@ import ClientRoot from "./components/ClientRoot"
 const playfairDisplay = Playfair_Display({ 
   subsets: ['latin'], 
   variable: '--font-heading',
-  weight: ['400', '500', '600', '700', '900']
+  weight: ['400', '500', '600', '700', '900'],
+  display: 'swap',
+  preload: true,
 })
 
 // Lato for body text
@@ -17,6 +19,8 @@ const lato = Lato({
   subsets: ["latin"],
   weight: ["300", "400", "700"],
   variable: "--font-body",
+  display: 'swap',
+  preload: true,
 })
 
 // Great Vibes for accent/buttons
@@ -24,6 +28,8 @@ const greatVibes = Great_Vibes({
   subsets: ["latin"],
   weight: ["400"],
   variable: "--font-accent",
+  display: 'swap',
+  preload: false, // Not critical, can load later
 })
 
 
@@ -33,6 +39,13 @@ export const metadata: Metadata = {
   description:
     "Walk in faith. Wear your purpose. A Christian clothing brand inspired by devotion, strength, and grace.",
   generator: "v0.app",
+  keywords: ["Christian clothing", "faith-based fashion", "Son of God", "religious apparel"],
+  authors: [{ name: "Son of God Clothing" }],
+  openGraph: {
+    title: "Son of God Clothing",
+    description: "Walk in faith. Wear your purpose.",
+    type: "website",
+  },
 }
 
 export const viewport: Viewport = {

@@ -177,7 +177,7 @@ export default function GalleryPage() {
                     key={item.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: idx * 0.05 }}
+                    transition={{ duration: 0.3, delay: Math.min(idx * 0.02, 0.3) }}
                     className="relative overflow-hidden group cursor-pointer bg-gray-100 aspect-[4/5] md:aspect-[3/4]"
                     onMouseEnter={() => setHoveredId(item.id)}
                     onMouseLeave={() => setHoveredId(null)}
@@ -192,6 +192,7 @@ export default function GalleryPage() {
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 33vw"
                       className="object-cover transition-all duration-700 group-hover:scale-105"
+                      loading={idx < 6 ? "eager" : "lazy"}
                       style={{
                         filter: 'brightness(0.95) contrast(0.9) saturate(0.8)',
                       }}

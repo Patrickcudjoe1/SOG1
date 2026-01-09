@@ -165,8 +165,8 @@ export default function ExplorePage() {
                   key={item.index}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: item.index * 0.05 }}
-                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: Math.min(item.index * 0.02, 0.3) }}
+                  viewport={{ once: true, margin: "50px" }}
                   className="relative overflow-hidden group cursor-pointer bg-gray-100 aspect-[4/5] md:aspect-[3/4]"
                   onMouseEnter={() => setHoveredIndex(item.index)}
                   onMouseLeave={() => setHoveredIndex(null)}
@@ -181,6 +181,7 @@ export default function ExplorePage() {
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 33vw"
                       className="object-cover transition-all duration-700 group-hover:scale-105"
+                      loading={item.index < 6 ? "eager" : "lazy"}
                       style={{
                         filter: 'brightness(0.95) contrast(0.9) saturate(0.8)',
                       }}
