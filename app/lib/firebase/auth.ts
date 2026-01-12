@@ -22,10 +22,15 @@ const getFirebaseErrorMessage = (errorCode: string): string => {
     'auth/user-not-found': 'Invalid email or password',
     'auth/wrong-password': 'Invalid email or password',
     'auth/invalid-credential': 'Invalid email or password',
+    'auth/invalid-verification-code': 'Invalid verification code',
+    'auth/invalid-verification-id': 'Invalid verification ID',
     'auth/too-many-requests': 'Too many failed attempts. Please try again later',
     'auth/network-request-failed': 'Network error. Please check your connection',
+    'auth/app-not-authorized': 'Firebase app not authorized. Please check your configuration.',
+    'auth/api-key-not-valid': 'Firebase API key is not valid. Please check your configuration.',
+    'auth/project-not-found': 'Firebase project not found. Please check your configuration.',
   }
-  return errorMessages[errorCode] || 'An error occurred. Please try again.'
+  return errorMessages[errorCode] || `An error occurred: ${errorCode || 'Unknown error'}. Please try again.`
 }
 
 /**
@@ -62,7 +67,18 @@ export const signInWithEmail = async (
   try {
     return await signInWithEmailAndPassword(auth, email, password)
   } catch (error: any) {
-    throw new Error(getFirebaseErrorMessage(error.code))
+    // Log the full error for debugging
+    console.error('Firebase sign-in error:', error)
+    console.error('Error code:', error?.code)
+    console.error('Error message:', error?.message)
+    
+    // Handle case where error code might not exist
+    if (error?.code) {
+      throw new Error(getFirebaseErrorMessage(error.code))
+    } else {
+      // If no error code, use the error message or default
+      throw new Error(error?.message || 'An error occurred. Please try again.')
+    }
   }
 }
 

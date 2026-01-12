@@ -4,14 +4,14 @@ import { getDatabase, Database } from 'firebase/database'
 import { getFirestore, Firestore } from 'firebase/firestore'
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAl7mIdtWflUibipwblChTahmqe3Vc_Rjw",
-  authDomain: "sog1-32845.firebaseapp.com",
-  databaseURL: "https://sog1-32845-default-rtdb.firebaseio.com",
-  projectId: "sog1-32845",
-  storageBucket: "sog1-32845.firebasestorage.app",
-  messagingSenderId: "783644971638",
-  appId: "1:783644971638:web:4d6da90a3ac104991a0557",
-  measurementId: "G-3M9YB8PTZN"
+  apiKey: "AIzaSyBXvn_aq_pwMbRNMypPmVkWTHN3zjr0kXI",
+  authDomain: "son-of-god-7.firebaseapp.com",
+  databaseURL: "https://son-of-god-7-default-rtdb.firebaseio.com",
+  projectId: "son-of-god-7",
+  storageBucket: "son-of-god-7.firebasestorage.app",
+  messagingSenderId: "834154822850",
+  appId: "1:834154822850:web:74f6f17f637735efcb0f5b",
+  measurementId: "G-RQ1PDVDPFC"
 }
 
 // Initialize Firebase (works on both client and server)
