@@ -70,9 +70,9 @@ export default function Footer() {
                   <Link href="/contact" className="hover:opacity-60 transition-opacity">
                     Contact
                   </Link>
-                  <a href="#" className="hover:opacity-60 transition-opacity">
+                  <Link href="/client-services" className="hover:opacity-60 transition-opacity">
                     Services
-                  </a>
+                  </Link>
                   <a
                     href="mailto:contact@sonofgod.com"
                     className="flex items-center gap-2 hover:opacity-60 transition-opacity"
@@ -113,15 +113,18 @@ export default function Footer() {
                 className="overflow-hidden pb-4"
               >
                 <div className="flex flex-col gap-3 text-xs tracking-widest uppercase font-light pl-0">
+                  <Link href="/legal" className="hover:opacity-60 transition-opacity">
+                    Legal Notices
+                  </Link>
                   <Link href="/terms" className="hover:opacity-60 transition-opacity">
                     Terms & Services
                   </Link>
                   <Link href="/privacy" className="hover:opacity-60 transition-opacity">
                     Privacy Policy
                   </Link>
-                  <a href="#" className="hover:opacity-60 transition-opacity">
+                  <Link href="/supply-chains-act" className="hover:opacity-60 transition-opacity">
                     Supply Chain Act
-                  </a>
+                  </Link>
                 </div>
               </motion.div>
             )}
@@ -198,9 +201,9 @@ export default function Footer() {
             <Link href="/contact" className="hover:opacity-60 transition-opacity">
               Contact
             </Link>
-            <a href="#" className="hover:opacity-60 transition-opacity">
+            <Link href="/client-services" className="hover:opacity-60 transition-opacity">
               Services
-            </a>
+            </Link>
             <a
               href="mailto:contact@sonofgod.com"
               className="flex items-center gap-2 hover:opacity-60 transition-opacity"
@@ -216,15 +219,18 @@ export default function Footer() {
           </div>
 
           <div className="flex flex-col gap-3 text-xs tracking-widest uppercase font-light">
+            <Link href="/legal" className="hover:opacity-60 transition-opacity">
+              Legal Notices
+            </Link>
             <Link href="/terms" className="hover:opacity-60 transition-opacity">
               Terms & Services
             </Link>
             <Link href="/privacy" className="hover:opacity-60 transition-opacity">
               Privacy Policy
             </Link>
-            <a href="#" className="hover:opacity-60 transition-opacity">
+            <Link href="/supply-chains-act" className="hover:opacity-60 transition-opacity">
               Supply Chain Act
-            </a>
+            </Link>
           </div>
 
           <div className="flex flex-col gap-3 text-xs tracking-widest uppercase font-light">
