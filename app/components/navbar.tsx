@@ -192,17 +192,17 @@ export default function SONOFGODNavbar({ hasHeroSection }: NavbarProps) {
             {/* CENTER LOGO */}
             <Link
               href="/"
-              className="relative flex items-center justify-center h-full"
+              className="relative flex items-center justify-center"
             >
               <Image
-                src="/logo.png"
+                src="/SOG-LO.png"
                 alt="SON OF GOD"
-                width={300}
-                height={80}
-                className={`h-12 sm:h-14 md:h-16 lg:h-20 w-auto object-contain max-w-[200px] sm:max-w-[250px] md:max-w-[300px] lg:max-w-[350px] transition-all duration-300 ${
-                  isBlackNavbarPage || !scrolled ? "brightness-0 invert" : ""
+                width={1000}
+                height={1000}
+                className={`h-16 sm:h-20 md:h-36 lg:h-44 w-auto object-contain transition-all duration-300 ${
+                  isBlackNavbarPage || !scrolled ? "brightness-0 invert" : "brightness-0"
                 }`}
-                style={{ width: "auto", height: "100%" }}
+                style={{ width: "auto", maxWidth: "min(90vw, 400px)" }}
                 priority
               />
             </Link>
