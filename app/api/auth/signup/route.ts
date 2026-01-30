@@ -55,12 +55,17 @@ export async function POST(req: NextRequest) {
     // If user doesn't exist in database, create them
     if (!dbUser) {
       console.log('📝 Creating new user in database:', firebaseUser.uid)
-      dbUser = await UserService.createUser({
+      await UserService.createUser({
         id: firebaseUser.uid,
         email: firebaseUser.email || '',
         name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
         image: firebaseUser.photoURL || undefined,
       })
+      // Fetch the newly created user with full details (addresses, _count)
+      dbUser = await UserService.getUserById(firebaseUser.uid)
+      if (!dbUser) {
+        throw new Error('Failed to retrieve created user')
+      }
       console.log('✅ User created in database:', dbUser.id)
     } else {
       console.log('✅ User already exists in database:', dbUser.id)
