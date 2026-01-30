@@ -199,10 +199,10 @@ export default function SONOFGODNavbar({ hasHeroSection }: NavbarProps) {
                 alt="SON OF GOD"
                 width={1000}
                 height={1000}
-                className={`h-16 sm:h-20 md:h-36 lg:h-44 w-auto object-contain transition-all duration-300 ${
+                className={`h-24 sm:h-28 md:h-36 lg:h-44 w-auto object-contain transition-all duration-300 ${
                   isBlackNavbarPage || !scrolled ? "brightness-0 invert" : "brightness-0"
                 }`}
-                style={{ width: "auto", maxWidth: "min(90vw, 400px)" }}
+                style={{ width: "auto", maxWidth: "min(85vw, 500px)" }}
                 priority
               />
             </Link>
