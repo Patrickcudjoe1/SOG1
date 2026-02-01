@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Playfair_Display, Lato, Great_Vibes } from 'next/font/google'
 import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import "./globals.css"
 import ClientRoot from "./components/ClientRoot"
 
@@ -71,6 +72,7 @@ export default function RootLayout({
       <body className="antialiased bg-background text-foreground">
         <ClientRoot>{children}</ClientRoot>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
